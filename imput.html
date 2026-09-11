@@ -53,6 +53,12 @@
       </button>
     </div>
 
+    <!-- INDIKATOR STATUS MEMUAT DATA MASTER -->
+    <div id="statusDataMaster" class="p-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 bg-amber-100 text-amber-800 border border-amber-200">
+      <i class="fa-solid fa-spinner fa-spin text-amber-600"></i>
+      <span>Sedang memuat data master siswa...</span>
+    </div>
+
     <!-- TAB MENU PILIHAN -->
     <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1.5 rounded-xl text-xs font-bold">
       <button id="tabTidakHadir" type="button" onclick="switchMenu('tidak_hadir')"
@@ -78,9 +84,9 @@
       <!-- Pilih Kelas -->
       <div>
         <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Pilih Kelas</label>
-        <select id="selectKelas" onchange="filterSiswaByKelas()" required
-          class="w-full px-3.5 py-2 border border-slate-300 rounded-lg text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
-          <option value="">-- Pilih Kelas --</option>
+        <select id="selectKelas" onchange="filterSiswaByKelas()" required disabled
+          class="w-full px-3.5 py-2 border border-slate-300 rounded-lg text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:bg-slate-100 disabled:text-slate-400">
+          <option value="">-- Sedang Memuat Data... --</option>
         </select>
       </div>
 
@@ -139,8 +145,8 @@
       <div id="notif" class="hidden p-3 rounded-lg text-xs font-bold text-center"></div>
 
       <!-- Tombol Simpan -->
-      <button type="submit" id="btnSubmit"
-        class="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold py-3 rounded-xl text-sm transition shadow-sm flex items-center justify-center gap-2">
+      <button type="submit" id="btnSubmit" disabled
+        class="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl text-sm transition shadow-sm flex items-center justify-center gap-2">
         <i class="fa-solid fa-paper-plane"></i> Simpan Presensi
       </button>
     </form>
@@ -150,7 +156,7 @@
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzq05A9BpVJFjNkHn7p2QDjbaY2ajsWjVXk5sVDkH3rStFaAC5XgEkndZSg39zOLX_2/exec";
     const TOKEN_BENAR = "GURU2026";
     let masterSiswa = [];
-    let currentMode = "tidak_hadir"; // 'tidak_hadir' atau 'lupa_absen'
+    let currentMode = "tidak_hadir";
 
     document.addEventListener("DOMContentLoaded", () => {
       const now = new Date();
@@ -199,11 +205,35 @@
     }
 
     function loadMasterData() {
+      const statusBox = document.getElementById("statusDataMaster");
+      const selectKelas = document.getElementById("selectKelas");
+      const btnSubmit = document.getElementById("btnSubmit");
+
+      // Set Status sedang memuat data
+      statusBox.className = "p-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 bg-amber-100 text-amber-800 border border-amber-200";
+      statusBox.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-amber-600"></i> <span>Sedang memuat data master siswa...</span>';
+      
+      selectKelas.disabled = true;
+      selectKelas.innerHTML = '<option value="">-- Sedang Memuat Data... --</option>';
+      btnSubmit.disabled = true;
+
       fetch(WEB_APP_URL)
         .then(res => res.json())
         .then(data => {
           masterSiswa = data.master || [];
           populateKelas();
+
+          // Set Status data pengisian siap
+          statusBox.className = "p-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 bg-emerald-100 text-emerald-800 border border-emerald-200";
+          statusBox.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-600"></i> <span>Data pengisian sudah siap!</span>';
+          
+          selectKelas.disabled = false;
+          btnSubmit.disabled = false;
+        })
+        .catch(err => {
+          // Set Status jika terjadi error saat memuat data
+          statusBox.className = "p-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 bg-rose-100 text-rose-800 border border-rose-200";
+          statusBox.innerHTML = '<i class="fa-solid fa-circle-xmark text-rose-600"></i> <span>Gagal memuat data! Periksa koneksi internet Anda.</span>';
         });
     }
 
