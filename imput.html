@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Input Presensi Manual - SMPN 1 RANCAH</title>
+  <title>Input Presensi Guru - SMPN 1 RANCAH</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -40,20 +40,35 @@
     </form>
   </div>
 
-  <!-- 2. FORM INPUT SECTION (TERSEMBUNYI SEBELUM LOGIN) -->
+  <!-- 2. FORM INPUT SECTION -->
   <div id="formSection" class="hidden w-full max-w-lg bg-white p-6 md:p-8 rounded-2xl shadow-md border border-slate-200 space-y-6">
+    <!-- Header -->
     <div class="flex items-center justify-between border-b pb-4 border-slate-100">
       <div>
-        <h2 class="text-lg font-extrabold text-slate-800">Input Manual Presensi</h2>
-        <p class="text-xs text-slate-500">Izin, Sakit, atau Alpa Siswa</p>
+        <h2 class="text-lg font-extrabold text-slate-800">Input Presensi Manual</h2>
+        <p class="text-xs text-slate-500">SMPN 1 RANCAH</p>
       </div>
-      <button onclick="logout()" class="text-xs font-bold text-rose-600 hover:text-rose-800 hover:underline">
-        <i class="fa-solid fa-right-from-bracket mr-1"></i>Keluar
+      <button onclick="logout()" class="text-xs font-bold text-rose-600 hover:text-rose-800 hover:underline flex items-center gap-1">
+        <i class="fa-solid fa-right-from-bracket"></i> Keluar
+      </button>
+    </div>
+
+    <!-- TAB MENU PILIHAN -->
+    <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1.5 rounded-xl text-xs font-bold">
+      <button id="tabTidakHadir" type="button" onclick="switchMenu('tidak_hadir')"
+        class="py-2.5 px-3 rounded-lg transition-all text-center flex items-center justify-center gap-1.5 bg-white text-blue-700 shadow-sm font-extrabold">
+        <i class="fa-solid fa-user-xmark"></i>
+        <span>1. Tidak Hadir</span>
+      </button>
+      <button id="tabLupaAbsen" type="button" onclick="switchMenu('lupa_absen')"
+        class="py-2.5 px-3 rounded-lg transition-all text-center flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900 font-semibold">
+        <i class="fa-solid fa-clock-rotate-left"></i>
+        <span>2. Lupa Absen</span>
       </button>
     </div>
 
     <form onsubmit="handleSubmit(event)" class="space-y-4">
-      <!-- Tanggal -->
+      <!-- Tanggal Presensi -->
       <div>
         <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Tanggal Presensi</label>
         <input type="date" id="inputTanggal" required
@@ -78,22 +93,45 @@
         </select>
       </div>
 
-      <!-- Keterangan Status -->
-      <div>
-        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Status Kehadiran</label>
-        <div class="grid grid-cols-3 gap-3">
-          <label class="flex items-center justify-center p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition">
-            <input type="radio" name="status" value="Izin" required class="accent-blue-600 mr-2">
-            <span class="text-sm font-bold text-blue-700">Izin</span>
-          </label>
-          <label class="flex items-center justify-center p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition">
-            <input type="radio" name="status" value="Sakit" required class="accent-amber-600 mr-2">
-            <span class="text-sm font-bold text-amber-700">Sakit</span>
-          </label>
-          <label class="flex items-center justify-center p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition">
-            <input type="radio" name="status" value="Alpa" required class="accent-rose-600 mr-2">
-            <span class="text-sm font-bold text-rose-700">Alpa</span>
-          </label>
+      <!-- KONTEN MENU 1: SISWA TIDAK HADIR -->
+      <div id="sectionTidakHadir" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Keterangan Tidak Hadir</label>
+          <div class="grid grid-cols-3 gap-2">
+            <label class="flex items-center justify-center p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition">
+              <input type="radio" name="statusTidakHadir" value="Izin" class="accent-blue-600 mr-2">
+              <span class="text-sm font-bold text-blue-700">Izin</span>
+            </label>
+            <label class="flex items-center justify-center p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition">
+              <input type="radio" name="statusTidakHadir" value="Sakit" class="accent-amber-600 mr-2">
+              <span class="text-sm font-bold text-amber-700">Sakit</span>
+            </label>
+            <label class="flex items-center justify-center p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition">
+              <input type="radio" name="statusTidakHadir" value="Alpa" class="accent-rose-600 mr-2">
+              <span class="text-sm font-bold text-rose-700">Alpa</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- KONTEN MENU 2: SISWA LUPA ABSEN (JAM MASUK & PULANG) -->
+      <div id="sectionLupaAbsen" class="hidden space-y-4 bg-amber-50/50 p-4 rounded-xl border border-amber-200/80">
+        <div class="flex items-center gap-2 text-xs font-bold text-amber-800">
+          <i class="fa-solid fa-circle-info text-amber-600 text-base"></i>
+          <span>Fitur susulan untuk siswa yang hadir tetapi belum scan QR.</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Jam Masuk</label>
+            <input type="time" id="inputJamMasuk" value="07:00"
+              class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Jam Pulang</label>
+            <input type="time" id="inputJamPulang" value="14:00"
+              class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
         </div>
       </div>
 
@@ -112,6 +150,7 @@
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzq05A9BpVJFjNkHn7p2QDjbaY2ajsWjVXk5sVDkH3rStFaAC5XgEkndZSg39zOLX_2/exec";
     const TOKEN_BENAR = "GURU2026";
     let masterSiswa = [];
+    let currentMode = "tidak_hadir"; // 'tidak_hadir' atau 'lupa_absen'
 
     document.addEventListener("DOMContentLoaded", () => {
       const now = new Date();
@@ -137,6 +176,26 @@
       document.getElementById("formSection").classList.add("hidden");
       document.getElementById("loginSection").classList.remove("hidden");
       document.getElementById("inputToken").value = "";
+    }
+
+    function switchMenu(mode) {
+      currentMode = mode;
+      const tab1 = document.getElementById("tabTidakHadir");
+      const tab2 = document.getElementById("tabLupaAbsen");
+      const sec1 = document.getElementById("sectionTidakHadir");
+      const sec2 = document.getElementById("sectionLupaAbsen");
+
+      if (mode === 'tidak_hadir') {
+        tab1.className = "py-2.5 px-3 rounded-lg transition-all text-center flex items-center justify-center gap-1.5 bg-white text-blue-700 shadow-sm font-extrabold";
+        tab2.className = "py-2.5 px-3 rounded-lg transition-all text-center flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900 font-semibold";
+        sec1.classList.remove("hidden");
+        sec2.classList.add("hidden");
+      } else {
+        tab2.className = "py-2.5 px-3 rounded-lg transition-all text-center flex items-center justify-center gap-1.5 bg-white text-amber-700 shadow-sm font-extrabold";
+        tab1.className = "py-2.5 px-3 rounded-lg transition-all text-center flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900 font-semibold";
+        sec2.classList.remove("hidden");
+        sec1.classList.add("hidden");
+      }
     }
 
     function loadMasterData() {
@@ -192,17 +251,43 @@
 
       const tanggal = document.getElementById("inputTanggal").value;
       const nisn = document.getElementById("selectSiswa").value;
-      const status = document.querySelector('input[name="status"]:checked')?.value;
 
-      if (!nisn || !status) {
-        alert("Lengkapi semua data!");
+      if (!nisn || !tanggal) {
+        alert("Pilih kelas dan siswa terlebih dahulu!");
         return;
+      }
+
+      let payload = {
+        nisn: nisn,
+        tanggal: tanggal,
+        token: TOKEN_BENAR
+      };
+
+      if (currentMode === 'tidak_hadir') {
+        const statusRadio = document.querySelector('input[name="statusTidakHadir"]:checked');
+        if (!statusRadio) {
+          alert("Pilih keterangan tidak hadir (Izin, Sakit, atau Alpa)!");
+          return;
+        }
+        payload.status = statusRadio.value;
+        payload.tipe = "tidak_hadir";
+      } else {
+        const jamMasuk = document.getElementById("inputJamMasuk").value;
+        const jamPulang = document.getElementById("inputJamPulang").value;
+        
+        if (!jamMasuk) {
+          alert("Masukkan Jam Masuk siswa!");
+          return;
+        }
+        
+        payload.status = "Hadir";
+        payload.jamMasuk = jamMasuk;
+        payload.jamPulang = jamPulang;
+        payload.tipe = "lupa_absen";
       }
 
       btn.disabled = true;
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
-
-      const payload = { nisn: nisn, status: status, tanggal: tanggal, token: TOKEN_BENAR };
 
       fetch(WEB_APP_URL, {
         method: "POST",
@@ -214,8 +299,9 @@
         notif.classList.add("bg-emerald-100", "text-emerald-700");
         notif.textContent = "Data presensi berhasil disimpan!";
 
+        // Reset form pilihan siswa & radio
         document.getElementById("selectSiswa").value = "";
-        document.querySelectorAll('input[name="status"]').forEach(r => r.checked = false);
+        document.querySelectorAll('input[name="statusTidakHadir"]').forEach(r => r.checked = false);
       })
       .catch(err => {
         notif.classList.remove("hidden", "bg-emerald-100", "text-emerald-700");
