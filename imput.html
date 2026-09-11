@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Input Presensi Manual - SMPN 1 RANCAH</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex items-center justify-center p-4">
+
+  <!-- 1. LOGIN CONTAINER -->
+  <div id="loginSection" class="w-full max-w-md bg-white p-6 md:p-8 rounded-2xl shadow-md border border-slate-200">
+    <div class="text-center mb-6">
+      <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
+        <i class="fa-solid fa-user-lock"></i>
+      </div>
+      <h1 class="text-xl font-extrabold text-slate-800">Akses Guru / Piket</h1>
+      <p class="text-xs font-semibold text-blue-600 mt-1">SMPN 1 RANCAH</p>
+    </div>
+
+    <form onsubmit="handleLogin(event)" class="space-y-4">
+      <div>
+        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Token / Password Guru</label>
+        <input type="password" id="inputToken" placeholder="Masukkan token guru..." required
+          class="w-full px-4 py-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+      </div>
+      <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold py-2.5 rounded-xl text-sm transition shadow-sm">
+        Masuk ke Form Input
+      </button>
+    </form>
+  </div>
+
+  <!-- 2. FORM INPUT SECTION (TERSEMBUNYI SEBELUM LOGIN) -->
+  <div id="formSection" class="hidden w-full max-w-lg bg-white p-6 md:p-8 rounded-2xl shadow-md border border-slate-200 space-y-6">
+    <div class="flex items-center justify-between border-b pb-4 border-slate-100">
+      <div>
+        <h2 class="text-lg font-extrabold text-slate-800">Input Manual Presensi</h2>
+        <p class="text-xs text-slate-500">Izin, Sakit, atau Alpa Siswa</p>
+      </div>
+      <button onclick="logout()" class="text-xs font-bold text-rose-600 hover:text-rose-800 hover:underline">
+        <i class="fa-solid fa-right-from-bracket mr-1"></i>Keluar
+      </button>
+    </div>
+
+    <form onsubmit="handleSubmit(event)" class="space-y-4">
+      <!-- Tanggal -->
+      <div>
+        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Tanggal Presensi</label>
+        <input type="date" id="inputTanggal" required
+          class="w-full px-3.5 py-2 border border-slate-300 rounded-lg text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
+      </div>
+
+      <!-- Pilih Kelas -->
+      <div>
+        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Pilih Kelas</label>
+        <select id="selectKelas" onchange="filterSiswaByKelas()" required
+          class="w-full px-3.5 py-2 border border-slate-300 rounded-lg text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          <option value="">-- Pilih Kelas --</option>
+        </select>
+      </div>
+
+      <!-- Pilih Siswa -->
+      <div>
+        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Pilih Siswa</label>
+        <select id="selectSiswa" required disabled
+          class="w-full px-3.5 py-2 border border-slate-300 rounded-lg text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:bg-slate-100 disabled:text-slate-400">
+          <option value="">-- Pilih Kelas Terlebih Dahulu --</option>
+        </select>
+      </div>
+
+      <!-- Keterangan Status -->
+      <div>
+        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Status Kehadiran</label>
+        <div class="grid grid-cols-3 gap-3">
+          <label class="flex items-center justify-center p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition">
+            <input type="radio" name="status" value="Izin" required class="accent-blue-600 mr-2">
+            <span class="text-sm font-bold text-blue-700">Izin</span>
+          </label>
+          <label class="flex items-center justify-center p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition">
+            <input type="radio" name="status" value="Sakit" required class="accent-amber-600 mr-2">
+            <span class="text-sm font-bold text-amber-700">Sakit</span>
+          </label>
+          <label class="flex items-center justify-center p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition">
+            <input type="radio" name="status" value="Alpa" required class="accent-rose-600 mr-2">
+            <span class="text-sm font-bold text-rose-700">Alpa</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Notifikasi Toast -->
+      <div id="notif" class="hidden p-3 rounded-lg text-xs font-bold text-center"></div>
+
+      <!-- Tombol Simpan -->
+      <button type="submit" id="btnSubmit"
+        class="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold py-3 rounded-xl text-sm transition shadow-sm flex items-center justify-center gap-2">
+        <i class="fa-solid fa-paper-plane"></i> Simpan Presensi
+      </button>
+    </form>
+  </div>
+
+  <script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzq05A9BpVJFjNkHn7p2QDjbaY2ajsWjVXk5sVDkH3rStFaAC5XgEkndZSg39zOLX_2/exec";
+    const TOKEN_BENAR = "GURU2026";
+    let masterSiswa = [];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      document.getElementById("inputTanggal").value = `${yyyy}-${mm}-${dd}`;
+    });
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const token = document.getElementById("inputToken").value.trim();
+      if (token === TOKEN_BENAR) {
+        document.getElementById("loginSection").classList.add("hidden");
+        document.getElementById("formSection").classList.remove("hidden");
+        loadMasterData();
+      } else {
+        alert("Token / Password Guru Salah!");
+      }
+    }
+
+    function logout() {
+      document.getElementById("formSection").classList.add("hidden");
+      document.getElementById("loginSection").classList.remove("hidden");
+      document.getElementById("inputToken").value = "";
+    }
+
+    function loadMasterData() {
+      fetch(WEB_APP_URL)
+        .then(res => res.json())
+        .then(data => {
+          masterSiswa = data.master || [];
+          populateKelas();
+        });
+    }
+
+    function populateKelas() {
+      const selectKelas = document.getElementById("selectKelas");
+      let setKelas = new Set();
+      masterSiswa.forEach(s => { if(s.kelas) setKelas.add(s.kelas); });
+      
+      selectKelas.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+      [...setKelas].sort().forEach(k => {
+        const opt = document.createElement("option");
+        opt.value = k;
+        opt.textContent = `Kelas ${k}`;
+        selectKelas.appendChild(opt);
+      });
+    }
+
+    function filterSiswaByKelas() {
+      const kelas = document.getElementById("selectKelas").value;
+      const selectSiswa = document.getElementById("selectSiswa");
+
+      if (!kelas) {
+        selectSiswa.innerHTML = '<option value="">-- Pilih Kelas Terlebih Dahulu --</option>';
+        selectSiswa.disabled = true;
+        return;
+      }
+
+      const filtered = masterSiswa.filter(s => s.kelas === kelas);
+      selectSiswa.innerHTML = '<option value="">-- Pilih Siswa --</option>';
+      
+      filtered.forEach(s => {
+        const opt = document.createElement("option");
+        opt.value = s.nisn;
+        opt.textContent = `${s.nama} (${s.nisn})`;
+        selectSiswa.appendChild(opt);
+      });
+
+      selectSiswa.disabled = false;
+    }
+
+    function handleSubmit(e) {
+      e.preventDefault();
+      const btn = document.getElementById("btnSubmit");
+      const notif = document.getElementById("notif");
+
+      const tanggal = document.getElementById("inputTanggal").value;
+      const nisn = document.getElementById("selectSiswa").value;
+      const status = document.querySelector('input[name="status"]:checked')?.value;
+
+      if (!nisn || !status) {
+        alert("Lengkapi semua data!");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+
+      const payload = { nisn: nisn, status: status, tanggal: tanggal, token: TOKEN_BENAR };
+
+      fetch(WEB_APP_URL, {
+        method: "POST",
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json())
+      .then(res => {
+        notif.classList.remove("hidden", "bg-rose-100", "text-rose-700");
+        notif.classList.add("bg-emerald-100", "text-emerald-700");
+        notif.textContent = "Data presensi berhasil disimpan!";
+
+        document.getElementById("selectSiswa").value = "";
+        document.querySelectorAll('input[name="status"]').forEach(r => r.checked = false);
+      })
+      .catch(err => {
+        notif.classList.remove("hidden", "bg-emerald-100", "text-emerald-700");
+        notif.classList.add("bg-rose-100", "text-rose-700");
+        notif.textContent = "Gagal menyimpan data ke server!";
+      })
+      .finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Simpan Presensi';
+        setTimeout(() => notif.classList.add("hidden"), 3000);
+      });
+    }
+  </script>
+</body>
+</html>
