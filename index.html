@@ -84,211 +84,230 @@
 
   </main>
 
-  <script>
-    // URL WEB APP TELAH TERHUBUNG
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzq05A9BpVJFjNkHn7p2QDjbaY2ajsWjVXk5sVDkH3rStFaAC5XgEkndZSg39zOLX_2/exec";
+<script>
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzq05A9BpVJFjNkHn7p2QDjbaY2ajsWjVXk5sVDkH3rStFaAC5XgEkndZSg39zOLX_2/exec";
 
-    let rawMaster = [];
-    let rawLogs = [];
+  let rawMaster = [];
+  let rawLogs = [];
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const today = new Date().toISOString().slice(0, 10);
-      document.getElementById("filterTanggal").value = today;
-      document.getElementById("filterBulan").value = today.slice(0, 7);
-      loadData();
+  document.addEventListener("DOMContentLoaded", () => {
+    // Gunakan tanggal lokal perangkat (WIB), bukan UTC
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const todayLocal = `${yyyy}-${mm}-${dd}`;
+    const monthLocal = `${yyyy}-${mm}`;
+
+    document.getElementById("filterTanggal").value = todayLocal;
+    document.getElementById("filterBulan").value = monthLocal;
+    loadData();
+  });
+
+  function loadData() {
+    fetch(WEB_APP_URL)
+      .then(res => res.json())
+      .then(data => {
+        rawMaster = data.master || [];
+        rawLogs = data.logs || [];
+        initKelasDropdown();
+        renderTable();
+      })
+      .catch(err => alert("Gagal mengambil data presensi: " + err));
+  }
+
+  function initKelasDropdown() {
+    const select = document.getElementById("filterKelas");
+    const currentVal = select.value;
+    const kelasList = [...new Set(rawMaster.map(s => s.kelas))].sort();
+    
+    select.innerHTML = '<option value="">-- Semua Kelas --</option>';
+    kelasList.forEach(k => {
+      if(k) {
+        const opt = document.createElement("option");
+        opt.value = k;
+        opt.textContent = `Kelas ${k}`;
+        select.appendChild(opt);
+      }
+    });
+    select.value = currentVal;
+  }
+
+  function renderTable() {
+    const mode = document.getElementById("filterMode").value;
+    const kelas = document.getElementById("filterKelas").value;
+
+    if (mode === "bulanan") {
+      document.getElementById("boxBulan").classList.remove("hidden");
+      document.getElementById("boxTanggal").classList.add("hidden");
+      renderRekapBulanan(kelas);
+    } else {
+      document.getElementById("boxBulan").classList.add("hidden");
+      document.getElementById("boxTanggal").classList.remove("hidden");
+      renderRekapHarian(kelas);
+    }
+  }
+
+  // --- REKAP HARIAN PER KELAS ---
+  function renderRekapHarian(kelasSelected) {
+    const tgl = document.getElementById("filterTanggal").value;
+    document.getElementById("judulRekap").textContent = `REKAP HARIAN PRESENSI SISWA (${tgl})`;
+    document.getElementById("subJudulRekap").textContent = kelasSelected ? `Kelas: ${kelasSelected}` : "Seluruh Kelas";
+
+    let filteredMaster = kelasSelected ? rawMaster.filter(m => m.kelas === kelasSelected) : rawMaster;
+    const tabel = document.getElementById("tabelUtama");
+
+    let html = `
+      <thead>
+        <tr class="bg-slate-100 font-bold">
+          <th class="border border-slate-300 p-2">No</th>
+          <th class="border border-slate-300 p-2">NISN</th>
+          <th class="border border-slate-300 p-2 text-left">Nama Siswa</th>
+          <th class="border border-slate-300 p-2">Kelas</th>
+          <th class="border border-slate-300 p-2">Jam Masuk</th>
+          <th class="border border-slate-300 p-2">Jam Pulang</th>
+          <th class="border border-slate-300 p-2">Status Kehadiran</th>
+        </tr>
+      </thead>
+      <tbody>`;
+
+    filteredMaster.forEach((siswa, index) => {
+      const studentLogs = rawLogs.filter(l => {
+        const sameDate = String(l.tanggal).trim() === String(tgl).trim();
+        const matchKode = String(l.kode).trim() === String(siswa.nisn).trim();
+        const matchNama = String(l.nama).toLowerCase().trim() === String(siswa.nama).toLowerCase().trim();
+        return sameDate && (matchKode || matchNama);
+      });
+      
+      const logMasuk = studentLogs.find(l => l.keterangan === "Masuk" || l.keterangan === "Terlambat Masuk");
+      const logPulang = studentLogs.find(l => l.keterangan === "Pulang");
+      const logManual = studentLogs.find(l => ["Izin", "Sakit", "Alpa"].includes(l.keterangan));
+
+      let jamMasuk = logMasuk ? logMasuk.timestamp.split(" ")[1] : "-";
+      let jamPulang = logPulang ? logPulang.timestamp.split(" ")[1] : "-";
+      let status = "Alpa";
+      let bgRow = "";
+
+      if (logManual) {
+        status = logManual.keterangan;
+      } else if (logMasuk) {
+        if (!logPulang) {
+          status = "Alpa (Tidak Absen Pulang)";
+          bgRow = "bg-rose-100 text-rose-800 font-semibold";
+        } else if (logMasuk.keterangan === "Terlambat Masuk") {
+          status = "Terlambat Masuk";
+          bgRow = "bg-yellow-200 text-yellow-900 font-semibold";
+        } else {
+          status = "Hadir";
+        }
+      }
+
+      html += `
+        <tr class="${bgRow}">
+          <td class="border border-slate-300 p-2">${index + 1}</td>
+          <td class="border border-slate-300 p-2 font-mono">${siswa.nisn}</td>
+          <td class="border border-slate-300 p-2 text-left font-medium">${siswa.nama}</td>
+          <td class="border border-slate-300 p-2">${siswa.kelas}</td>
+          <td class="border border-slate-300 p-2">${jamMasuk}</td>
+          <td class="border border-slate-300 p-2">${jamPulang}</td>
+          <td class="border border-slate-300 p-2">${status}</td>
+        </tr>`;
     });
 
-    function loadData() {
-      fetch(WEB_APP_URL)
-        .then(res => res.json())
-        .then(data => {
-          rawMaster = data.master || [];
-          rawLogs = data.logs || [];
-          initKelasDropdown();
-          renderTable();
-        })
-        .catch(err => alert("Gagal mengambil data presensi: " + err));
-    }
+    html += `</tbody>`;
+    tabel.innerHTML = html;
+  }
 
-    function initKelasDropdown() {
-      const select = document.getElementById("filterKelas");
-      const currentVal = select.value;
-      const kelasList = [...new Set(rawMaster.map(s => s.kelas))].sort();
+  // --- REKAP BULANAN PER KELAS ---
+  function renderRekapBulanan(kelasSelected) {
+    const ym = document.getElementById("filterBulan").value;
+    const [year, month] = ym.split("-").map(Number);
+    const totalDays = new Date(year, month, 0).getDate();
+    
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+    document.getElementById("judulRekap").textContent = `REKAP BULANAN PRESENSI SISWA (${ym})`;
+    document.getElementById("subJudulRekap").textContent = kelasSelected ? `Kelas: ${kelasSelected}` : "Seluruh Kelas";
+
+    let filteredMaster = kelasSelected ? rawMaster.filter(m => m.kelas === kelasSelected) : rawMaster;
+    const tabel = document.getElementById("tabelUtama");
+
+    let html = `<thead><tr class="bg-slate-100 font-bold"><th class="border border-slate-300 p-1">No</th><th class="border border-slate-300 p-1 text-left">Nama Siswa</th>`;
+
+    for (let d = 1; d <= totalDays; d++) {
+      const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      const dayOfWeek = new Date(year, month - 1, d).getDay();
       
-      select.innerHTML = '<option value="">-- Semua Kelas --</option>';
-      kelasList.forEach(k => {
-        if(k) {
-          const opt = document.createElement("option");
-          opt.value = k;
-          opt.textContent = `Kelas ${k}`;
-          select.appendChild(opt);
-        }
-      });
-      select.value = currentVal;
+      let bgHeader = "";
+      if (dateStr === todayStr) bgHeader = "bg-yellow-300 font-bold text-slate-900";
+      else if (dayOfWeek === 0 || dayOfWeek === 6) bgHeader = "bg-rose-200 text-rose-800 font-bold";
+
+      html += `<th class="border border-slate-300 p-1 min-w-[24px] ${bgHeader}">${d}</th>`;
     }
 
-    function renderTable() {
-      const mode = document.getElementById("filterMode").value;
-      const kelas = document.getElementById("filterKelas").value;
+    html += `<th class="border border-slate-300 p-1 bg-emerald-100">H</th>
+             <th class="border border-slate-300 p-1 bg-blue-100">I</th>
+             <th class="border border-slate-300 p-1 bg-yellow-100">S</th>
+             <th class="border border-slate-300 p-1 bg-rose-100">A</th></tr></thead><tbody>`;
 
-      if (mode === "bulanan") {
-        document.getElementById("boxBulan").classList.remove("hidden");
-        document.getElementById("boxTanggal").classList.add("hidden");
-        renderRekapBulanan(kelas);
-      } else {
-        document.getElementById("boxBulan").classList.add("hidden");
-        document.getElementById("boxTanggal").classList.remove("hidden");
-        renderRekapHarian(kelas);
-      }
-    }
+    filteredMaster.forEach((siswa, index) => {
+      let countH = 0, countI = 0, countS = 0, countA = 0;
 
-    // --- REKAP HARIAN PER KELAS ---
-    function renderRekapHarian(kelasSelected) {
-      const tgl = document.getElementById("filterTanggal").value;
-      document.getElementById("judulRekap").textContent = `REKAP HARIAN PRESENSI SISWA (${tgl})`;
-      document.getElementById("subJudulRekap").textContent = kelasSelected ? `Kelas: ${kelasSelected}` : "Seluruh Kelas";
-
-      let filteredMaster = kelasSelected ? rawMaster.filter(m => m.kelas === kelasSelected) : rawMaster;
-      const tabel = document.getElementById("tabelUtama");
-
-      let html = `
-        <thead>
-          <tr class="bg-slate-100 font-bold">
-            <th class="border border-slate-300 p-2">No</th>
-            <th class="border border-slate-300 p-2">NISN</th>
-            <th class="border border-slate-300 p-2 text-left">Nama Siswa</th>
-            <th class="border border-slate-300 p-2">Kelas</th>
-            <th class="border border-slate-300 p-2">Jam Masuk</th>
-            <th class="border border-slate-300 p-2">Jam Pulang</th>
-            <th class="border border-slate-300 p-2">Status Kehadiran</th>
-          </tr>
-        </thead>
-        <tbody>`;
-
-      filteredMaster.forEach((siswa, index) => {
-        const studentLogs = rawLogs.filter(l => l.tanggal === tgl && (l.kode === siswa.nisn || l.nama.toLowerCase() === siswa.nama.toLowerCase()));
-        
-        const logMasuk = studentLogs.find(l => l.keterangan === "Masuk" || l.keterangan === "Terlambat Masuk");
-        const logPulang = studentLogs.find(l => l.keterangan === "Pulang");
-        const logManual = studentLogs.find(l => ["Izin", "Sakit", "Alpa"].includes(l.keterangan));
-
-        let jamMasuk = logMasuk ? logMasuk.timestamp.split(" ")[1] : "-";
-        let jamPulang = logPulang ? logPulang.timestamp.split(" ")[1] : "-";
-        let status = "Alpa";
-        let bgRow = "";
-
-        if (logManual) {
-          status = logManual.keterangan;
-        } else if (logMasuk) {
-          if (!logPulang) {
-            status = "Alpa (Tidak Absen Pulang)";
-            bgRow = "bg-rose-100 text-rose-800 font-semibold";
-          } else if (logMasuk.keterangan === "Terlambat Masuk") {
-            status = "Terlambat Masuk";
-            bgRow = "bg-yellow-200 text-yellow-900 font-semibold";
-          } else {
-            status = "Hadir";
-          }
-        }
-
-        html += `
-          <tr class="${bgRow}">
-            <td class="border border-slate-300 p-2">${index + 1}</td>
-            <td class="border border-slate-300 p-2 font-mono">${siswa.nisn}</td>
-            <td class="border border-slate-300 p-2 text-left font-medium">${siswa.nama}</td>
-            <td class="border border-slate-300 p-2">${siswa.kelas}</td>
-            <td class="border border-slate-300 p-2">${jamMasuk}</td>
-            <td class="border border-slate-300 p-2">${jamPulang}</td>
-            <td class="border border-slate-300 p-2">${status}</td>
-          </tr>`;
-      });
-
-      html += `</tbody>`;
-      tabel.innerHTML = html;
-    }
-
-    // --- REKAP BULANAN PER KELAS ---
-    function renderRekapBulanan(kelasSelected) {
-      const ym = document.getElementById("filterBulan").value;
-      const [year, month] = ym.split("-").map(Number);
-      const totalDays = new Date(year, month, 0).getDate();
-      const todayStr = new Date().toISOString().slice(0, 10);
-
-      document.getElementById("judulRekap").textContent = `REKAP BULANAN PRESENSI SISWA (${ym})`;
-      document.getElementById("subJudulRekap").textContent = kelasSelected ? `Kelas: ${kelasSelected}` : "Seluruh Kelas";
-
-      let filteredMaster = kelasSelected ? rawMaster.filter(m => m.kelas === kelasSelected) : rawMaster;
-      const tabel = document.getElementById("tabelUtama");
-
-      let html = `<thead><tr class="bg-slate-100 font-bold"><th class="border border-slate-300 p-1">No</th><th class="border border-slate-300 p-1 text-left">Nama Siswa</th>`;
+      html += `<tr><td class="border border-slate-300 p-1">${index + 1}</td><td class="border border-slate-300 p-1 text-left font-medium whitespace-nowrap">${siswa.nama}</td>`;
 
       for (let d = 1; d <= totalDays; d++) {
         const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
         const dayOfWeek = new Date(year, month - 1, d).getDay();
-        
-        let bgHeader = "";
-        if (dateStr === todayStr) bgHeader = "bg-yellow-300 font-bold text-slate-900";
-        else if (dayOfWeek === 0 || dayOfWeek === 6) bgHeader = "bg-rose-200 text-rose-800 font-bold";
+        const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
 
-        html += `<th class="border border-slate-300 p-1 min-w-[24px] ${bgHeader}">${d}</th>`;
-      }
-
-      html += `<th class="border border-slate-300 p-1 bg-emerald-100">H</th>
-               <th class="border border-slate-300 p-1 bg-blue-100">I</th>
-               <th class="border border-slate-300 p-1 bg-yellow-100">S</th>
-               <th class="border border-slate-300 p-1 bg-rose-100">A</th></tr></thead><tbody>`;
-
-      filteredMaster.forEach((siswa, index) => {
-        let countH = 0, countI = 0, countS = 0, countA = 0;
-
-        html += `<tr><td class="border border-slate-300 p-1">${index + 1}</td><td class="border border-slate-300 p-1 text-left font-medium whitespace-nowrap">${siswa.nama}</td>`;
-
-        for (let d = 1; d <= totalDays; d++) {
-          const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-          const dayOfWeek = new Date(year, month - 1, d).getDay();
-          const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
-
-          if (isWeekend) {
-            html += `<td class="border border-slate-300 p-1 bg-rose-200 text-rose-700 font-bold">L</td>`;
-            continue;
-          }
-
-          const studentLogs = rawLogs.filter(l => l.tanggal === dateStr && (l.kode === siswa.nisn || l.nama.toLowerCase() === siswa.nama.toLowerCase()));
-          const logMasuk = studentLogs.find(l => l.keterangan === "Masuk" || l.keterangan === "Terlambat Masuk");
-          const logPulang = studentLogs.find(l => l.keterangan === "Pulang");
-          const logManual = studentLogs.find(l => ["Izin", "Sakit", "Alpa"].includes(l.keterangan));
-
-          let code = "-";
-          let bgCell = "";
-
-          if (logManual) {
-            if (logManual.keterangan === "Izin") { code = "I"; countI++; bgCell = "bg-blue-100 text-blue-800"; }
-            else if (logManual.keterangan === "Sakit") { code = "S"; countS++; bgCell = "bg-yellow-100 text-yellow-800"; }
-            else { code = "A"; countA++; bgCell = "bg-rose-100 text-rose-800"; }
-          } else if (logMasuk && logPulang) {
-            code = "H"; countH++; bgCell = "bg-emerald-100 text-emerald-800 font-bold";
-          } else {
-            code = "A"; countA++; bgCell = "bg-rose-100 text-rose-800 font-bold";
-          }
-
-          html += `<td class="border border-slate-300 p-1 ${bgCell}">${code}</td>`;
+        if (isWeekend) {
+          html += `<td class="border border-slate-300 p-1 bg-rose-200 text-rose-700 font-bold">L</td>`;
+          continue;
         }
 
-        html += `<td class="border border-slate-300 p-1 font-bold bg-emerald-50">${countH}</td>
-                 <td class="border border-slate-300 p-1 font-bold bg-blue-50">${countI}</td>
-                 <td class="border border-slate-300 p-1 font-bold bg-yellow-50">${countS}</td>
-                 <td class="border border-slate-300 p-1 font-bold bg-rose-50">${countA}</td></tr>`;
-      });
+        const studentLogs = rawLogs.filter(l => {
+          const sameDate = String(l.tanggal).trim() === String(dateStr).trim();
+          const matchKode = String(l.kode).trim() === String(siswa.nisn).trim();
+          const matchNama = String(l.nama).toLowerCase().trim() === String(siswa.nama).toLowerCase().trim();
+          return sameDate && (matchKode || matchNama);
+        });
 
-      html += `</tbody>`;
-      tabel.innerHTML = html;
-    }
+        const logMasuk = studentLogs.find(l => l.keterangan === "Masuk" || l.keterangan === "Terlambat Masuk");
+        const logPulang = studentLogs.find(l => l.keterangan === "Pulang");
+        const logManual = studentLogs.find(l => ["Izin", "Sakit", "Alpa"].includes(l.keterangan));
 
-    function downloadExcel() {
-      const table = document.getElementById("tabelUtama");
-      const wb = XLSX.utils.table_to_book(table, { sheet: "Rekap" });
-      XLSX.writeFile(wb, `Rekap_Presensi_${new Date().toISOString().slice(0,10)}.xlsx`);
-    }
-  </script>
+        let code = "-";
+        let bgCell = "";
+
+        if (logManual) {
+          if (logManual.keterangan === "Izin") { code = "I"; countI++; bgCell = "bg-blue-100 text-blue-800"; }
+          else if (logManual.keterangan === "Sakit") { code = "S"; countS++; bgCell = "bg-yellow-100 text-yellow-800"; }
+          else { code = "A"; countA++; bgCell = "bg-rose-100 text-rose-800"; }
+        } else if (logMasuk && logPulang) {
+          code = "H"; countH++; bgCell = "bg-emerald-100 text-emerald-800 font-bold";
+        } else {
+          code = "A"; countA++; bgCell = "bg-rose-100 text-rose-800 font-bold";
+        }
+
+        html += `<td class="border border-slate-300 p-1 ${bgCell}">${code}</td>`;
+      }
+
+      html += `<td class="border border-slate-300 p-1 font-bold bg-emerald-50">${countH}</td>
+               <td class="border border-slate-300 p-1 font-bold bg-blue-50">${countI}</td>
+               <td class="border border-slate-300 p-1 font-bold bg-yellow-50">${countS}</td>
+               <td class="border border-slate-300 p-1 font-bold bg-rose-50">${countA}</td></tr>`;
+    });
+
+    html += `</tbody>`;
+    tabel.innerHTML = html;
+  }
+
+  function downloadExcel() {
+    const table = document.getElementById("tabelUtama");
+    const wb = XLSX.utils.table_to_book(table, { sheet: "Rekap" });
+    XLSX.writeFile(wb, `Rekap_Presensi_${new Date().toISOString().slice(0,10)}.xlsx`);
+  }
+</script>
 </body>
 </html>
