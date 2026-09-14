@@ -24,7 +24,7 @@
     /* Ukuran ID Card Standar Portrait */
     .id-card {
       width: 250px;
-      height: 400px;
+      height: 410px;
       box-sizing: border-box;
     }
   </style>
@@ -96,14 +96,12 @@
       
       <!-- DROPDOWN PILIHAN UMUM (TANGGAL, KELAS, SISWA) -->
       <div id="commonInputs" class="space-y-4">
-        <!-- Tanggal Presensi -->
         <div>
           <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Tanggal Presensi</label>
           <input type="date" id="inputTanggal" required
             class="w-full px-3.5 py-2 border border-slate-300 rounded-lg text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
         </div>
 
-        <!-- Pilih Kelas -->
         <div>
           <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Pilih Kelas</label>
           <select id="selectKelas" onchange="filterSiswaByKelas()" required disabled
@@ -112,7 +110,6 @@
           </select>
         </div>
 
-        <!-- Pilih Siswa -->
         <div>
           <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Pilih Siswa</label>
           <select id="selectSiswa" required disabled
@@ -167,7 +164,7 @@
       <!-- Notifikasi Toast -->
       <div id="notif" class="hidden p-3 rounded-xl text-xs font-bold text-center border"></div>
 
-      <!-- Tombol Simpan (Menu 1 & 2) -->
+      <!-- Tombol Simpan -->
       <button type="submit" id="btnSubmit" disabled
         class="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl text-sm transition shadow-sm flex items-center justify-center gap-2">
         <i class="fa-solid fa-paper-plane"></i> Simpan Presensi
@@ -193,7 +190,6 @@
           </button>
         </div>
 
-        <!-- Progress Box ZIP -->
         <div id="progressBox" class="hidden p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 font-mono text-center">
           ⏳ Mengonversi: <span id="progressText">0</span> / <span id="totalText">0</span> ID Card...
         </div>
@@ -201,7 +197,6 @@
 
       <!-- Container ID Card Siswa -->
       <div id="cardContainer" class="flex flex-wrap gap-6 justify-center max-h-[500px] overflow-y-auto p-2 border border-slate-100 rounded-xl bg-slate-50/50">
-        <!-- Kartu ID Card di-generate otomatis via JS -->
       </div>
     </div>
 
@@ -253,7 +248,6 @@
       const formContainer = document.getElementById("formSection");
       const title = document.getElementById("sectionTitle");
 
-      // Reset style tab
       const inactiveClass = "py-2.5 px-2 rounded-lg transition-all text-center flex items-center justify-center gap-1 text-slate-600 hover:text-slate-900 font-semibold";
       tab1.className = inactiveClass;
       tab2.className = inactiveClass;
@@ -278,7 +272,6 @@
         sec1.classList.add("hidden");
         sec3.classList.add("hidden");
       } else if (mode === 'cetak_qr') {
-        // Melebarkan container agar pas menampilkan ID Card
         formContainer.className = "w-full max-w-4xl bg-white p-6 md:p-8 rounded-2xl shadow-md border border-slate-200 space-y-6";
         title.textContent = "Cetak & Download ID Card QR";
         tab3.className = "py-2.5 px-2 rounded-lg transition-all text-center flex items-center justify-center gap-1 bg-white text-emerald-700 shadow-sm font-extrabold";
@@ -465,21 +458,22 @@
         const wrapper = document.createElement("div");
         wrapper.className = "flex flex-col items-center gap-2";
 
+        // PERBAIKAN: Menghapus truncate dan memberikan leading-normal serta padding aman pada teks nama
         wrapper.innerHTML = `
-          <div id="card-${index}" class="id-card bg-gradient-to-b from-blue-900 via-slate-800 to-slate-900 rounded-2xl border-2 border-blue-500 p-4 shadow-xl flex flex-col justify-between items-center text-center overflow-hidden">
+          <div id="card-${index}" class="id-card bg-gradient-to-b from-blue-900 via-slate-800 to-slate-900 rounded-2xl border-2 border-blue-500 p-4 shadow-xl flex flex-col justify-between items-center text-center">
             <div class="w-full border-b border-blue-400/30 pb-2">
-              <h2 class="text-[11px] font-black tracking-widest text-blue-300 uppercase">SMPN 1 RANCAH</h2>
-              <p class="text-[9px] text-slate-300 font-medium">KARTU PRESENSI SISWA</p>
+              <h2 class="text-[11px] font-black tracking-widest text-blue-300 uppercase leading-normal">SMPN 1 RANCAH</h2>
+              <p class="text-[9px] text-slate-300 font-medium leading-normal">KARTU PRESENSI SISWA</p>
             </div>
 
             <div class="bg-white p-2.5 rounded-xl shadow-md my-auto border border-blue-400 flex justify-center items-center">
               <div id="qrcode-${index}"></div>
             </div>
 
-            <div class="w-full bg-slate-900/90 p-2.5 rounded-xl border border-slate-700">
-              <h3 class="text-xs font-bold text-white uppercase tracking-wide truncate">${siswa.nama}</h3>
-              <p class="text-[10px] text-blue-400 font-mono mt-0.5">NISN: ${siswa.nisn}</p>
-              <div class="mt-1.5 inline-block bg-blue-600 text-white font-bold text-[9px] px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+            <div class="w-full bg-slate-900/90 p-3 rounded-xl border border-slate-700 flex flex-col items-center justify-center">
+              <h3 class="text-xs font-extrabold text-white uppercase tracking-wide leading-normal px-1 py-0.5 break-words w-full">${siswa.nama}</h3>
+              <p class="text-[10px] text-blue-400 font-mono font-bold mt-1 leading-normal">NISN: ${siswa.nisn}</p>
+              <div class="mt-2 inline-block bg-blue-600 text-white font-bold text-[10px] px-3 py-1 rounded-full uppercase tracking-wider leading-none">
                 KELAS ${siswa.kelas}
               </div>
             </div>
@@ -509,7 +503,11 @@
     function downloadSingleCard(index, namaSiswa) {
       const cardElem = document.getElementById(`card-${index}`);
       
-      html2canvas(cardElem, { scale: 3, useCORS: true }).then(canvas => {
+      html2canvas(cardElem, { 
+        scale: 3, 
+        useCORS: true,
+        logging: false
+      }).then(canvas => {
         const link = document.createElement("a");
         link.download = `ID_CARD_${namaSiswa.replace(/\s+/g, "_")}.png`;
         link.href = canvas.toDataURL("image/png");
@@ -543,7 +541,7 @@
         const cardElem = document.getElementById(`card-${i}`);
 
         if (cardElem) {
-          const canvas = await html2canvas(cardElem, { scale: 3, useCORS: true });
+          const canvas = await html2canvas(cardElem, { scale: 3, useCORS: true, logging: false });
           const imgData = canvas.toDataURL("image/png").split(",")[1];
           
           const fileName = `Kelas_${siswa.kelas}/${siswa.nisn}_${siswa.nama.replace(/\s+/g, "_")}.png`;
