@@ -142,7 +142,7 @@
       </div>
 
       <!-- Notifikasi Toast -->
-      <div id="notif" class="hidden p-3 rounded-lg text-xs font-bold text-center"></div>
+      <div id="notif" class="hidden p-3 rounded-xl text-xs font-bold text-center border"></div>
 
       <!-- Tombol Simpan -->
       <button type="submit" id="btnSubmit" disabled
@@ -209,7 +209,6 @@
       const selectKelas = document.getElementById("selectKelas");
       const btnSubmit = document.getElementById("btnSubmit");
 
-      // Set Status sedang memuat data
       statusBox.className = "p-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 bg-amber-100 text-amber-800 border border-amber-200";
       statusBox.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-amber-600"></i> <span>Sedang memuat data master siswa...</span>';
       
@@ -223,7 +222,6 @@
           masterSiswa = data.master || [];
           populateKelas();
 
-          // Set Status data pengisian siap
           statusBox.className = "p-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 bg-emerald-100 text-emerald-800 border border-emerald-200";
           statusBox.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-600"></i> <span>Data pengisian sudah siap!</span>';
           
@@ -231,7 +229,6 @@
           btnSubmit.disabled = false;
         })
         .catch(err => {
-          // Set Status jika terjadi error saat memuat data
           statusBox.className = "p-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 bg-rose-100 text-rose-800 border border-rose-200";
           statusBox.innerHTML = '<i class="fa-solid fa-circle-xmark text-rose-600"></i> <span>Gagal memuat data! Periksa koneksi internet Anda.</span>';
         });
@@ -305,8 +302,8 @@
         const jamMasuk = document.getElementById("inputJamMasuk").value;
         const jamPulang = document.getElementById("inputJamPulang").value;
         
-        if (!jamMasuk) {
-          alert("Masukkan Jam Masuk siswa!");
+        if (!jamMasuk && !jamPulang) {
+          alert("Isi minimal salah satu (Jam Masuk atau Jam Pulang)!");
           return;
         }
         
@@ -325,23 +322,27 @@
       })
       .then(res => res.json())
       .then(res => {
-        notif.classList.remove("hidden", "bg-rose-100", "text-rose-700");
-        notif.classList.add("bg-emerald-100", "text-emerald-700");
-        notif.textContent = "Data presensi berhasil disimpan!";
+        if (res.status === "success") {
+          notif.className = "p-3 rounded-xl text-xs font-bold text-center bg-emerald-100 text-emerald-800 border border-emerald-200";
+          notif.textContent = res.message || "Data presensi berhasil disimpan!";
 
-        // Reset form pilihan siswa & radio
-        document.getElementById("selectSiswa").value = "";
-        document.querySelectorAll('input[name="statusTidakHadir"]').forEach(r => r.checked = false);
+          // Reset pilihan siswa & radio
+          document.getElementById("selectSiswa").value = "";
+          document.querySelectorAll('input[name="statusTidakHadir"]').forEach(r => r.checked = false);
+        } else {
+          // Jika ditolak backend (misal data duplikat)
+          notif.className = "p-3 rounded-xl text-xs font-bold text-center bg-rose-100 text-rose-800 border border-rose-200";
+          notif.textContent = res.message || "Gagal menyimpan data!";
+        }
       })
       .catch(err => {
-        notif.classList.remove("hidden", "bg-emerald-100", "text-emerald-700");
-        notif.classList.add("bg-rose-100", "text-rose-700");
-        notif.textContent = "Gagal menyimpan data ke server!";
+        notif.className = "p-3 rounded-xl text-xs font-bold text-center bg-rose-100 text-rose-800 border border-rose-200";
+        notif.textContent = "Gagal terhubung ke server! Periksa koneksi internet Anda.";
       })
       .finally(() => {
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Simpan Presensi';
-        setTimeout(() => notif.classList.add("hidden"), 3000);
+        setTimeout(() => notif.classList.add("hidden"), 4000);
       });
     }
   </script>
