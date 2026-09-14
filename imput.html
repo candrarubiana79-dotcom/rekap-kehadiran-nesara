@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Input Presensi Guru - SMPN 1 RANCAH</title>
+  <title>Input Presensi & ID Card Guru - SMPN 1 RANCAH</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -12,8 +12,21 @@
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+  <!-- Library tambahan untuk ID Card & QR Code -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    
+    /* Ukuran ID Card Standar Portrait */
+    .id-card {
+      width: 250px;
+      height: 400px;
+      box-sizing: border-box;
+    }
   </style>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen flex items-center justify-center p-4">
@@ -40,12 +53,12 @@
     </form>
   </div>
 
-  <!-- 2. FORM INPUT SECTION -->
-  <div id="formSection" class="hidden w-full max-w-lg bg-white p-6 md:p-8 rounded-2xl shadow-md border border-slate-200 space-y-6">
+  <!-- 2. FORM INPUT & ID CARD CONTAINER -->
+  <div id="formSection" class="hidden w-full max-w-lg bg-white p-6 md:p-8 rounded-2xl shadow-md border border-slate-200 space-y-6 transition-all duration-300">
     <!-- Header -->
     <div class="flex items-center justify-between border-b pb-4 border-slate-100">
       <div>
-        <h2 class="text-lg font-extrabold text-slate-800">Input Presensi Manual</h2>
+        <h2 id="sectionTitle" class="text-lg font-extrabold text-slate-800">Input Presensi Manual</h2>
         <p class="text-xs text-slate-500">SMPN 1 RANCAH</p>
       </div>
       <button onclick="logout()" class="text-xs font-bold text-rose-600 hover:text-rose-800 hover:underline flex items-center gap-1">
@@ -59,44 +72,54 @@
       <span>Sedang memuat data master siswa...</span>
     </div>
 
-    <!-- TAB MENU PILIHAN -->
-    <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1.5 rounded-xl text-xs font-bold">
+    <!-- TAB MENU PILIHAN (3 TAB) -->
+    <div class="grid grid-cols-3 gap-1.5 bg-slate-100 p-1.5 rounded-xl text-[11px] font-bold">
       <button id="tabTidakHadir" type="button" onclick="switchMenu('tidak_hadir')"
-        class="py-2.5 px-3 rounded-lg transition-all text-center flex items-center justify-center gap-1.5 bg-white text-blue-700 shadow-sm font-extrabold">
+        class="py-2.5 px-2 rounded-lg transition-all text-center flex items-center justify-center gap-1 bg-white text-blue-700 shadow-sm font-extrabold">
         <i class="fa-solid fa-user-xmark"></i>
         <span>1. Tidak Hadir</span>
       </button>
       <button id="tabLupaAbsen" type="button" onclick="switchMenu('lupa_absen')"
-        class="py-2.5 px-3 rounded-lg transition-all text-center flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900 font-semibold">
+        class="py-2.5 px-2 rounded-lg transition-all text-center flex items-center justify-center gap-1 text-slate-600 hover:text-slate-900 font-semibold">
         <i class="fa-solid fa-clock-rotate-left"></i>
         <span>2. Lupa Absen</span>
       </button>
+      <button id="tabCetakQr" type="button" onclick="switchMenu('cetak_qr')"
+        class="py-2.5 px-2 rounded-lg transition-all text-center flex items-center justify-center gap-1 text-slate-600 hover:text-slate-900 font-semibold">
+        <i class="fa-solid fa-id-card"></i>
+        <span>3. Cetak ID Card</span>
+      </button>
     </div>
 
-    <form onsubmit="handleSubmit(event)" class="space-y-4">
-      <!-- Tanggal Presensi -->
-      <div>
-        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Tanggal Presensi</label>
-        <input type="date" id="inputTanggal" required
-          class="w-full px-3.5 py-2 border border-slate-300 rounded-lg text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
-      </div>
+    <!-- FORM PRESENSI (UNTUK MENU 1 & 2) -->
+    <form id="mainForm" onsubmit="handleSubmit(event)" class="space-y-4">
+      
+      <!-- DROPDOWN PILIHAN UMUM (TANGGAL, KELAS, SISWA) -->
+      <div id="commonInputs" class="space-y-4">
+        <!-- Tanggal Presensi -->
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Tanggal Presensi</label>
+          <input type="date" id="inputTanggal" required
+            class="w-full px-3.5 py-2 border border-slate-300 rounded-lg text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
 
-      <!-- Pilih Kelas -->
-      <div>
-        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Pilih Kelas</label>
-        <select id="selectKelas" onchange="filterSiswaByKelas()" required disabled
-          class="w-full px-3.5 py-2 border border-slate-300 rounded-lg text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:bg-slate-100 disabled:text-slate-400">
-          <option value="">-- Sedang Memuat Data... --</option>
-        </select>
-      </div>
+        <!-- Pilih Kelas -->
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Pilih Kelas</label>
+          <select id="selectKelas" onchange="filterSiswaByKelas()" required disabled
+            class="w-full px-3.5 py-2 border border-slate-300 rounded-lg text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:bg-slate-100 disabled:text-slate-400">
+            <option value="">-- Sedang Memuat Data... --</option>
+          </select>
+        </div>
 
-      <!-- Pilih Siswa -->
-      <div>
-        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Pilih Siswa</label>
-        <select id="selectSiswa" required disabled
-          class="w-full px-3.5 py-2 border border-slate-300 rounded-lg text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:bg-slate-100 disabled:text-slate-400">
-          <option value="">-- Pilih Kelas Terlebih Dahulu --</option>
-        </select>
+        <!-- Pilih Siswa -->
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Pilih Siswa</label>
+          <select id="selectSiswa" required disabled
+            class="w-full px-3.5 py-2 border border-slate-300 rounded-lg text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:bg-slate-100 disabled:text-slate-400">
+            <option value="">-- Pilih Kelas Terlebih Dahulu --</option>
+          </select>
+        </div>
       </div>
 
       <!-- KONTEN MENU 1: SISWA TIDAK HADIR -->
@@ -120,7 +143,7 @@
         </div>
       </div>
 
-      <!-- KONTEN MENU 2: SISWA LUPA ABSEN (JAM MASUK & PULANG) -->
+      <!-- KONTEN MENU 2: SISWA LUPA ABSEN -->
       <div id="sectionLupaAbsen" class="hidden space-y-4 bg-amber-50/50 p-4 rounded-xl border border-amber-200/80">
         <div class="flex items-center gap-2 text-xs font-bold text-amber-800">
           <i class="fa-solid fa-circle-info text-amber-600 text-base"></i>
@@ -144,12 +167,44 @@
       <!-- Notifikasi Toast -->
       <div id="notif" class="hidden p-3 rounded-xl text-xs font-bold text-center border"></div>
 
-      <!-- Tombol Simpan -->
+      <!-- Tombol Simpan (Menu 1 & 2) -->
       <button type="submit" id="btnSubmit" disabled
         class="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl text-sm transition shadow-sm flex items-center justify-center gap-2">
         <i class="fa-solid fa-paper-plane"></i> Simpan Presensi
       </button>
     </form>
+
+    <!-- KONTEN MENU 3: CETAK & DOWNLOAD ID CARD QR SISWA -->
+    <div id="sectionCetakQr" class="hidden space-y-6">
+      
+      <!-- Panel Kontrol ID Card -->
+      <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div class="w-full sm:w-1/2">
+            <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Filter Kelas ID Card</label>
+            <select id="selectKelasQr" onchange="renderCardsUI()"
+              class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-semibold focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <option value="SEMUA">-- Tampilkan Semua Kelas --</option>
+            </select>
+          </div>
+          
+          <button type="button" onclick="downloadAllZip()" class="w-full sm:w-auto mt-auto bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-bold text-xs transition flex items-center justify-center gap-2 shadow-sm">
+            <i class="fa-solid fa-file-zipper"></i> Download ZIP ID Card
+          </button>
+        </div>
+
+        <!-- Progress Box ZIP -->
+        <div id="progressBox" class="hidden p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 font-mono text-center">
+          ⏳ Mengonversi: <span id="progressText">0</span> / <span id="totalText">0</span> ID Card...
+        </div>
+      </div>
+
+      <!-- Container ID Card Siswa -->
+      <div id="cardContainer" class="flex flex-wrap gap-6 justify-center max-h-[500px] overflow-y-auto p-2 border border-slate-100 rounded-xl bg-slate-50/50">
+        <!-- Kartu ID Card di-generate otomatis via JS -->
+      </div>
+    </div>
+
   </div>
 
   <script>
@@ -188,19 +243,50 @@
       currentMode = mode;
       const tab1 = document.getElementById("tabTidakHadir");
       const tab2 = document.getElementById("tabLupaAbsen");
+      const tab3 = document.getElementById("tabCetakQr");
+      
       const sec1 = document.getElementById("sectionTidakHadir");
       const sec2 = document.getElementById("sectionLupaAbsen");
+      const sec3 = document.getElementById("sectionCetakQr");
+      
+      const mainForm = document.getElementById("mainForm");
+      const formContainer = document.getElementById("formSection");
+      const title = document.getElementById("sectionTitle");
+
+      // Reset style tab
+      const inactiveClass = "py-2.5 px-2 rounded-lg transition-all text-center flex items-center justify-center gap-1 text-slate-600 hover:text-slate-900 font-semibold";
+      tab1.className = inactiveClass;
+      tab2.className = inactiveClass;
+      tab3.className = inactiveClass;
 
       if (mode === 'tidak_hadir') {
-        tab1.className = "py-2.5 px-3 rounded-lg transition-all text-center flex items-center justify-center gap-1.5 bg-white text-blue-700 shadow-sm font-extrabold";
-        tab2.className = "py-2.5 px-3 rounded-lg transition-all text-center flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900 font-semibold";
+        formContainer.className = "w-full max-w-lg bg-white p-6 md:p-8 rounded-2xl shadow-md border border-slate-200 space-y-6";
+        title.textContent = "Input Presensi Manual";
+        tab1.className = "py-2.5 px-2 rounded-lg transition-all text-center flex items-center justify-center gap-1 bg-white text-blue-700 shadow-sm font-extrabold";
+        
+        mainForm.classList.remove("hidden");
         sec1.classList.remove("hidden");
         sec2.classList.add("hidden");
-      } else {
-        tab2.className = "py-2.5 px-3 rounded-lg transition-all text-center flex items-center justify-center gap-1.5 bg-white text-amber-700 shadow-sm font-extrabold";
-        tab1.className = "py-2.5 px-3 rounded-lg transition-all text-center flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900 font-semibold";
+        sec3.classList.add("hidden");
+      } else if (mode === 'lupa_absen') {
+        formContainer.className = "w-full max-w-lg bg-white p-6 md:p-8 rounded-2xl shadow-md border border-slate-200 space-y-6";
+        title.textContent = "Input Presensi Susulan";
+        tab2.className = "py-2.5 px-2 rounded-lg transition-all text-center flex items-center justify-center gap-1 bg-white text-amber-700 shadow-sm font-extrabold";
+        
+        mainForm.classList.remove("hidden");
         sec2.classList.remove("hidden");
         sec1.classList.add("hidden");
+        sec3.classList.add("hidden");
+      } else if (mode === 'cetak_qr') {
+        // Melebarkan container agar pas menampilkan ID Card
+        formContainer.className = "w-full max-w-4xl bg-white p-6 md:p-8 rounded-2xl shadow-md border border-slate-200 space-y-6";
+        title.textContent = "Cetak & Download ID Card QR";
+        tab3.className = "py-2.5 px-2 rounded-lg transition-all text-center flex items-center justify-center gap-1 bg-white text-emerald-700 shadow-sm font-extrabold";
+        
+        mainForm.classList.add("hidden");
+        sec3.classList.remove("hidden");
+        
+        renderCardsUI();
       }
     }
 
@@ -236,15 +322,24 @@
 
     function populateKelas() {
       const selectKelas = document.getElementById("selectKelas");
+      const selectKelasQr = document.getElementById("selectKelasQr");
+      
       let setKelas = new Set();
       masterSiswa.forEach(s => { if(s.kelas) setKelas.add(s.kelas); });
       
       selectKelas.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+      selectKelasQr.innerHTML = '<option value="SEMUA">-- Tampilkan Semua Kelas --</option>';
+
       [...setKelas].sort().forEach(k => {
-        const opt = document.createElement("option");
-        opt.value = k;
-        opt.textContent = `Kelas ${k}`;
-        selectKelas.appendChild(opt);
+        const opt1 = document.createElement("option");
+        opt1.value = k;
+        opt1.textContent = `Kelas ${k}`;
+        selectKelas.appendChild(opt1);
+
+        const opt2 = document.createElement("option");
+        opt2.value = k;
+        opt2.textContent = `Kelas ${k}`;
+        selectKelasQr.appendChild(opt2);
       });
     }
 
@@ -322,20 +417,20 @@
       })
       .then(res => res.json())
       .then(res => {
+        notif.classList.remove("hidden");
         if (res.status === "success") {
           notif.className = "p-3 rounded-xl text-xs font-bold text-center bg-emerald-100 text-emerald-800 border border-emerald-200";
           notif.textContent = res.message || "Data presensi berhasil disimpan!";
 
-          // Reset pilihan siswa & radio
           document.getElementById("selectSiswa").value = "";
           document.querySelectorAll('input[name="statusTidakHadir"]').forEach(r => r.checked = false);
         } else {
-          // Jika ditolak backend (misal data duplikat)
           notif.className = "p-3 rounded-xl text-xs font-bold text-center bg-rose-100 text-rose-800 border border-rose-200";
           notif.textContent = res.message || "Gagal menyimpan data!";
         }
       })
       .catch(err => {
+        notif.classList.remove("hidden");
         notif.className = "p-3 rounded-xl text-xs font-bold text-center bg-rose-100 text-rose-800 border border-rose-200";
         notif.textContent = "Gagal terhubung ke server! Periksa koneksi internet Anda.";
       })
@@ -343,6 +438,125 @@
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Simpan Presensi';
         setTimeout(() => notif.classList.add("hidden"), 4000);
+      });
+    }
+
+    // ==========================================
+    // LOGIKA GENERATOR & DOWNLOAD ID CARD SISWA
+    // ==========================================
+
+    function renderCardsUI() {
+      const container = document.getElementById("cardContainer");
+      const filterKelas = document.getElementById("selectKelasQr").value;
+
+      container.innerHTML = "";
+
+      let dataToRender = masterSiswa;
+      if (filterKelas !== "SEMUA") {
+        dataToRender = masterSiswa.filter(s => s.kelas === filterKelas);
+      }
+
+      if (dataToRender.length === 0) {
+        container.innerHTML = "<p class='text-xs text-slate-400 font-semibold py-4'>Tidak ada data siswa untuk ditampilkan.</p>";
+        return;
+      }
+
+      dataToRender.forEach((siswa, index) => {
+        const wrapper = document.createElement("div");
+        wrapper.className = "flex flex-col items-center gap-2";
+
+        wrapper.innerHTML = `
+          <div id="card-${index}" class="id-card bg-gradient-to-b from-blue-900 via-slate-800 to-slate-900 rounded-2xl border-2 border-blue-500 p-4 shadow-xl flex flex-col justify-between items-center text-center overflow-hidden">
+            <div class="w-full border-b border-blue-400/30 pb-2">
+              <h2 class="text-[11px] font-black tracking-widest text-blue-300 uppercase">SMPN 1 RANCAH</h2>
+              <p class="text-[9px] text-slate-300 font-medium">KARTU PRESENSI SISWA</p>
+            </div>
+
+            <div class="bg-white p-2.5 rounded-xl shadow-md my-auto border border-blue-400 flex justify-center items-center">
+              <div id="qrcode-${index}"></div>
+            </div>
+
+            <div class="w-full bg-slate-900/90 p-2.5 rounded-xl border border-slate-700">
+              <h3 class="text-xs font-bold text-white uppercase tracking-wide truncate">${siswa.nama}</h3>
+              <p class="text-[10px] text-blue-400 font-mono mt-0.5">NISN: ${siswa.nisn}</p>
+              <div class="mt-1.5 inline-block bg-blue-600 text-white font-bold text-[9px] px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                KELAS ${siswa.kelas}
+              </div>
+            </div>
+          </div>
+
+          <button type="button" onclick="downloadSingleCard(${index}, '${siswa.nama}')" 
+            class="text-[11px] bg-slate-800 hover:bg-slate-700 text-blue-300 border border-slate-700 px-3 py-1 rounded-lg font-semibold transition flex items-center gap-1 shadow-sm">
+            <i class="fa-solid fa-camera"></i> Unduh Gambar
+          </button>
+        `;
+
+        container.appendChild(wrapper);
+
+        // Generate QR Code
+        new QRCode(document.getElementById(`qrcode-${index}`), {
+          text: String(siswa.nisn),
+          width: 100,
+          height: 100,
+          colorDark: "#000000",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.H
+        });
+      });
+    }
+
+    // Download 1 Gambar (PNG)
+    function downloadSingleCard(index, namaSiswa) {
+      const cardElem = document.getElementById(`card-${index}`);
+      
+      html2canvas(cardElem, { scale: 3, useCORS: true }).then(canvas => {
+        const link = document.createElement("a");
+        link.download = `ID_CARD_${namaSiswa.replace(/\s+/g, "_")}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      });
+    }
+
+    // Download Semua Gambar (.ZIP)
+    async function downloadAllZip() {
+      const filterKelas = document.getElementById("selectKelasQr").value;
+      let dataToZip = masterSiswa;
+      if (filterKelas !== "SEMUA") {
+        dataToZip = masterSiswa.filter(s => s.kelas === filterKelas);
+      }
+
+      if (dataToZip.length === 0) {
+        alert("Tidak ada data kartu untuk diunduh!");
+        return;
+      }
+
+      const zip = new JSZip();
+      const progressBox = document.getElementById("progressBox");
+      const progressText = document.getElementById("progressText");
+      const totalText = document.getElementById("totalText");
+
+      progressBox.classList.remove("hidden");
+      totalText.textContent = dataToZip.length;
+
+      for (let i = 0; i < dataToZip.length; i++) {
+        const siswa = dataToZip[i];
+        const cardElem = document.getElementById(`card-${i}`);
+
+        if (cardElem) {
+          const canvas = await html2canvas(cardElem, { scale: 3, useCORS: true });
+          const imgData = canvas.toDataURL("image/png").split(",")[1];
+          
+          const fileName = `Kelas_${siswa.kelas}/${siswa.nisn}_${siswa.nama.replace(/\s+/g, "_")}.png`;
+          zip.file(fileName, imgData, { base64: true });
+        }
+
+        progressText.textContent = i + 1;
+      }
+
+      progressBox.innerHTML = "⚡ Menyusun file ZIP, harap tunggu sebentar...";
+      zip.generateAsync({ type: "blob" }).then(content => {
+        saveAs(content, `ID_Card_Siswa_${filterKelas}.zip`);
+        progressBox.classList.add("hidden");
       });
     }
   </script>
