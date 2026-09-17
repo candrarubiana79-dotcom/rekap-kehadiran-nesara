@@ -251,12 +251,20 @@
       const mm = String(now.getMonth() + 1).padStart(2, '0');
       const dd = String(now.getDate()).padStart(2, '0');
       document.getElementById("inputTanggal").value = `${yyyy}-${mm}-${dd}`;
+
+      // Cek status login saat halaman diakses
+      if (localStorage.getItem("isLoggedIn") === "true") {
+        document.getElementById("loginSection").classList.add("hidden");
+        document.getElementById("formSection").classList.remove("hidden");
+        loadMasterData();
+      }
     });
 
     function handleLogin(e) {
       e.preventDefault();
       const token = document.getElementById("inputToken").value.trim();
       if (token === TOKEN_BENAR) {
+        localStorage.setItem("isLoggedIn", "true"); // Simpan status sesi login
         document.getElementById("loginSection").classList.add("hidden");
         document.getElementById("formSection").classList.remove("hidden");
         loadMasterData();
@@ -266,6 +274,7 @@
     }
 
     function logout() {
+      localStorage.removeItem("isLoggedIn"); // Hapus status sesi login
       document.getElementById("formSection").classList.add("hidden");
       document.getElementById("loginSection").classList.remove("hidden");
       document.getElementById("inputToken").value = "";
