@@ -113,7 +113,7 @@
       </div>
     </div>
 
-    <!-- FITUR 2: PEMENDEK URL -->
+    <!-- FITUR 2: PEMENDEK URL (TINYURL DIRECT) -->
     <div id="sectionPemendekUrl" class="hidden space-y-5">
       <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200/80 space-y-4">
         <div>
@@ -126,24 +126,26 @@
         </div>
 
         <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Custom Alias / Suffix Link (Opsional)</label>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Custom Alias / Suffix TinyURL (Opsional)</label>
           <div class="relative">
-            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-mono text-xs font-bold">alias/</span>
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-mono text-xs font-bold">tinyurl.com/</span>
             <input type="text" id="inputCustomAlias" oninput="handleAliasInput()" placeholder="contoh: NesaraDigital"
-              class="w-full pl-20 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
+              class="w-full pl-28 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
           </div>
-          <div id="aliasStatusMsg" class="mt-2 text-xs font-semibold min-h-[20px]"></div>
+          
+          <!-- AREA REKOMENDASI ALIAS UNIK -->
+          <div id="aliasRecommendationBox" class="mt-2.5 text-xs"></div>
         </div>
 
         <button type="button" id="btnShorten" onclick="processShortenURL()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl text-xs transition shadow-md shadow-indigo-500/20 flex items-center justify-center gap-2">
-          <i class="fa-solid fa-bolt"></i> Pendekkan Link Sekarang
+          <i class="fa-solid fa-bolt"></i> Pendekkan Link via TinyURL
         </button>
       </div>
 
       <!-- KOTAK HASIL PEMENDEKAN LINK -->
       <div id="shortenResultBox" class="hidden bg-emerald-50 border border-emerald-200/80 p-5 rounded-2xl space-y-3">
         <label class="block text-xs font-bold uppercase tracking-wider text-emerald-800">
-          <i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i> Link Berhasil Dipendekkan & Siap Di-Copy:
+          <i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i> Link Berhasil Dipendekkan:
         </label>
         <div class="flex items-center gap-2">
           <input type="text" id="outputShortUrl" readonly class="w-full px-3.5 py-2.5 bg-white border border-emerald-300 rounded-xl text-sm font-mono font-bold text-emerald-700 focus:outline-none select-all">
@@ -161,10 +163,7 @@
 
   <script>
     const MY_WORKER_URL = "https://shortlinknesara.candrarubiana79.workers.dev";
-
     let uploadedLogoImg = null;
-    let aliasStatus = "none";
-    let debounceTimer = null;
 
     document.addEventListener("DOMContentLoaded", () => {
       if (localStorage.getItem("isLoggedIn") !== "true") {
@@ -189,7 +188,7 @@
         tabQr.className = "py-2.5 px-2 rounded-xl transition-all text-center flex items-center justify-center gap-2 bg-white text-indigo-600 shadow-sm font-extrabold";
         tabUrl.className = "py-2.5 px-2 rounded-xl transition-all text-center flex items-center justify-center gap-2 text-slate-500 hover:text-slate-800 font-semibold";
       } else {
-        title.textContent = "Pemendek Link URL";
+        title.textContent = "Pemendek Link URL (TinyURL)";
         secQr.classList.add("hidden");
         secUrl.classList.remove("hidden");
         tabUrl.className = "py-2.5 px-2 rounded-xl transition-all text-center flex items-center justify-center gap-2 bg-white text-indigo-600 shadow-sm font-extrabold";
@@ -197,43 +196,50 @@
       }
     }
 
+    // MEMBUAT REKOMENDASI ALIAS UNIK REAL-TIME (TANPA CHECKER BOT)
     function handleAliasInput() {
-      const alias = document.getElementById("inputCustomAlias").value.trim();
-      const statusDiv = document.getElementById("aliasStatusMsg");
+      const rawInput = document.getElementById("inputCustomAlias").value.trim();
+      const recBox = document.getElementById("aliasRecommendationBox");
 
-      if (!alias) {
-        aliasStatus = "none";
-        statusDiv.innerHTML = "";
+      if (!rawInput) {
+        recBox.innerHTML = "";
         return;
       }
 
-      if (!/^[a-zA-Z0-9_-]+$/.test(alias)) {
-        aliasStatus = "invalid";
-        statusDiv.innerHTML = '<span class="text-rose-600 font-bold flex items-center gap-1.5"><i class="fa-solid fa-circle-xmark"></i> Alias hanya boleh berisi huruf, angka, "-" dan "_"</span>';
-        return;
-      }
+      // Bersihkan dari karakter aneh
+      const cleanInput = rawInput.replace(/[^a-zA-Z0-9_-]/g, "");
 
-      aliasStatus = "checking";
-      statusDiv.innerHTML = '<span class="text-slate-500 font-bold flex items-center gap-1.5"><i class="fa-solid fa-spinner fa-spin"></i> Memeriksa ketersediaan link...</span>';
+      const rec1 = `${cleanInput}-nesara`;
+      const rec2 = `${cleanInput}-2026`;
+      const rec3 = `${cleanInput}-smpn1rancah`;
 
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(async () => {
-        try {
-          const res = await fetch(`${MY_WORKER_URL}/?action=check&alias=${encodeURIComponent(alias)}`);
-          const data = await res.json();
+      recBox.innerHTML = `
+        <div class="bg-indigo-50/80 border border-indigo-100 p-3 rounded-xl space-y-2">
+          <p class="text-indigo-900 font-bold flex items-center gap-1.5">
+            <i class="fa-solid fa-lightbulb text-amber-500"></i> Rekomendasi Alias Unik (Klik untuk pakai agar pasti berhasil):
+          </p>
+          <div class="flex flex-wrap gap-2 pt-0.5">
+            <button type="button" onclick="applyRecommendation('${rec1}')" class="px-2.5 py-1 bg-white hover:bg-indigo-600 hover:text-white border border-indigo-200 text-indigo-700 font-mono font-bold rounded-lg transition text-[11px] shadow-sm">
+              ${rec1}
+            </button>
+            <button type="button" onclick="applyRecommendation('${rec2}')" class="px-2.5 py-1 bg-white hover:bg-indigo-600 hover:text-white border border-indigo-200 text-indigo-700 font-mono font-bold rounded-lg transition text-[11px] shadow-sm">
+              ${rec2}
+            </button>
+            <button type="button" onclick="applyRecommendation('${rec3}')" class="px-2.5 py-1 bg-white hover:bg-indigo-600 hover:text-white border border-indigo-200 text-indigo-700 font-mono font-bold rounded-lg transition text-[11px] shadow-sm">
+              ${rec3}
+            </button>
+          </div>
+        </div>
+      `;
+    }
 
-          if (data.available === true) {
-            aliasStatus = "available";
-            statusDiv.innerHTML = '<span class="text-emerald-600 font-bold flex items-center gap-1.5"><i class="fa-solid fa-circle-check"></i> Link tersedia</span>';
-          } else {
-            aliasStatus = "unavailable";
-            statusDiv.innerHTML = '<span class="text-rose-600 font-bold flex items-center gap-1.5"><i class="fa-solid fa-circle-xmark"></i> Link tidak tersedia</span>';
-          }
-        } catch (err) {
-          aliasStatus = "unavailable";
-          statusDiv.innerHTML = '<span class="text-rose-600 font-bold flex items-center gap-1.5"><i class="fa-solid fa-circle-xmark"></i> Gagal memeriksa ketersediaan link</span>';
-        }
-      }, 500);
+    function applyRecommendation(selectedAlias) {
+      document.getElementById("inputCustomAlias").value = selectedAlias;
+      document.getElementById("aliasRecommendationBox").innerHTML = `
+        <span class="text-emerald-600 font-bold flex items-center gap-1">
+          <i class="fa-solid fa-circle-check"></i> Menggunakan alias rekomendasi: <b>${selectedAlias}</b>
+        </span>
+      `;
     }
 
     function previewLogoName() {
@@ -346,29 +352,16 @@
 
       if (!longUrl) return alert("Silakan masukkan URL yang valid!");
 
-      // Otomatis tambahkan https:// jika pengguna lupa memasukkannya
       if (!/^https?:\/\//i.test(longUrl)) {
         longUrl = "https://" + longUrl;
         document.getElementById("inputLongUrl").value = longUrl;
       }
 
-      if (customAlias) {
-        if (aliasStatus === "checking") {
-          return alert("Sedang memeriksa ketersediaan alias. Silakan tunggu sebentar!");
-        }
-        if (aliasStatus === "unavailable") {
-          return alert("Gagal: Link alias ini sudah terpakai! Silakan gunakan nama alias lain.");
-        }
-        if (aliasStatus === "invalid") {
-          return alert("Gagal: Alias berisi karakter yang tidak diizinkan!");
-        }
-      }
-
       btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses ke TinyURL...';
 
       try {
-        let endpoint = `${MY_WORKER_URL}/?action=create&url=${encodeURIComponent(longUrl)}`;
+        let endpoint = `${MY_WORKER_URL}/?url=${encodeURIComponent(longUrl)}`;
         if (customAlias) {
           endpoint += `&alias=${encodeURIComponent(customAlias)}`;
         }
@@ -380,7 +373,7 @@
           outputInput.value = data.shorturl;
           resultBox.classList.remove("hidden");
         } else if (data.errormessage) {
-          alert("Gagal: " + data.errormessage);
+          alert(data.errormessage);
         } else {
           alert("Gagal memendekkan URL!");
         }
@@ -388,7 +381,7 @@
         alert("Terjadi kesalahan jaringan atau koneksi diblokir!");
       } finally {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-bolt"></i> Pendekkan Link Sekarang';
+        btn.innerHTML = '<i class="fa-solid fa-bolt"></i> Pendekkan Link via TinyURL';
       }
     }
 
@@ -396,7 +389,7 @@
       const copyText = document.getElementById("outputShortUrl");
       copyText.select();
       navigator.clipboard.writeText(copyText.value);
-      alert("Link pendek berhasil disalin ke clipboard!");
+      alert("Link pendek berhasil disalin!");
     }
 
     function sendShortUrlToCustomQR() {
