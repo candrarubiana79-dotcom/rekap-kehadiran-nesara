@@ -129,9 +129,11 @@
           <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Custom Alias / Suffix Link (Opsional)</label>
           <div class="relative">
             <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-mono text-xs font-bold">is.gd/</span>
-            <input type="text" id="inputCustomAlias" placeholder="contoh: NesaraDigital"
+            <input type="text" id="inputCustomAlias" oninput="handleAliasInput()" placeholder="contoh: NesaraDigital"
               class="w-full pl-20 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
           </div>
+          <!-- Indikator Ketersediaan Link -->
+          <div id="aliasStatusMsg" class="mt-2 text-xs font-semibold min-h-[20px]"></div>
         </div>
 
         <button type="button" id="btnShorten" onclick="processShortenURL()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl text-xs transition shadow-md shadow-indigo-500/20 flex items-center justify-center gap-2">
@@ -139,11 +141,15 @@
         </button>
       </div>
 
+      <!-- KOTAK HASIL PEMENDEKAN LINK -->
       <div id="shortenResultBox" class="hidden bg-emerald-50 border border-emerald-200/80 p-5 rounded-2xl space-y-3">
+        <label class="block text-xs font-bold uppercase tracking-wider text-emerald-800">
+          <i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i> Link Berhasil Dipendekkan & Siap Di-Copy:
+        </label>
         <div class="flex items-center gap-2">
-          <input type="text" id="outputShortUrl" readonly class="w-full px-3.5 py-2.5 bg-white border border-emerald-300 rounded-xl text-sm font-mono font-bold text-emerald-700 focus:outline-none">
+          <input type="text" id="outputShortUrl" readonly class="w-full px-3.5 py-2.5 bg-white border border-emerald-300 rounded-xl text-sm font-mono font-bold text-emerald-700 focus:outline-none select-all">
           <button type="button" onclick="copyShortUrl()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition flex items-center gap-1.5 whitespace-nowrap shadow-sm">
-            <i class="fa-solid fa-copy"></i> Salin
+            <i class="fa-solid fa-copy"></i> Salin Link
           </button>
         </div>
         <button type="button" onclick="sendShortUrlToCustomQR()" class="w-full bg-slate-900 hover:bg-slate-800 text-indigo-300 font-bold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2">
@@ -156,6 +162,8 @@
 
   <script>
     let uploadedLogoImg = null;
+    let aliasStatus = "none"; // Option values: 'none', 'checking', 'available', 'unavailable', 'invalid'
+    let debounceTimer = null;
 
     document.addEventListener("DOMContentLoaded", () => {
       // Proteksi Sesi Login
@@ -188,6 +196,50 @@
         tabUrl.className = "py-2.5 px-2 rounded-xl transition-all text-center flex items-center justify-center gap-2 bg-white text-indigo-600 shadow-sm font-extrabold";
         tabQr.className = "py-2.5 px-2 rounded-xl transition-all text-center flex items-center justify-center gap-2 text-slate-500 hover:text-slate-800 font-semibold";
       }
+    }
+
+    // FUNGSI PENGECEKAN KETERSEDIAAN ALIAS
+    function handleAliasInput() {
+      const alias = document.getElementById("inputCustomAlias").value.trim();
+      const statusDiv = document.getElementById("aliasStatusMsg");
+
+      if (!alias) {
+        aliasStatus = "none";
+        statusDiv.innerHTML = "";
+        return;
+      }
+
+      // Validasi Karakter (hanya huruf, angka, -, _)
+      if (!/^[a-zA-Z0-9_-]+$/.test(alias)) {
+        aliasStatus = "invalid";
+        statusDiv.innerHTML = '<span class="text-rose-600 font-bold flex items-center gap-1.5"><i class="fa-solid fa-circle-xmark"></i> Alias hanya boleh berisi huruf, angka, "-" dan "_"</span>';
+        return;
+      }
+
+      aliasStatus = "checking";
+      statusDiv.innerHTML = '<span class="text-slate-500 font-bold flex items-center gap-1.5"><i class="fa-solid fa-spinner fa-spin"></i> Memeriksa ketersediaan link...</span>';
+
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(async () => {
+        try {
+          const res = await fetch(`https://is.gd/forward.php?format=json&shorturl=${encodeURIComponent(alias)}`);
+          const data = await res.json();
+
+          if (data.url) {
+            // Berarti link sudah terdaftar
+            aliasStatus = "unavailable";
+            statusDiv.innerHTML = '<span class="text-rose-600 font-bold flex items-center gap-1.5"><i class="fa-solid fa-circle-xmark"></i> Link tidak tersedia</span>';
+          } else {
+            // Link belum terdaftar
+            aliasStatus = "available";
+            statusDiv.innerHTML = '<span class="text-emerald-600 font-bold flex items-center gap-1.5"><i class="fa-solid fa-circle-check"></i> Link tersedia</span>';
+          }
+        } catch (err) {
+          // Jika is.gd merespons error (link tidak ditemukan), berarti ALIAS MASIH TERSEDIA
+          aliasStatus = "available";
+          statusDiv.innerHTML = '<span class="text-emerald-600 font-bold flex items-center gap-1.5"><i class="fa-solid fa-circle-check"></i> Link tersedia</span>';
+        }
+      }, 500);
     }
 
     function previewLogoName() {
@@ -300,6 +352,19 @@
 
       if (!longUrl) return alert("Silakan masukkan URL yang valid!");
 
+      // VALIDASI KETERSEDIAAN ALIAS SEBELUM GENERATE
+      if (customAlias) {
+        if (aliasStatus === "checking") {
+          return alert("Sedang memeriksa ketersediaan alias. Silakan tunggu sebentar!");
+        }
+        if (aliasStatus === "unavailable") {
+          return alert("Gagal: Link tidak tersedia! Silakan gunakan alias nama lain.");
+        }
+        if (aliasStatus === "invalid") {
+          return alert("Gagal: Alias berisi karakter yang tidak diizinkan!");
+        }
+      }
+
       btn.disabled = true;
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
 
@@ -316,15 +381,7 @@
           outputInput.value = data.shorturl;
           resultBox.classList.remove("hidden");
         } else if (data.errormessage) {
-          // Pengecekan ketersediaan alias dan validasi kesalahan
-          const msg = data.errormessage.toLowerCase();
-          if (msg.includes("already in use") || msg.includes("already exists")) {
-            alert(`Alias "is.gd/${customAlias}" sudah dipakai! Silakan ganti dengan nama lain.`);
-          } else if (msg.includes("disallowed characters")) {
-            alert("Alias hanya boleh berisi huruf, angka, dan tanda hubung (-).");
-          } else {
-            alert("Gagal: " + data.errormessage);
-          }
+          alert("Gagal: " + data.errormessage);
         } else {
           alert("Gagal memendekkan URL!");
         }
@@ -340,7 +397,7 @@
       const copyText = document.getElementById("outputShortUrl");
       copyText.select();
       navigator.clipboard.writeText(copyText.value);
-      alert("Link pendek berhasil disalin!");
+      alert("Link pendek berhasil disalin ke clipboard!");
     }
 
     function sendShortUrlToCustomQR() {
