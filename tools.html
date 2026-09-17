@@ -129,7 +129,7 @@
           <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Custom Alias / Suffix Link (Opsional)</label>
           <div class="relative">
             <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-mono text-xs font-bold">is.gd/</span>
-            <input type="text" id="inputCustomAlias" oninput="handleAliasInput()" placeholder="contoh: PemalasYangBudiman"
+            <input type="text" id="inputCustomAlias" oninput="handleAliasInput()" placeholder="contoh: NesaraDigital"
               class="w-full pl-20 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
           </div>
           <!-- Indikator Ketersediaan Link -->
@@ -162,8 +162,11 @@
 
   <script>
     let uploadedLogoImg = null;
-    let aliasStatus = "none"; // Option values: 'none', 'checking', 'available', 'unavailable', 'invalid'
+    let aliasStatus = "none";
     let debounceTimer = null;
+
+    // CORS PROXY HELPER
+    const CORS_PROXY = "https://api.allorigins.win/raw?url=";
 
     document.addEventListener("DOMContentLoaded", () => {
       // Proteksi Sesi Login
@@ -209,7 +212,6 @@
         return;
       }
 
-      // Validasi Karakter (hanya huruf, angka, -, _)
       if (!/^[a-zA-Z0-9_-]+$/.test(alias)) {
         aliasStatus = "invalid";
         statusDiv.innerHTML = '<span class="text-rose-600 font-bold flex items-center gap-1.5"><i class="fa-solid fa-circle-xmark"></i> Alias hanya boleh berisi huruf, angka, "-" dan "_"</span>';
@@ -222,20 +224,18 @@
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(async () => {
         try {
-          const res = await fetch(`https://is.gd/forward.php?format=json&shorturl=${encodeURIComponent(alias)}`);
+          const targetUrl = `https://is.gd/forward.php?format=json&shorturl=${encodeURIComponent(alias)}`;
+          const res = await fetch(CORS_PROXY + encodeURIComponent(targetUrl));
           const data = await res.json();
 
           if (data.url) {
-            // Berarti link sudah terdaftar
             aliasStatus = "unavailable";
             statusDiv.innerHTML = '<span class="text-rose-600 font-bold flex items-center gap-1.5"><i class="fa-solid fa-circle-xmark"></i> Link tidak tersedia</span>';
           } else {
-            // Link belum terdaftar
             aliasStatus = "available";
             statusDiv.innerHTML = '<span class="text-emerald-600 font-bold flex items-center gap-1.5"><i class="fa-solid fa-circle-check"></i> Link tersedia</span>';
           }
         } catch (err) {
-          // Jika is.gd merespons error (link tidak ditemukan), berarti ALIAS MASIH TERSEDIA
           aliasStatus = "available";
           statusDiv.innerHTML = '<span class="text-emerald-600 font-bold flex items-center gap-1.5"><i class="fa-solid fa-circle-check"></i> Link tersedia</span>';
         }
@@ -352,7 +352,6 @@
 
       if (!longUrl) return alert("Silakan masukkan URL yang valid!");
 
-      // VALIDASI KETERSEDIAAN ALIAS SEBELUM GENERATE
       if (customAlias) {
         if (aliasStatus === "checking") {
           return alert("Sedang memeriksa ketersediaan alias. Silakan tunggu sebentar!");
@@ -374,7 +373,7 @@
           apiUrl += `&shorturl=${encodeURIComponent(customAlias)}`;
         }
 
-        const response = await fetch(apiUrl);
+        const response = await fetch(CORS_PROXY + encodeURIComponent(apiUrl));
         const data = await response.json();
 
         if (data.shorturl) {
