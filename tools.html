@@ -338,7 +338,7 @@
     }
 
     async function processShortenURL() {
-      const longUrl = document.getElementById("inputLongUrl").value.trim();
+      let longUrl = document.getElementById("inputLongUrl").value.trim();
       const customAlias = document.getElementById("inputCustomAlias").value.trim();
       const btn = document.getElementById("btnShorten");
       const resultBox = document.getElementById("shortenResultBox");
@@ -346,12 +346,18 @@
 
       if (!longUrl) return alert("Silakan masukkan URL yang valid!");
 
+      // Otomatis tambahkan https:// jika pengguna lupa memasukkannya
+      if (!/^https?:\/\//i.test(longUrl)) {
+        longUrl = "https://" + longUrl;
+        document.getElementById("inputLongUrl").value = longUrl;
+      }
+
       if (customAlias) {
         if (aliasStatus === "checking") {
           return alert("Sedang memeriksa ketersediaan alias. Silakan tunggu sebentar!");
         }
         if (aliasStatus === "unavailable") {
-          return alert("Gagal: Link tidak tersedia! Silakan gunakan alias nama lain.");
+          return alert("Gagal: Link alias ini sudah terpakai! Silakan gunakan nama alias lain.");
         }
         if (aliasStatus === "invalid") {
           return alert("Gagal: Alias berisi karakter yang tidak diizinkan!");
