@@ -158,6 +158,13 @@
     let uploadedLogoImg = null;
 
     document.addEventListener("DOMContentLoaded", () => {
+      // Proteksi Sesi Login
+      if (localStorage.getItem("isLoggedIn") !== "true") {
+        alert("Akses ditolak! Silakan login terlebih dahulu melalui portal presensi.");
+        window.location.href = "imput.html";
+        return;
+      }
+
       renderCustomQR();
     });
 
