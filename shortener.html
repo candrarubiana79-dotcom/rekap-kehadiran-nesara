@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pemendek URL - SMPN 1 RANCAH</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-800 min-h-screen flex items-center justify-center p-3 sm:p-4 md:p-6 relative overflow-x-hidden selection:bg-emerald-500 selection:text-white">
+
+  <!-- Background Light Orbs -->
+  <div class="fixed -top-32 -left-32 w-96 h-96 bg-emerald-600/20 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="fixed -bottom-32 -right-32 w-96 h-96 bg-teal-600/20 rounded-full blur-3xl pointer-events-none"></div>
+
+  <!-- CONTAINER UTAMA -->
+  <div class="w-full max-w-2xl bg-white/95 backdrop-blur-xl p-5 sm:p-6 md:p-8 rounded-3xl shadow-2xl border border-white/20 space-y-6 relative z-10">
+    
+    <!-- Header -->
+    <div class="flex items-center justify-between border-b pb-5 border-slate-100">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-lg font-bold">
+          <i class="fa-solid fa-link"></i>
+        </div>
+        <div>
+          <h2 class="text-lg font-extrabold text-slate-900 leading-tight">Pemendek Link URL (TinyURL)</h2>
+          <p class="text-xs font-bold text-emerald-600 uppercase tracking-wider">SMPN 1 RANCAH</p>
+        </div>
+      </div>
+      <a href="tools.html" class="text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 px-3.5 py-2 rounded-xl transition flex items-center gap-1.5">
+        <i class="fa-solid fa-arrow-left"></i> Kembali ke Tools
+      </a>
+    </div>
+
+    <!-- FITUR: PEMENDEK URL -->
+    <div class="space-y-5">
+      <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200/80 space-y-4">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Masukkan Link Panjang (URL)</label>
+          <div class="relative">
+            <i class="fa-solid fa-link absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input type="url" id="inputLongUrl" placeholder="https://candrarubiana79-dotcom.github.io/rekap-kehadiran-nesara/" required
+              class="w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Custom Alias / Suffix TinyURL (Opsional)</label>
+          <div class="relative">
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-mono text-xs font-bold">tinyurl.com/</span>
+            <input type="text" id="inputCustomAlias" oninput="handleAliasInput()" placeholder="contoh: NesaraDigital"
+              class="w-full pl-28 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
+          </div>
+          
+          <!-- AREA REKOMENDASI ALIAS UNIK -->
+          <div id="aliasRecommendationBox" class="mt-2.5 text-xs"></div>
+        </div>
+
+        <button type="button" id="btnShorten" onclick="processShortenURL()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-xs transition shadow-md shadow-emerald-500/20 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-bolt"></i> Pendekkan Link via TinyURL
+        </button>
+      </div>
+
+      <!-- KOTAK HASIL PEMENDEKAN LINK -->
+      <div id="shortenResultBox" class="hidden bg-emerald-50 border border-emerald-200/80 p-5 rounded-2xl space-y-3">
+        <label class="block text-xs font-bold uppercase tracking-wider text-emerald-800">
+          <i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i> Link Berhasil Dipendekkan:
+        </label>
+        <div class="flex items-center gap-2">
+          <input type="text" id="outputShortUrl" readonly class="w-full px-3.5 py-2.5 bg-white border border-emerald-300 rounded-xl text-sm font-mono font-bold text-emerald-700 focus:outline-none select-all">
+          <button type="button" onclick="copyShortUrl()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition flex items-center gap-1.5 whitespace-nowrap shadow-sm">
+            <i class="fa-solid fa-copy"></i> Salin Link
+          </button>
+        </div>
+        <button type="button" onclick="sendShortUrlToCustomQR()" class="w-full bg-slate-900 hover:bg-slate-800 text-emerald-300 font-bold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-qrcode text-emerald-400"></i> Buat Kode QR dari Link Ini
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const MY_WORKER_URL = "https://shortlinknesara.candrarubiana79.workers.dev";
+
+    document.addEventListener("DOMContentLoaded", () => {
+      if (localStorage.getItem("isLoggedIn") !== "true") {
+        alert("Akses ditolak! Silakan login terlebih dahulu melalui portal presensi.");
+        window.location.href = "imput.html";
+      }
+    });
+
+    function handleAliasInput() {
+      const rawInput = document.getElementById("inputCustomAlias").value.trim();
+      const recBox = document.getElementById("aliasRecommendationBox");
+
+      if (!rawInput) {
+        recBox.innerHTML = "";
+        return;
+      }
+
+      const cleanInput = rawInput.replace(/[^a-zA-Z0-9_-]/g, "");
+
+      const rec1 = `${cleanInput}-nesara`;
+      const rec2 = `${cleanInput}-2026`;
+      const rec3 = `${cleanInput}-smpn1rancah`;
+
+      recBox.innerHTML = `
+        <div class="bg-emerald-50/80 border border-emerald-100 p-3 rounded-xl space-y-2">
+          <p class="text-emerald-900 font-bold flex items-center gap-1.5">
+            <i class="fa-solid fa-lightbulb text-amber-500"></i> Rekomendasi Alias Unik (Klik untuk pakai agar pasti berhasil):
+          </p>
+          <div class="flex flex-wrap gap-2 pt-0.5">
+            <button type="button" onclick="applyRecommendation('${rec1}')" class="px-2.5 py-1 bg-white hover:bg-emerald-600 hover:text-white border border-emerald-200 text-emerald-700 font-mono font-bold rounded-lg transition text-[11px] shadow-sm">
+              ${rec1}
+            </button>
+            <button type="button" onclick="applyRecommendation('${rec2}')" class="px-2.5 py-1 bg-white hover:bg-emerald-600 hover:text-white border border-emerald-200 text-emerald-700 font-mono font-bold rounded-lg transition text-[11px] shadow-sm">
+              ${rec2}
+            </button>
+            <button type="button" onclick="applyRecommendation('${rec3}')" class="px-2.5 py-1 bg-white hover:bg-emerald-600 hover:text-white border border-emerald-200 text-emerald-700 font-mono font-bold rounded-lg transition text-[11px] shadow-sm">
+              ${rec3}
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function applyRecommendation(selectedAlias) {
+      document.getElementById("inputCustomAlias").value = selectedAlias;
+      document.getElementById("aliasRecommendationBox").innerHTML = `
+        <span class="text-emerald-600 font-bold flex items-center gap-1">
+          <i class="fa-solid fa-circle-check"></i> Menggunakan alias rekomendasi: <b>${selectedAlias}</b>
+        </span>
+      `;
+    }
+
+    async function processShortenURL() {
+      let longUrl = document.getElementById("inputLongUrl").value.trim();
+      const customAlias = document.getElementById("inputCustomAlias").value.trim();
+      const btn = document.getElementById("btnShorten");
+      const resultBox = document.getElementById("shortenResultBox");
+      const outputInput = document.getElementById("outputShortUrl");
+
+      if (!longUrl) return alert("Silakan masukkan URL yang valid!");
+
+      if (!/^https?:\/\//i.test(longUrl)) {
+        longUrl = "https://" + longUrl;
+        document.getElementById("inputLongUrl").value = longUrl;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses ke TinyURL...';
+
+      try {
+        let endpoint = `${MY_WORKER_URL}/?url=${encodeURIComponent(longUrl)}`;
+        if (customAlias) {
+          endpoint += `&alias=${encodeURIComponent(customAlias)}`;
+        }
+
+        const response = await fetch(endpoint);
+        const data = await response.json();
+
+        if (data.shorturl) {
+          outputInput.value = data.shorturl;
+          resultBox.classList.remove("hidden");
+        } else if (data.errormessage) {
+          alert(data.errormessage);
+        } else {
+          alert("Gagal memendekkan URL!");
+        }
+      } catch (err) {
+        alert("Terjadi kesalahan jaringan atau koneksi diblokir!");
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-bolt"></i> Pendekkan Link via TinyURL';
+      }
+    }
+
+    function copyShortUrl() {
+      const copyText = document.getElementById("outputShortUrl");
+      copyText.select();
+      navigator.clipboard.writeText(copyText.value);
+      alert("Link pendek berhasil disalin!");
+    }
+
+    function sendShortUrlToCustomQR() {
+      const shortUrl = document.getElementById("outputShortUrl").value;
+      if (!shortUrl) return;
+      // Simpan link pendek ke localStorage agar langsung otomatis terisi saat membuka qr-custom.html
+      localStorage.setItem("qrContentToLoad", shortUrl);
+      window.location.href = "qr-custom.html";
+    }
+  </script>
+</body>
+</html>
