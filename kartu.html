@@ -3,9 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Generator Kartu Pelajar - SMPN 1 Rancah</title>
+  <title>Generator Kartu Pelajar Ukuran KTP - SMPN 1 Rancah</title>
   <!-- Library Parser CSV -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <!-- Library Convert HTML to Image (PNG Download) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background-color: #0f172a; padding: 20px; color: #334155; min-height: 100vh; }
@@ -35,74 +37,88 @@
     .form-group select, .form-group input { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; font-weight: 600; outline: none; transition: 0.2s; }
     .form-group select:focus, .form-group input:focus { border-color: #0284c7; box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15); }
 
-    .btn-cetak {
-      padding: 10px 20px; background: #16a34a; color: #fff; border: none; border-radius: 8px;
-      cursor: pointer; font-weight: 800; font-size: 13px; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; height: 38px;
+    .action-buttons { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+    .btn {
+      padding: 9px 16px; border: none; border-radius: 8px; cursor: pointer;
+      font-weight: 800; font-size: 12px; transition: 0.2s; display: inline-flex;
+      align-items: center; justify-content: center; gap: 6px; height: 38px; text-decoration: none;
     }
+    .btn-download { background: #0284c7; color: #fff; }
+    .btn-download:hover { background: #0369a1; }
+    .btn-cetak { background: #16a34a; color: #fff; }
     .btn-cetak:hover { background: #15803d; }
     .hidden { display: none !important; }
 
     /* GRID WADAH KARTU */
     .grid-cetak-container {
-      display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; max-width: 1150px; margin: 0 auto;
+      display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; max-width: 1200px; margin: 0 auto;
     }
 
-    /* DESAIN KARTU PELAJAR */
+    /* DESAIN KARTU PELAJAR PRESISI UKURAN KTP (85.6mm x 53.9mm) */
     .kartu-container {
-      width: 530px; height: 335px; background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
-      border: 1.5px solid #0284c7; border-radius: 12px; position: relative; overflow: hidden;
-      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); flex-shrink: 0; page-break-inside: avoid;
+      width: 85.6mm;
+      height: 53.9mm;
+      background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+      border: 1px solid #0284c7;
+      border-radius: 3.2mm; /* Radius standar KTP */
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+      flex-shrink: 0;
+      page-break-inside: avoid;
+      box-sizing: border-box;
+      background-clip: padding-box;
     }
 
     /* Header Kartu */
     .header {
       background: linear-gradient(90deg, #0284c7 0%, #0369a1 100%); color: white; text-align: center;
-      padding: 7px 48px; position: relative; border-bottom: 2.5px solid #0f172a;
+      padding: 1.5mm 6mm; position: relative; border-bottom: 0.5mm solid #0f172a;
     }
-    .logo-left { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; object-fit: contain; }
-    .logo-right { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; object-fit: contain; }
-    .header h4 { font-size: 10px; font-weight: 700; letter-spacing: 0.5px; opacity: 0.9; }
-    .header h3 { font-size: 9.5px; font-weight: 700; }
-    .header h2 { font-size: 14.5px; font-weight: 900; letter-spacing: 0.5px; margin: 1px 0; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
-    .header p { font-size: 7.5px; opacity: 0.85; }
+    .logo-left { position: absolute; left: 1.5mm; top: 50%; transform: translateY(-50%); width: 7.5mm; height: 7.5mm; object-fit: contain; }
+    .logo-right { position: absolute; right: 1.5mm; top: 50%; transform: translateY(-50%); width: 7.5mm; height: 7.5mm; object-fit: contain; }
+    .header h4 { font-size: 4.8px; font-weight: 700; letter-spacing: 0.2px; opacity: 0.95; line-height: 1; }
+    .header h3 { font-size: 4.5px; font-weight: 700; line-height: 1; }
+    .header h2 { font-size: 7px; font-weight: 900; letter-spacing: 0.2px; margin: 0.3mm 0; line-height: 1; text-shadow: 0 0.5px 1px rgba(0,0,0,0.3); }
+    .header p { font-size: 3.8px; opacity: 0.9; line-height: 1; }
 
     /* Judul Kartu */
     .judul-kartu {
-      text-align: center; font-size: 17px; font-weight: 900;
-      letter-spacing: 1.5px; margin: 7px 0; color: #0f172a; text-transform: uppercase;
+      text-align: center; font-size: 8.5px; font-weight: 900;
+      letter-spacing: 0.8px; margin: 1mm 0 0.8mm 0; color: #0f172a; text-transform: uppercase; line-height: 1;
     }
 
     /* Konten Data & Foto */
-    .content { display: flex; padding: 0 14px; position: relative; z-index: 2; }
+    .content { display: flex; padding: 0 2.5mm; position: relative; z-index: 2; }
     .foto-box {
-      width: 108px; height: 138px; border: 2px solid #0f172a; border-radius: 6px;
-      background: #f1f5f9; object-fit: cover; flex-shrink: 0; box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+      width: 16.5mm; height: 22mm; border: 0.4mm solid #0f172a; border-radius: 1mm;
+      background: #f1f5f9; object-fit: cover; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
     .data-box {
-      flex-grow: 1; margin-left: 12px; background: rgba(255, 255, 255, 0.92);
-      border: 1.5px solid #0f172a; border-radius: 10px; padding: 7px 10px;
-      font-size: 10.5px; line-height: 1.4; height: fit-content; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      flex-grow: 1; margin-left: 2mm; background: rgba(255, 255, 255, 0.94);
+      border: 0.3mm solid #0f172a; border-radius: 1.5mm; padding: 1.2mm 1.8mm;
+      font-size: 5.6px; line-height: 1.25; height: fit-content; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
-    .data-row { display: flex; margin-bottom: 2px; }
-    .data-label { width: 80px; color: #334155; }
-    .data-separator { width: 8px; font-weight: bold; }
+    .data-row { display: flex; margin-bottom: 0.3mm; }
+    .data-label { width: 14.5mm; color: #334155; font-weight: 600; }
+    .data-separator { width: 1.5mm; font-weight: bold; }
     .data-value { flex: 1; color: #0f172a; word-break: break-word; }
     .data-value.bold { font-weight: 800; }
 
     /* TTD & Stempel Section */
     .ttd-section {
-      position: absolute; right: 14px; bottom: 8px; text-align: center;
-      font-size: 9.5px; z-index: 3; line-height: 1.25; color: #0f172a;
+      position: absolute; right: 2.5mm; bottom: 1.2mm; text-align: center;
+      font-size: 4.8px; z-index: 3; line-height: 1.15; color: #0f172a;
     }
     .stempel-ttd-wrapper {
-      position: relative; width: 140px; height: 42px; margin: 1px auto;
+      position: relative; width: 22mm; height: 6.5mm; margin: 0.2mm auto;
     }
     .img-stempel {
-      position: absolute; left: 5px; top: -10px; width: 58px; height: auto;
+      position: absolute; left: 1mm; top: -1.5mm; width: 9mm; height: auto;
       opacity: 0.88; z-index: 1; mix-blend-mode: multiply;
     }
     .img-ttd {
-      position: absolute; right: 10px; top: -6px; width: 75px; height: auto; z-index: 2;
+      position: absolute; right: 1.5mm; top: -1mm; width: 12mm; height: auto; z-index: 2;
     }
 
     /* Background Wave */
@@ -115,12 +131,12 @@
       background: #0369a1; clip-path: polygon(0 85%, 100% 30%, 100% 100%, 0% 100%); z-index: 1;
     }
 
-    /* MEDIA PRINT A4 */
+    /* MEDIA PRINT A4 STANDAR UKURAN KTP */
     @media print {
       body { background: #ffffff !important; padding: 0 !important; margin: 0 !important; }
       .panel-control { display: none !important; }
-      .grid-cetak-container { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 8mm !important; max-width: 100% !important; }
-      .kartu-container { box-shadow: none !important; border-color: #000 !important; page-break-inside: avoid !important; }
+      .grid-cetak-container { display: grid !important; grid-template-columns: repeat(2, 85.6mm) !important; gap: 5mm !important; padding: 10mm !important; max-width: 100% !important; justify-content: start !important; }
+      .kartu-container { box-shadow: none !important; border-color: #000 !important; page-break-inside: avoid !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     }
   </style>
 </head>
@@ -128,7 +144,7 @@
 
   <!-- PANEL KONTROL ADMIN -->
   <div class="panel-control">
-    <h2>Kontrol Generator Kartu Pelajar</h2>
+    <h2>Kontrol Generator Kartu Pelajar (Ukuran KTP)</h2>
     
     <!-- Status Indikator Data Master -->
     <div id="statusIndikator" class="status-box loading">
@@ -161,13 +177,13 @@
     </div>
 
     <!-- TAHAP 2: GENERATE SISWA / KELAS -->
-    <div class="section-title">2. Mode Generate & Cetak Kartu</div>
+    <div class="section-title">2. Mode Tampilan & Pilihan Download</div>
     <div class="grid-form">
       <div class="form-group">
         <label>Mode Tampilan:</label>
         <select id="selectMode" onchange="switchModeCetak()">
-          <option value="single">Per Siswa (Preview 1 Kartu)</option>
-          <option value="kelas">Per Kelas (Massal Siap Cetak A4)</option>
+          <option value="single">Per Siswa (Preview & Download 1 Kartu)</option>
+          <option value="kelas">Per Kelas (Preview, Download Massal & Cetak A4)</option>
         </select>
       </div>
 
@@ -186,14 +202,23 @@
       </div>
 
       <div class="form-group" style="justify-content: flex-end;">
-        <button type="button" onclick="window.print()" class="btn-cetak">
-          🖨️ Cetak / Simpan PDF
-        </button>
+        <label>Aksi Download / Cetak:</label>
+        <div class="action-buttons">
+          <button type="button" id="btnDownloadSingle" onclick="downloadPNGSingle()" class="btn btn-download">
+            🖼️ Download Gambar (PNG)
+          </button>
+          <button type="button" id="btnDownloadKelas" onclick="downloadPNGKelas()" class="btn btn-download hidden">
+            📦 Download Semua PNG Kelas
+          </button>
+          <button type="button" onclick="window.print()" class="btn btn-cetak">
+            🖨️ Cetak / PDF (A4)
+          </button>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- AREA RENDER KARTU -->
+  <!-- AREA RENDER KARTU PREVIEW -->
   <div id="wadahCetak" class="grid-cetak-container"></div>
 
   <script>
@@ -273,7 +298,6 @@
     function prosesDataCsv(rowsAll) {
       const statusBox = document.getElementById('statusIndikator');
       
-      // Baris 0 adalah Header, ambil baris 1 ke bawah yang punya Nama (kolom indeks 1)
       const rows = rowsAll.slice(1);
       dataSiswaGlobal = rows.filter(r => r && r[1] && r[1].trim() !== '');
 
@@ -283,7 +307,6 @@
         return;
       }
 
-      // Ambil daftar kelas unik dari kolom KELAS (indeks 2)
       daftarKelasGlobal = [...new Set(dataSiswaGlobal.map(s => (s[2] || '').trim()))].filter(Boolean).sort();
 
       statusBox.className = 'status-box ready';
@@ -313,14 +336,20 @@
       const mode = document.getElementById('selectMode').value;
       const grpSiswa = document.getElementById('grpSelectSiswa');
       const grpKelas = document.getElementById('grpSelectKelas');
+      const btnSingle = document.getElementById('btnDownloadSingle');
+      const btnKelas = document.getElementById('btnDownloadKelas');
 
       if (mode === 'single') {
         grpSiswa.classList.remove('hidden');
         grpKelas.classList.add('hidden');
+        btnSingle.classList.remove('hidden');
+        btnKelas.classList.add('hidden');
         renderKartuSingle();
       } else {
         grpSiswa.classList.add('hidden');
         grpKelas.classList.remove('hidden');
+        btnSingle.classList.add('hidden');
+        btnKelas.classList.remove('hidden');
         renderKartuPerKelas();
       }
     }
@@ -333,17 +362,15 @@
       const stempelBase64 = localStorage.getItem('stempelData') || '';
       const ttdBase64 = localStorage.getItem('ttdData') || '';
 
-      // Tempat & Tanggal Lahir (E & F -> indeks 4 & 5)
       const tempatLahir = (s[4] || '').trim();
       const tglLahir = (s[5] || '').trim();
       let ttl = '';
       if (tempatLahir && tglLahir) ttl = `${tempatLahir}, ${tglLahir}`;
       else ttl = tempatLahir || tglLahir || '-';
 
-      // Jenis Kelamin (G -> indeks 6)
       const jk = (s[6] || '').trim();
 
-      // PEMBENTUKAN ALAMAT PRESISI SESUAI SPREADSHEET (H, I, J, K, L -> indeks 7, 8, 9, 10, 11)
+      // FORMAT ALAMAT PRESISI
       const dsn = (s[7] || '').trim();
       const rt = (s[8] || '').trim();
       const rw = (s[9] || '').trim();
@@ -353,12 +380,8 @@
       let bagianAlamat = [];
 
       if (dsn) {
-        // Cek apakah data dusun sudah memiliki kata "Dusun"
-        if (/^d(sn|usun)\.?\s+/i.test(dsn)) {
-          bagianAlamat.push(dsn);
-        } else {
-          bagianAlamat.push(`Dsn. ${dsn}`);
-        }
+        if (/^d(sn|usun)\.?\s+/i.test(dsn)) bagianAlamat.push(dsn);
+        else bagianAlamat.push(`Dsn. ${dsn}`);
       }
 
       if (rt || rw) {
@@ -366,29 +389,25 @@
       }
 
       if (desa) {
-        if (/^d(esa|s)\.?\s+/i.test(desa)) {
-          bagianAlamat.push(desa);
-        } else {
-          bagianAlamat.push(`Ds. ${desa}`);
-        }
+        if (/^d(esa|s)\.?\s+/i.test(desa)) bagianAlamat.push(desa);
+        else bagianAlamat.push(`Ds. ${desa}`);
       }
 
       if (kec) {
-        if (/^kec(amatan)?\.?\s+/i.test(kec)) {
-          bagianAlamat.push(kec);
-        } else {
-          bagianAlamat.push(`Kec. ${kec}`);
-        }
+        if (/^kec(amatan)?\.?\s+/i.test(kec)) bagianAlamat.push(kec);
+        else bagianAlamat.push(`Kec. ${kec}`);
       }
 
       const alamat = bagianAlamat.join(' ') || '-';
+      const nisn = (s[0] || '').trim();
+      const nama = (s[1] || '').trim();
 
-      // Foto dari URL Google Drive / path lokal
+      // Foto
       const fotoRaw = (s[12] || '').trim();
-      const fotoUrl = (fotoRaw.startsWith('http')) ? fotoRaw : `assets/foto_${(s[0]||'').trim()}.jpg`;
+      const fotoUrl = (fotoRaw.startsWith('http')) ? fotoRaw : `assets/foto_${nisn}.jpg`;
 
       return `
-        <div class="kartu-container">
+        <div class="kartu-container" id="kartu-${nisn}">
           <div class="header">
             <img src="assets/logo-ciamis.png" class="logo-left" alt="Logo Ciamis">
             <img src="assets/logo-smpn1rancah.png" class="logo-right" alt="Logo SMP">
@@ -401,12 +420,12 @@
           <div class="judul-kartu">KARTU PELAJAR</div>
 
           <div class="content">
-            <img src="${fotoUrl}" class="foto-box" onerror="this.src='https://via.placeholder.com/108x138?text=Foto+Siswa'">
+            <img src="${fotoUrl}" class="foto-box" onerror="this.src='https://via.placeholder.com/108x138?text=Foto'">
             <div class="data-box">
-              <div class="data-row"><div class="data-label">Nama</div><div class="data-separator">:</div><div class="data-value bold">${(s[1]||'-').trim()}</div></div>
+              <div class="data-row"><div class="data-label">Nama</div><div class="data-separator">:</div><div class="data-value bold">${nama}</div></div>
               <div class="data-row"><div class="data-label">TTL</div><div class="data-separator">:</div><div class="data-value">${ttl}</div></div>
               <div class="data-row"><div class="data-label">Jenis Kelamin</div><div class="data-separator">:</div><div class="data-value">${jk || '-'}</div></div>
-              <div class="data-row"><div class="data-label">NISN</div><div class="data-separator">:</div><div class="data-value">${(s[0]||'-').trim()}</div></div>
+              <div class="data-row"><div class="data-label">NISN</div><div class="data-separator">:</div><div class="data-value">${nisn}</div></div>
               <div class="data-row"><div class="data-label">Alamat</div><div class="data-separator">:</div><div class="data-value">${alamat}</div></div>
             </div>
           </div>
@@ -452,6 +471,49 @@
         htmlAll += buatHtmlKartu(s);
       });
       wadah.innerHTML = htmlAll;
+    }
+
+    /* FITUR DOWNLOAD KARTU GAMBAR (PNG 300DPI) */
+    function downloadPNGSingle() {
+      const kartuElem = document.querySelector('.kartu-container');
+      if (!kartuElem) {
+        alert('Tidak ada kartu yang dipilih!');
+        return;
+      }
+
+      const idx = document.getElementById('selectSiswa').value;
+      const namaSiswa = dataSiswaGlobal[idx] ? dataSiswaGlobal[idx][1].trim() : 'Siswa';
+      const nisnSiswa = dataSiswaGlobal[idx] ? dataSiswaGlobal[idx][0].trim() : '000';
+
+      html2canvas(kartuElem, { scale: 3, useCORS: true }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `Kartu_${nisnSiswa}_${namaSiswa.replace(/\s+/g, '_')}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      });
+    }
+
+    function downloadPNGKelas() {
+      const elemenKartuAll = document.querySelectorAll('.kartu-container');
+      if (elemenKartuAll.length === 0) {
+        alert('Pilih kelas terlebih dahulu!');
+        return;
+      }
+
+      const confirmCetak = confirm(`Sistem akan mengunduh ${elemenKartuAll.length} gambar kartu secara berurutan. Lanjutkan?`);
+      if (!confirmCetak) return;
+
+      elemenKartuAll.forEach((elem, index) => {
+        setTimeout(() => {
+          const nisn = elem.id.replace('kartu-', '');
+          html2canvas(elem, { scale: 3, useCORS: true }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `Kartu_${nisn}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+          });
+        }, index * 600); // Delay 600ms per kartu agar peramban tidak memblokir pop-up download
+      });
     }
 
     function uploadGambarLokal(event, storageKey) {
