@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Generator Kartu Pelajar - SMPN 1 Rancah</title>
+  <!-- Library Parser CSV Profesional -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background-color: #0f172a; padding: 20px; color: #334155; min-height: 100vh; }
@@ -23,8 +25,9 @@
     }
     .status-box.loading { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
     .status-box.ready { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .status-box.error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
     
-    .section-title { font-size: 13px; font-weight: 800; text-transform: uppercase; color: #0284c7; letter-spacing: 0.5px; margin-bottom: 10px; border-bottom: 2px solid #e2e8f0; pb: 4px; }
+    .section-title { font-size: 13px; font-weight: 800; text-transform: uppercase; color: #0284c7; letter-spacing: 0.5px; margin-bottom: 10px; border-bottom: 2px solid #e2e8f0; padding-bottom: 4px; }
     
     .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 18px; }
     .form-group { display: flex; flex-direction: column; }
@@ -132,7 +135,7 @@
       ⏳ Memuat data master siswa dari Google Sheets...
     </div>
 
-    <!-- TAHAP 1: LEGALITAS & UPLOAD (TERSAMPAN LOKAL) -->
+    <!-- TAHAP 1: LEGALITAS & UPLOAD -->
     <div class="section-title">1. Pengaturan Legalitas & Gambar (Tersimpan di Browser)</div>
     <div class="grid-form">
       <div class="form-group">
@@ -195,13 +198,12 @@
 
   <script>
     const sheetID = '1rzj6ucYgbUf4X1x9fcZVsTGwJBgIXPnCaHazl73mSU';
-    const csvURL = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:csv&sheet=data%20master%20siswa`;
+    const csvExportURL = `https://docs.google.com/spreadsheets/d/${sheetID}/export?format=csv&sheet=${encodeURIComponent('data master siswa')}`;
 
     let dataSiswaGlobal = [];
     let daftarKelasGlobal = [];
 
     window.onload = function() {
-      // Load metadata tersimpan
       if (localStorage.getItem('namaKepsek')) document.getElementById('inputNamaKepsek').value = localStorage.getItem('namaKepsek');
       if (localStorage.getItem('nipKepsek')) document.getElementById('inputNipKepsek').value = localStorage.getItem('nipKepsek');
       if (localStorage.getItem('tglTtdData')) document.getElementById('inputTglTtd').value = localStorage.getItem('tglTtdData');
@@ -218,32 +220,42 @@
       localStorage.setItem('nipKepsek', nip);
       localStorage.setItem('tglTtdData', tgl);
 
-      // Re-render tampilan aktif
       const mode = document.getElementById('selectMode').value;
       if (mode === 'single') renderKartuSingle();
       else renderKartuPerKelas();
     }
 
     function fetchDataSiswa() {
-      fetch(csvURL)
-        .then(res => res.text())
-        .then(csvText => {
-          const rows = csvText.split('\n').map(row => row.split(',').map(cell => cell.replace(/"/g, '').trim()));
-          dataSiswaGlobal = rows.slice(1).filter(r => r[1]); // Filter yang ada nama
-          
-          // Ambil daftar kelas unik
-          daftarKelasGlobal = [...new Set(dataSiswaGlobal.map(s => s[2]))].filter(Boolean).sort();
+      const statusBox = document.getElementById('statusIndikator');
+      statusBox.className = 'status-box loading';
+      statusBox.innerHTML = '⏳ Memuat seluruh data master siswa dari Google Sheets...';
 
-          // Update Indikator Status
-          const statusBox = document.getElementById('statusIndikator');
+      Papa.parse(csvExportURL, {
+        download: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+          if (!results.data || results.data.length < 2) {
+            statusBox.className = 'status-box error';
+            statusBox.innerHTML = '❌ Data di Google Sheets kosong atau tidak dapat diakses.';
+            return;
+          }
+
+          // Baris 0 = Header. Ambil baris 1 ke bawah yang memiliki nama (kolom index 1)
+          const rows = results.data.slice(1);
+          dataSiswaGlobal = rows.filter(r => r[1] && r[1].trim() !== '');
+
+          // Ambil daftar kelas unik
+          daftarKelasGlobal = [...new Set(dataSiswaGlobal.map(s => (s[2] || '').trim()))].filter(Boolean).sort();
+
+          // Update Indikator Status Berhasil
           statusBox.className = 'status-box ready';
-          statusBox.innerHTML = `✅ <b>Data Master Terbaca:</b> ${dataSiswaGlobal.length} Siswa (${daftarKelasGlobal.length} Kelas) Siap Di-generate!`;
+          statusBox.innerHTML = `✅ <b>Data Master Terbaca Sempurna:</b> ${dataSiswaGlobal.length} Siswa (${daftarKelasGlobal.length} Kelas) Siap Di-generate!`;
 
           // Populate Dropdown Siswa
           const selSiswa = document.getElementById('selectSiswa');
           selSiswa.innerHTML = '<option value="">-- Pilih Nama Siswa --</option>';
           dataSiswaGlobal.forEach((s, i) => {
-            selSiswa.innerHTML += `<option value="${i}">${s[1]} (${s[0]}) - Kelas ${s[2]}</option>`;
+            selSiswa.innerHTML += `<option value="${i}">${s[1].trim()} (${(s[0]||'-').trim()}) - Kelas ${(s[2]||'-').trim()}</option>`;
           });
 
           // Populate Dropdown Kelas
@@ -253,17 +265,16 @@
             selKelas.innerHTML += `<option value="${k}">Kelas ${k}</option>`;
           });
 
-          // Render default kartu pertama
           if (dataSiswaGlobal.length > 0) {
             selSiswa.selectedIndex = 1;
             renderKartuSingle();
           }
-        })
-        .catch(err => {
-          const statusBox = document.getElementById('statusIndikator');
-          statusBox.className = 'status-box loading';
-          statusBox.innerHTML = `❌ Gagal mengambil data dari Google Sheets. Pastikan spreadsheet dipublikasikan.`;
-        });
+        },
+        error: function(err) {
+          statusBox.className = 'status-box error';
+          statusBox.innerHTML = '❌ Gagal mengunduh data dari Google Sheets. Pastikan dokumen dipublikasikan ke publik.';
+        }
+      });
     }
 
     function switchModeCetak() {
@@ -282,7 +293,6 @@
       }
     }
 
-    // FUNGSI BUAT TEMPLATE HTML 1 KARTU
     function buatHtmlKartu(s) {
       const namaKepsek = document.getElementById('inputNamaKepsek').value || '-';
       const nipKepsek = document.getElementById('inputNipKepsek').value || '-';
@@ -291,15 +301,25 @@
       const stempelBase64 = localStorage.getItem('stempelData') || '';
       const ttdBase64 = localStorage.getItem('ttdData') || '';
 
-      const ttl = (s[4] || '') + (s[5] ? ', ' + s[5] : '');
-      
-      let alamat = '';
-      if (s[9]) alamat += 'Dsn. ' + s[9] + ' ';
-      if (s[7] || s[8]) alamat += 'RT ' + (s[7]||'0') + '/RW ' + (s[8]||'0') + ' ';
-      if (s[10]) alamat += 'Ds. ' + s[10] + ' ';
-      if (s[11]) alamat += 'Kec. ' + s[11];
+      const tempatLahir = (s[4] || '').trim();
+      const tglLahir = (s[5] || '').trim();
+      let ttl = '';
+      if (tempatLahir && tglLahir) ttl = `${tempatLahir}, ${tglLahir}`;
+      else ttl = tempatLahir || tglLahir || '-';
 
-      const fotoUrl = (s[12] && s[12].startsWith('http')) ? s[12] : `assets/foto_${s[0]}.jpg`;
+      const jk = (s[6] || '').trim();
+
+      // Format Alamat Lengkap
+      let alamat = '';
+      if (s[9] && s[9].trim()) alamat += 'Dsn. ' + s[9].trim() + ' ';
+      if ((s[7] && s[7].trim()) || (s[8] && s[8].trim())) alamat += 'RT ' + (s[7]||'0').trim() + '/RW ' + (s[8]||'0').trim() + ' ';
+      if (s[10] && s[10].trim()) alamat += 'Ds. ' + s[10].trim() + ' ';
+      if (s[11] && s[11].trim()) alamat += 'Kec. ' + s[11].trim();
+      if (!alamat.trim()) alamat = '-';
+
+      // Link Foto
+      const fotoRaw = (s[12] || '').trim();
+      const fotoUrl = (fotoRaw.startsWith('http')) ? fotoRaw : `assets/foto_${(s[0]||'').trim()}.jpg`;
 
       return `
         <div class="kartu-container">
@@ -317,11 +337,11 @@
           <div class="content">
             <img src="${fotoUrl}" class="foto-box" onerror="this.src='https://via.placeholder.com/108x138?text=Foto+Siswa'">
             <div class="data-box">
-              <div class="data-row"><div class="data-label">Nama</div><div class="data-separator">:</div><div class="data-value bold">${s[1] || '-'}</div></div>
-              <div class="data-row"><div class="data-label">TTL</div><div class="data-separator">:</div><div class="data-value">${ttl || '-'}</div></div>
-              <div class="data-row"><div class="data-label">Jenis Kelamin</div><div class="data-separator">:</div><div class="data-value">${s[6] || '-'}</div></div>
-              <div class="data-row"><div class="data-label">NISN</div><div class="data-separator">:</div><div class="data-value">${s[0] || '-'}</div></div>
-              <div class="data-row"><div class="data-label">Alamat</div><div class="data-separator">:</div><div class="data-value">${alamat || '-'}</div></div>
+              <div class="data-row"><div class="data-label">Nama</div><div class="data-separator">:</div><div class="data-value bold">${(s[1]||'-').trim()}</div></div>
+              <div class="data-row"><div class="data-label">TTL</div><div class="data-separator">:</div><div class="data-value">${ttl}</div></div>
+              <div class="data-row"><div class="data-label">Jenis Kelamin</div><div class="data-separator">:</div><div class="data-value">${jk || '-'}</div></div>
+              <div class="data-row"><div class="data-label">NISN</div><div class="data-separator">:</div><div class="data-value">${(s[0]||'-').trim()}</div></div>
+              <div class="data-row"><div class="data-label">Alamat</div><div class="data-separator">:</div><div class="data-value">${alamat}</div></div>
             </div>
           </div>
 
@@ -360,7 +380,7 @@
         return;
       }
 
-      const siswaKelas = dataSiswaGlobal.filter(s => s[2] === kelasPilihan);
+      const siswaKelas = dataSiswaGlobal.filter(s => (s[2]||'').trim() === kelasPilihan);
       let htmlAll = '';
       siswaKelas.forEach(s => {
         htmlAll += buatHtmlKartu(s);
