@@ -3,398 +3,438 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Generator Kartu Pelajar Siap Pakai</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <title>Generator Kartu Pelajar - SMPN 1 Rancah</title>
+  <!-- Library Parser CSV Profesional -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-    body { font-family: 'Inter', sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: #0f172a; padding: 20px; color: #334155; min-height: 100vh; }
+    
+    /* Panel Kontrol Admin */
+    .panel-control {
+      max-width: 950px; margin: 0 auto 25px auto; background: #ffffff;
+      padding: 20px 25px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+      border: 1px solid #e2e8f0;
+    }
+    .panel-control h2 { font-size: 20px; margin-bottom: 12px; color: #1e293b; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+    
+    /* Indikator Status Data */
+    .status-box {
+      padding: 10px 15px; border-radius: 10px; font-size: 13px; font-weight: 700;
+      margin-bottom: 18px; display: flex; align-items: center; gap: 8px;
+    }
+    .status-box.loading { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .status-box.ready { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .status-box.error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+    
+    .section-title { font-size: 13px; font-weight: 800; text-transform: uppercase; color: #0284c7; letter-spacing: 0.5px; margin-bottom: 10px; border-bottom: 2px solid #e2e8f0; padding-bottom: 4px; }
+    
+    .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 18px; }
+    .form-group { display: flex; flex-direction: column; }
+    .form-group label { font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 4px; text-transform: uppercase; }
+    .form-group select, .form-group input { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; font-weight: 600; outline: none; transition: 0.2s; }
+    .form-group select:focus, .form-group input:focus { border-color: #0284c7; box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15); }
 
-    /* Dimensi standar CR-80 untuk pratinjau */
-    .card-preview {
-      width: 380px;
-      height: 240px;
+    .btn-cetak {
+      padding: 10px 20px; background: #16a34a; color: #fff; border: none; border-radius: 8px;
+      cursor: pointer; font-weight: 800; font-size: 13px; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; height: 38px;
+    }
+    .btn-cetak:hover { background: #15803d; }
+    .hidden { display: none !important; }
+
+    /* GRID WADAH KARTU (SINGLE & BULK) */
+    .grid-cetak-container {
+      display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; max-width: 1150px; margin: 0 auto;
     }
 
+    /* DESAIN AESTHETIC KARTU PELAJAR (STANDAR CR80) */
+    .kartu-container {
+      width: 530px; height: 335px; background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+      border: 1.5px solid #0284c7; border-radius: 12px; position: relative; overflow: hidden;
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); flex-shrink: 0; page-break-inside: avoid;
+    }
+
+    /* Header Kartu */
+    .header {
+      background: linear-gradient(90deg, #0284c7 0%, #0369a1 100%); color: white; text-align: center;
+      padding: 7px 48px; position: relative; border-bottom: 2.5px solid #0f172a;
+    }
+    .logo-left { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; object-fit: contain; }
+    .logo-right { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; object-fit: contain; }
+    .header h4 { font-size: 10px; font-weight: 700; letter-spacing: 0.5px; opacity: 0.9; }
+    .header h3 { font-size: 9.5px; font-weight: 700; }
+    .header h2 { font-size: 14.5px; font-weight: 900; letter-spacing: 0.5px; margin: 1px 0; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+    .header p { font-size: 7.5px; opacity: 0.85; }
+
+    /* Judul Kartu */
+    .judul-kartu {
+      text-align: center; font-size: 17px; font-weight: 900;
+      letter-spacing: 1.5px; margin: 7px 0; color: #0f172a; text-transform: uppercase;
+    }
+
+    /* Konten Data & Foto */
+    .content { display: flex; padding: 0 14px; position: relative; z-index: 2; }
+    .foto-box {
+      width: 108px; height: 138px; border: 2px solid #0f172a; border-radius: 6px;
+      background: #f1f5f9; object-fit: cover; flex-shrink: 0; box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+    }
+    .data-box {
+      flex-grow: 1; margin-left: 12px; background: rgba(255, 255, 255, 0.92);
+      border: 1.5px solid #0f172a; border-radius: 10px; padding: 7px 10px;
+      font-size: 10.5px; line-height: 1.4; height: fit-content; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .data-row { display: flex; margin-bottom: 2px; }
+    .data-label { width: 80px; color: #334155; }
+    .data-separator { width: 8px; font-weight: bold; }
+    .data-value { flex: 1; color: #0f172a; word-break: break-word; }
+    .data-value.bold { font-weight: 800; }
+
+    /* TTD & Stempel Section */
+    .ttd-section {
+      position: absolute; right: 14px; bottom: 8px; text-align: center;
+      font-size: 9.5px; z-index: 3; line-height: 1.25; color: #0f172a;
+    }
+    .stempel-ttd-wrapper {
+      position: relative; width: 140px; height: 42px; margin: 1px auto;
+    }
+    .img-stempel {
+      position: absolute; left: 5px; top: -10px; width: 58px; height: auto;
+      opacity: 0.88; z-index: 1; mix-blend-mode: multiply;
+    }
+    .img-ttd {
+      position: absolute; right: 10px; top: -6px; width: 75px; height: auto; z-index: 2;
+    }
+
+    /* Ombak Background Ganda (Dual Wave) */
+    .bg-wave-back {
+      position: absolute; bottom: 0; right: 0; width: 100%; height: 48%;
+      background: #0284c7; clip-path: polygon(0 75%, 100% 15%, 100% 100%, 0% 100%); z-index: 1;
+    }
+    .bg-wave-front {
+      position: absolute; bottom: 0; right: 0; width: 100%; height: 38%;
+      background: #0369a1; clip-path: polygon(0 85%, 100% 30%, 100% 100%, 0% 100%); z-index: 1;
+    }
+
+    /* METODE CETAK PRINT A4 */
     @media print {
-      body * {
-        visibility: hidden;
-      }
-      #print-area, #print-area * {
-        visibility: visible;
-      }
-      #print-area {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        display: flex !important;
-        flex-wrap: wrap;
-        gap: 20px;
-        justify-content: center;
-      }
-      .no-print {
-        display: none !important;
-      }
+      body { background: #ffffff !important; padding: 0 !important; margin: 0 !important; }
+      .panel-control { display: none !important; }
+      .grid-cetak-container { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 8mm !important; max-width: 100% !important; }
+      .kartu-container { box-shadow: none !important; border-color: #000 !important; page-break-inside: avoid !important; }
     }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen pb-12">
-  <!-- Header Aplikasi -->
-  <header class="bg-indigo-700 text-white shadow-lg no-print">
-    <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-      <div class="flex items-center gap-3">
-        <div class="p-2.5 bg-indigo-600 rounded-xl shadow-inner">
-          <i class="fa-solid fa-id-card text-2xl text-amber-400"></i>
-        </div>
-        <div>
-          <h1 class="text-xl font-bold tracking-tight">Generator Kartu Pelajar</h1>
-          <p class="text-xs text-indigo-200">Aplikasi Pembuat Kartu Pelajar Siap Pakai & Cetak</p>
-        </div>
+<body>
+
+  <!-- PANEL KONTROL ADMIN -->
+  <div class="panel-control">
+    <h2>Kontrol Generator Kartu Pelajar</h2>
+    
+    <!-- Status Indikator Data Master -->
+    <div id="statusIndikator" class="status-box loading">
+      ⏳ Memuat data master siswa dari Google Sheets...
+    </div>
+
+    <!-- TAHAP 1: LEGALITAS & UPLOAD -->
+    <div class="section-title">1. Pengaturan Legalitas & Gambar (Tersimpan di Browser)</div>
+    <div class="grid-form">
+      <div class="form-group">
+        <label>Nama Kepala Sekolah:</label>
+        <input type="text" id="inputNamaKepsek" value="AGUS SUPARMAN S, S.Pd.,M.M." oninput="updateMetadata()">
       </div>
-      <div class="flex flex-wrap gap-2">
-        <button onclick="downloadCard('card-front', 'Kartu_Pelajar_Depan')" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs rounded-lg shadow transition flex items-center gap-2">
-          <i class="fa-solid fa-download"></i> Unduh Depan (PNG)
-        </button>
-        <button onclick="downloadCard('card-back', 'Kartu_Pelajar_Belakang')" class="px-3.5 py-2 bg-teal-600 hover:bg-teal-500 text-white font-medium text-xs rounded-lg shadow transition flex items-center gap-2">
-          <i class="fa-solid fa-download"></i> Unduh Belakang (PNG)
-        </button>
-        <button onclick="window.print()" class="px-3.5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-900 font-semibold text-xs rounded-lg shadow transition flex items-center gap-2">
-          <i class="fa-solid fa-print"></i> Cetak / PDF
+      <div class="form-group">
+        <label>NIP Kepala Sekolah:</label>
+        <input type="text" id="inputNipKepsek" value="196608051988031010" oninput="updateMetadata()">
+      </div>
+      <div class="form-group">
+        <label>Tempat & Tanggal TTD:</label>
+        <input type="text" id="inputTglTtd" value="Rancah, Juli 2026" oninput="updateMetadata()">
+      </div>
+      <div class="form-group">
+        <label>Upload Cap Stempel (Lokal):</label>
+        <input type="file" id="inputStempel" accept="image/*" onchange="uploadGambarLokal(event, 'stempelData')">
+      </div>
+      <div class="form-group">
+        <label>Upload TTD Kepsek (Lokal):</label>
+        <input type="file" id="inputTTD" accept="image/*" onchange="uploadGambarLokal(event, 'ttdData')">
+      </div>
+    </div>
+
+    <!-- TAHAP 2: GENERATE SISWA / KELAS -->
+    <div class="section-title">2. Mode Generate & Cetak Kartu</div>
+    <div class="grid-form">
+      <div class="form-group">
+        <label>Mode Tampilan:</label>
+        <select id="selectMode" onchange="switchModeCetak()">
+          <option value="single">Per Siswa (Preview 1 Kartu)</option>
+          <option value="kelas">Per Kelas (Massal Siap Cetak A4)</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="grpSelectSiswa">
+        <label>Pilih Siswa:</label>
+        <select id="selectSiswa" onchange="renderKartuSingle()">
+          <option value="">-- Memuat Siswa... --</option>
+        </select>
+      </div>
+
+      <div class="form-group hidden" id="grpSelectKelas">
+        <label>Pilih Kelas:</label>
+        <select id="selectKelas" onchange="renderKartuPerKelas()">
+          <option value="">-- Pilih Kelas --</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="justify-content: flex-end;">
+        <button type="button" onclick="window.print()" class="btn-cetak">
+          🖨️ Cetak / Simpan PDF
         </button>
       </div>
     </div>
-  </header>
+  </div>
 
-  <!-- Content utama -->
-  <main class="max-w-7xl mx-auto px-4 mt-6">
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-      
-      <!-- Panel Form (Kiri) -->
-      <div class="lg:col-span-5 bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-5 no-print">
-        <h2 class="text-base font-bold text-slate-800 border-b pb-3 flex items-center gap-2">
-          <i class="fa-solid fa-sliders text-indigo-600"></i> Form Data Kartu
-        </h2>
+  <!-- AREA RENDER KARTU -->
+  <div id="wadahCetak" class="grid-cetak-container"></div>
 
-        <!-- Warna Tema -->
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 uppercase mb-2">Tema Warna Kartu</label>
-          <div class="flex gap-3">
-            <button type="button" onclick="setTheme('indigo')" title="Indigo" class="w-7 h-7 rounded-full bg-indigo-700 ring-2 ring-offset-1 ring-indigo-400 hover:scale-110 transition"></button>
-            <button type="button" onclick="setTheme('blue')" title="Blue" class="w-7 h-7 rounded-full bg-blue-700 ring-2 ring-offset-1 ring-blue-400 hover:scale-110 transition"></button>
-            <button type="button" onclick="setTheme('emerald')" title="Emerald" class="w-7 h-7 rounded-full bg-emerald-700 ring-2 ring-offset-1 ring-emerald-400 hover:scale-110 transition"></button>
-            <button type="button" onclick="setTheme('red')" title="Red" class="w-7 h-7 rounded-full bg-red-700 ring-2 ring-offset-1 ring-red-400 hover:scale-110 transition"></button>
-            <button type="button" onclick="setTheme('slate')" title="Slate" class="w-7 h-7 rounded-full bg-slate-800 ring-2 ring-offset-1 ring-slate-400 hover:scale-110 transition"></button>
-          </div>
-        </div>
-
-        <!-- Informasi Sekolah -->
-        <div class="space-y-3 pt-2">
-          <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider">1. Informasi Sekolah</h3>
-          <div>
-            <label class="block text-xs text-slate-600 font-medium mb-1">Nama Sekolah</label>
-            <input type="text" id="input-school" value="SMA NEGERI 1 INDONESIA" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-          </div>
-          <div>
-            <label class="block text-xs text-slate-600 font-medium mb-1">Alamat Sekolah</label>
-            <input type="text" id="input-address" value="Jl. Pendidikan No. 123, Nusantara" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-          </div>
-          <div>
-            <label class="block text-xs text-slate-600 font-medium mb-1">Logo Sekolah</label>
-            <input type="file" id="input-logo" accept="image/*" class="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:text-indigo-700 file:font-semibold">
-          </div>
-        </div>
-
-        <!-- Informasi Siswa -->
-        <div class="space-y-3 pt-2">
-          <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider">2. Informasi Siswa</h3>
-          <div>
-            <label class="block text-xs text-slate-600 font-medium mb-1">Nama Lengkap</label>
-            <input type="text" id="input-name" value="AHMAD FAUZI" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-          </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs text-slate-600 font-medium mb-1">NIS / NISN</label>
-              <input type="text" id="input-nis" value="20241001 / 0054321098" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-            </div>
-            <div>
-              <label class="block text-xs text-slate-600 font-medium mb-1">Kelas / Jurusan</label>
-              <input type="text" id="input-class" value="X IPA 1" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-            </div>
-          </div>
-          <div>
-            <label class="block text-xs text-slate-600 font-medium mb-1">Tempat, Tanggal Lahir</label>
-            <input type="text" id="input-ttl" value="Jakarta, 12 Mei 2008" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-          </div>
-          <div>
-            <label class="block text-xs text-slate-600 font-medium mb-1">Foto Siswa</label>
-            <input type="file" id="input-photo" accept="image/*" class="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:text-indigo-700 file:font-semibold">
-          </div>
-        </div>
-
-        <!-- Pengesahan -->
-        <div class="space-y-3 pt-2">
-          <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider">3. Legalitas & Pengesahan</h3>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs text-slate-600 font-medium mb-1">Masa Berlaku</label>
-              <input type="text" id="input-validity" value="2024 - 2027" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-            </div>
-            <div>
-              <label class="block text-xs text-slate-600 font-medium mb-1">Kota & Tgl Terbit</label>
-              <input type="text" id="input-issue-date" value="Jakarta, 15 Juli 2024" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-            </div>
-          </div>
-          <div>
-            <label class="block text-xs text-slate-600 font-medium mb-1">Nama Kepala Sekolah</label>
-            <input type="text" id="input-principal" value="Dr. H. Mulyadi, M.Pd." class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-          </div>
-          <div>
-            <label class="block text-xs text-slate-600 font-medium mb-1">NIP Kepala Sekolah</label>
-            <input type="text" id="input-nip" value="NIP. 19750812 200003 1 002" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-          </div>
-        </div>
-      </div>
-
-      <!-- Panel Preview (Kanan) -->
-      <div class="lg:col-span-7 space-y-6">
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-          <div class="flex justify-between items-center border-b pb-3 mb-6 no-print">
-            <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
-              <i class="fa-solid fa-eye text-indigo-600"></i> Pratinjau Kartu (Live Preview)
-            </h2>
-            <span class="text-[11px] bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-medium">Standard CR-80</span>
-          </div>
-
-          <!-- Printable Area Container -->
-          <div id="print-area" class="flex flex-col xl:flex-row gap-6 justify-center items-center">
-            
-            <!-- DEPAN KARTU -->
-            <div id="card-front" class="card-preview relative bg-white rounded-xl shadow-md overflow-hidden flex flex-col justify-between border border-slate-200">
-              <!-- Header -->
-              <div id="theme-header" class="bg-indigo-700 text-white p-2.5 flex items-center gap-2.5 relative overflow-hidden transition-colors">
-                <div class="w-8 h-8 rounded-full bg-white flex-shrink-0 flex items-center justify-center p-0.5 overflow-hidden shadow-sm">
-                  <img id="preview-logo" src="https://via.placeholder.com/80?text=LOGO" alt="Logo" class="w-full h-full object-contain">
-                </div>
-                <div class="z-10 leading-tight">
-                  <h4 id="preview-school" class="font-extrabold text-[11px] tracking-wide uppercase">SMA NEGERI 1 INDONESIA</h4>
-                  <p id="preview-address" class="text-[8px] text-indigo-100 opacity-90 truncate max-w-[260px]">Jl. Pendidikan No. 123, Nusantara</p>
-                  <p class="text-[7.5px] font-bold text-amber-300 uppercase tracking-widest mt-0.5">KARTU TANDA PELAJAR</p>
-                </div>
-              </div>
-
-              <!-- Content Body -->
-              <div class="p-2.5 flex-1 flex gap-3 items-center">
-                <!-- Foto Frame -->
-                <div class="flex flex-col items-center flex-shrink-0">
-                  <div class="w-[72px] h-[92px] bg-slate-100 border border-slate-300 rounded overflow-hidden shadow-sm flex items-center justify-center">
-                    <img id="preview-photo" src="https://via.placeholder.com/150x200?text=FOTO" alt="Foto Siswa" class="w-full h-full object-cover">
-                  </div>
-                  <span class="text-[7.5px] text-slate-400 mt-1 font-mono">NIS: <span id="preview-nis-short">20241001</span></span>
-                </div>
-
-                <!-- Informasi Detail -->
-                <div class="flex-1 text-[9.5px] space-y-1 text-slate-700 leading-snug">
-                  <div>
-                    <span class="text-[7px] uppercase tracking-wider text-slate-400 block font-bold">Nama Lengkap</span>
-                    <p id="preview-name" class="font-bold text-slate-900 text-[11px] truncate">AHMAD FAUZI</p>
-                  </div>
-                  <div class="grid grid-cols-2 gap-1">
-                    <div>
-                      <span class="text-[7px] uppercase tracking-wider text-slate-400 block font-bold">NIS / NISN</span>
-                      <p id="preview-nis" class="font-semibold text-slate-800 text-[9px]">20241001 / 0054321098</p>
-                    </div>
-                    <div>
-                      <span class="text-[7px] uppercase tracking-wider text-slate-400 block font-bold">Kelas</span>
-                      <p id="preview-class" class="font-semibold text-slate-800 text-[9px]">X IPA 1</p>
-                    </div>
-                  </div>
-                  <div>
-                    <span class="text-[7px] uppercase tracking-wider text-slate-400 block font-bold">Tempat, Tgl Lahir</span>
-                    <p id="preview-ttl" class="font-medium text-slate-800 text-[9px]">Jakarta, 12 Mei 2008</p>
-                  </div>
-                  <div>
-                    <span class="text-[7px] uppercase tracking-wider text-slate-400 block font-bold">Masa Berlaku</span>
-                    <p id="preview-validity" class="font-semibold text-indigo-700 text-[9px]"><span id="preview-valid-year">2024 - 2027</span></p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Footer & Barcode -->
-              <div class="bg-slate-50 px-3 py-1 border-t border-slate-100 flex justify-between items-center h-8">
-                <span class="text-[7px] text-slate-400 font-semibold tracking-wider uppercase">Kartu Pelajar Resmi</span>
-                <svg id="barcode" class="h-5 max-w-[110px]"></svg>
-              </div>
-            </div>
-
-            <!-- BELAKANG KARTU -->
-            <div id="card-back" class="card-preview relative bg-white rounded-xl shadow-md overflow-hidden flex flex-col justify-between border border-slate-200">
-              <!-- Header Bar -->
-              <div id="theme-header-back" class="bg-indigo-700 h-2.5 w-full transition-colors"></div>
-
-              <!-- Tata Tertib & TTD -->
-              <div class="p-3.5 flex-1 flex flex-col justify-between">
-                <div>
-                  <h5 class="text-[9px] font-bold text-slate-800 border-b pb-1 mb-1.5 uppercase tracking-wider text-center">Ketentuan Pemegang Kartu</h5>
-                  <ul class="text-[7.5px] text-slate-600 space-y-1 list-disc list-inside leading-tight">
-                    <li>Kartu ini wajib dibawa selama kegiatan di sekolah.</li>
-                    <li>Kartu ini tidak boleh dipindahtangankan.</li>
-                    <li>Bila menemukan kartu ini, mohon kembalikan ke sekolah.</li>
-                  </ul>
-                </div>
-
-                <!-- Tanda Tangan & Stempel -->
-                <div class="flex justify-between items-end pt-1 border-t border-slate-100">
-                  <div class="text-[7px] text-slate-400">
-                    <p class="font-semibold">SMA NEGERI 1 INDONESIA</p>
-                    <p>Kartu Pelajar Sah</p>
-                  </div>
-                  <div class="text-center text-[7.5px] text-slate-700">
-                    <p id="preview-issue-date">Jakarta, 15 Juli 2024</p>
-                    <p class="font-semibold">Kepala Sekolah,</p>
-                    <div class="h-6 my-0.5 flex items-center justify-center italic text-slate-300 text-[8px]">
-                      (Tanda Tangan)
-                    </div>
-                    <p id="preview-principal" class="font-bold underline text-slate-900">Dr. H. Mulyadi, M.Pd.</p>
-                    <p id="preview-nip" class="text-[6.5px] text-slate-500">NIP. 19750812 200003 1 002</p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Footer Bar -->
-              <div id="theme-footer-back" class="bg-indigo-700 h-2 w-full transition-colors"></div>
-            </div>
-
-          </div>
-        </div>
-
-        <!-- Bantuan -->
-        <div class="bg-indigo-50/70 border border-indigo-100 rounded-xl p-4 text-xs text-indigo-900 no-print space-y-1.5">
-          <h4 class="font-bold flex items-center gap-1.5 text-indigo-800">
-            <i class="fa-solid fa-circle-info"></i> Panduan Penggunaan
-          </h4>
-          <p class="text-indigo-700">
-            Isi formulir di sebelah kiri untuk mengubah data kartu secara langsung. Pilih tombol <strong>Unduh Depan/Belakang</strong> untuk menyimpan berkas berupa gambar PNG, atau klik <strong>Cetak / PDF</strong> untuk mencetak dokumen.
-          </p>
-        </div>
-      </div>
-
-    </div>
-  </main>
-
-  <!-- Script Aplikasi -->
   <script>
-    // Tema Warna Kartu
-    const themes = {
-      indigo: { header: 'bg-indigo-700' },
-      blue: { header: 'bg-blue-700' },
-      emerald: { header: 'bg-emerald-700' },
-      red: { header: 'bg-red-700' },
-      slate: { header: 'bg-slate-800' },
+    const sheetID = '1rzj6ucYgbUf4X1x9fcZVsTGwJBxglXPnCaHazl73mSU';
+    const sheetName = 'data master siswa';
+
+    let dataSiswaGlobal = [];
+    let daftarKelasGlobal = [];
+
+    window.onload = function() {
+      if (localStorage.getItem('namaKepsek')) document.getElementById('inputNamaKepsek').value = localStorage.getItem('namaKepsek');
+      if (localStorage.getItem('nipKepsek')) document.getElementById('inputNipKepsek').value = localStorage.getItem('nipKepsek');
+      if (localStorage.getItem('tglTtdData')) document.getElementById('inputTglTtd').value = localStorage.getItem('tglTtdData');
+
+      fetchDataSiswa();
     };
 
-    function setTheme(themeName) {
-      const theme = themes[themeName];
-      if (!theme) return;
+    function updateMetadata() {
+      const nama = document.getElementById('inputNamaKepsek').value;
+      const nip = document.getElementById('inputNipKepsek').value;
+      const tgl = document.getElementById('inputTglTtd').value;
 
-      const headerFront = document.getElementById('theme-header');
-      const headerBack = document.getElementById('theme-header-back');
-      const footerBack = document.getElementById('theme-footer-back');
+      localStorage.setItem('namaKepsek', nama);
+      localStorage.setItem('nipKepsek', nip);
+      localStorage.setItem('tglTtdData', tgl);
 
-      Object.values(themes).forEach(t => {
-        headerFront.classList.remove(t.header);
-        headerBack.classList.remove(t.header);
-        footerBack.classList.remove(t.header);
-      });
-
-      headerFront.classList.add(theme.header);
-      headerBack.classList.add(theme.header);
-      footerBack.classList.add(theme.header);
+      const mode = document.getElementById('selectMode').value;
+      if (mode === 'single') renderKartuSingle();
+      else renderKartuPerKelas();
     }
 
-    // Binding Live Input
-    const bindings = [
-      { input: 'input-school', preview: 'preview-school' },
-      { input: 'input-address', preview: 'preview-address' },
-      { input: 'input-name', preview: 'preview-name' },
-      { input: 'input-nis', preview: 'preview-nis', extra: (val) => {
-          const nisOnly = val.split('/')[0].trim();
-          document.getElementById('preview-nis-short').innerText = nisOnly || '20241001';
-          generateBarcode(nisOnly || '20241001');
-        }
-      },
-      { input: 'input-class', preview: 'preview-class' },
-      { input: 'input-ttl', preview: 'preview-ttl' },
-      { input: 'input-validity', preview: 'preview-valid-year' },
-      { input: 'input-issue-date', preview: 'preview-issue-date' },
-      { input: 'input-principal', preview: 'preview-principal' },
-      { input: 'input-nip', preview: 'preview-nip' },
-    ];
+    function fetchDataSiswa() {
+      const statusBox = document.getElementById('statusIndikator');
+      statusBox.className = 'status-box loading';
+      statusBox.innerHTML = '⏳ Memuat seluruh data master siswa dari Google Sheets...';
 
-    bindings.forEach(b => {
-      const el = document.getElementById(b.input);
-      if (el) {
-        el.addEventListener('input', (e) => {
-          const target = document.getElementById(b.preview);
-          if (target) target.innerText = e.target.value;
-          if (b.extra) b.extra(e.target.value);
-        });
-      }
-    });
-
-    // Fitur Unggah Foto & Logo
-    function setupImageUpload(inputId, previewId) {
-      const input = document.getElementById(inputId);
-      const preview = document.getElementById(previewId);
-      input.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = (event) => {
-            preview.src = event.target.result;
-          };
-          reader.readAsDataURL(file);
+      // Menggunakan GVIZ API CSV
+      const urlGviz = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+      
+      Papa.parse(urlGviz, {
+        download: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+          if (results.data && results.data.length >= 2) {
+            prosesDataCsv(results.data);
+          } else {
+            cobaUrlExportLanjutan();
+          }
+        },
+        error: function(err) {
+          cobaUrlExportLanjutan();
         }
       });
     }
 
-    setupImageUpload('input-logo', 'preview-logo');
-    setupImageUpload('input-photo', 'preview-photo');
-
-    // Pembuat Barcode Sederhana
-    function generateBarcode(value) {
-      try {
-        JsBarcode("#barcode", value, {
-          format: "CODE128",
-          height: 18,
-          width: 1,
-          displayValue: false,
-          margin: 0
-        });
-      } catch (e) {
-        console.warn("Error membuat barcode:", e);
-      }
-    }
-
-    // Fungsi Unduh Gambar PNG
-    function downloadCard(elementId, filename) {
-      const element = document.getElementById(elementId);
-      html2canvas(element, {
-        scale: 3, // Resolusi tinggi
-        useCORS: true,
-        backgroundColor: null
-      }).then(canvas => {
-        const link = document.createElement('a');
-        link.download = `${filename}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
+    function cobaUrlExportLanjutan() {
+      const statusBox = document.getElementById('statusIndikator');
+      const urlExport = `https://docs.google.com/spreadsheets/d/${sheetID}/export?format=csv&sheet=${encodeURIComponent(sheetName)}`;
+      
+      Papa.parse(urlExport, {
+        download: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+          if (results.data && results.data.length >= 2) {
+            prosesDataCsv(results.data);
+          } else {
+            statusBox.className = 'status-box error';
+            statusBox.innerHTML = '❌ Data di Google Sheets kosong atau tidak dapat diakses.';
+          }
+        },
+        error: function(err) {
+          statusBox.className = 'status-box error';
+          statusBox.innerHTML = '❌ Gagal mengunduh data dari Google Sheets. Pastikan dokumen dipublikasikan ke publik (File > Bagikan > Publikasikan ke web).';
+        }
       });
     }
 
-    // Inisialisasi awal
-    generateBarcode("20241001");
+    function prosesDataCsv(rowsAll) {
+      const statusBox = document.getElementById('statusIndikator');
+      
+      // Baris 0 = Header. Ambil baris 1 ke bawah yang memiliki Nama (kolom indeks 1)
+      const rows = rowsAll.slice(1);
+      dataSiswaGlobal = rows.filter(r => r && r[1] && r[1].trim() !== '');
+
+      if (dataSiswaGlobal.length === 0) {
+        statusBox.className = 'status-box error';
+        statusBox.innerHTML = '❌ Tidak ditemukan data siswa pada spreadsheet.';
+        return;
+      }
+
+      // Ambil daftar kelas unik
+      daftarKelasGlobal = [...new Set(dataSiswaGlobal.map(s => (s[2] || '').trim()))].filter(Boolean).sort();
+
+      // Update Indikator Status Berhasil
+      statusBox.className = 'status-box ready';
+      statusBox.innerHTML = `✅ <b>Data Master Terbaca Sempurna:</b> ${dataSiswaGlobal.length} Siswa (${daftarKelasGlobal.length} Kelas) Siap Di-generate!`;
+
+      // Populate Dropdown Siswa
+      const selSiswa = document.getElementById('selectSiswa');
+      selSiswa.innerHTML = '<option value="">-- Pilih Nama Siswa --</option>';
+      dataSiswaGlobal.forEach((s, i) => {
+        selSiswa.innerHTML += `<option value="${i}">${s[1].trim()} (${(s[0]||'-').trim()}) - Kelas ${(s[2]||'-').trim()}</option>`;
+      });
+
+      // Populate Dropdown Kelas
+      const selKelas = document.getElementById('selectKelas');
+      selKelas.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+      daftarKelasGlobal.forEach(k => {
+        selKelas.innerHTML += `<option value="${k}">Kelas ${k}</option>`;
+      });
+
+      if (dataSiswaGlobal.length > 0) {
+        selSiswa.selectedIndex = 1;
+        renderKartuSingle();
+      }
+    }
+
+    function switchModeCetak() {
+      const mode = document.getElementById('selectMode').value;
+      const grpSiswa = document.getElementById('grpSelectSiswa');
+      const grpKelas = document.getElementById('grpSelectKelas');
+
+      if (mode === 'single') {
+        grpSiswa.classList.remove('hidden');
+        grpKelas.classList.add('hidden');
+        renderKartuSingle();
+      } else {
+        grpSiswa.classList.add('hidden');
+        grpKelas.classList.remove('hidden');
+        renderKartuPerKelas();
+      }
+    }
+
+    function buatHtmlKartu(s) {
+      const namaKepsek = document.getElementById('inputNamaKepsek').value || '-';
+      const nipKepsek = document.getElementById('inputNipKepsek').value || '-';
+      const tglTtd = document.getElementById('inputTglTtd').value || '-';
+
+      const stempelBase64 = localStorage.getItem('stempelData') || '';
+      const ttdBase64 = localStorage.getItem('ttdData') || '';
+
+      const tempatLahir = (s[4] || '').trim();
+      const tglLahir = (s[5] || '').trim();
+      let ttl = '';
+      if (tempatLahir && tglLahir) ttl = `${tempatLahir}, ${tglLahir}`;
+      else ttl = tempatLahir || tglLahir || '-';
+
+      const jk = (s[6] || '').trim();
+
+      // Format Alamat Lengkap
+      let alamat = '';
+      if (s[9] && s[9].trim()) alamat += 'Dsn. ' + s[9].trim() + ' ';
+      if ((s[7] && s[7].trim()) || (s[8] && s[8].trim())) alamat += 'RT ' + (s[7]||'0').trim() + '/RW ' + (s[8]||'0').trim() + ' ';
+      if (s[10] && s[10].trim()) alamat += 'Ds. ' + s[10].trim() + ' ';
+      if (s[11] && s[11].trim()) alamat += 'Kec. ' + s[11].trim();
+      if (!alamat.trim()) alamat = '-';
+
+      // Link Foto
+      const fotoRaw = (s[12] || '').trim();
+      const fotoUrl = (fotoRaw.startsWith('http')) ? fotoRaw : `assets/foto_${(s[0]||'').trim()}.jpg`;
+
+      return `
+        <div class="kartu-container">
+          <div class="header">
+            <img src="assets/logo-ciamis.png" class="logo-left" alt="Logo Ciamis">
+            <img src="assets/logo-smpn1rancah.png" class="logo-right" alt="Logo SMP">
+            <h4>PEMERINTAH KABUPATEN CIAMIS</h4>
+            <h3>DINAS PENDIDIKAN</h3>
+            <h2>SMP NEGERI 1 RANCAH</h2>
+            <p>Jalan Cibeureum Rancah, Kecamatan Rancah – Kabupaten Ciamis</p>
+          </div>
+
+          <div class="judul-kartu">KARTU PELAJAR</div>
+
+          <div class="content">
+            <img src="${fotoUrl}" class="foto-box" onerror="this.src='https://via.placeholder.com/108x138?text=Foto+Siswa'">
+            <div class="data-box">
+              <div class="data-row"><div class="data-label">Nama</div><div class="data-separator">:</div><div class="data-value bold">${(s[1]||'-').trim()}</div></div>
+              <div class="data-row"><div class="data-label">TTL</div><div class="data-separator">:</div><div class="data-value">${ttl}</div></div>
+              <div class="data-row"><div class="data-label">Jenis Kelamin</div><div class="data-separator">:</div><div class="data-value">${jk || '-'}</div></div>
+              <div class="data-row"><div class="data-label">NISN</div><div class="data-separator">:</div><div class="data-value">${(s[0]||'-').trim()}</div></div>
+              <div class="data-row"><div class="data-label">Alamat</div><div class="data-separator">:</div><div class="data-value">${alamat}</div></div>
+            </div>
+          </div>
+
+          <div class="ttd-section">
+            <div>${tglTtd}</div>
+            <div>Kepala Sekolah</div>
+            <div class="stempel-ttd-wrapper">
+              ${stempelBase64 ? `<img src="${stempelBase64}" class="img-stempel">` : ''}
+              ${ttdBase64 ? `<img src="${ttdBase64}" class="img-ttd">` : ''}
+            </div>
+            <div style="font-weight: 800; text-decoration: underline;">${namaKepsek}</div>
+            <div>NIP. ${nipKepsek}</div>
+          </div>
+
+          <div class="bg-wave-back"></div>
+          <div class="bg-wave-front"></div>
+        </div>
+      `;
+    }
+
+    function renderKartuSingle() {
+      const idx = document.getElementById('selectSiswa').value;
+      const wadah = document.getElementById('wadahCetak');
+      if (idx === '' || !dataSiswaGlobal[idx]) {
+        wadah.innerHTML = '';
+        return;
+      }
+      wadah.innerHTML = buatHtmlKartu(dataSiswaGlobal[idx]);
+    }
+
+    function renderKartuPerKelas() {
+      const kelasPilihan = document.getElementById('selectKelas').value;
+      const wadah = document.getElementById('wadahCetak');
+      if (!kelasPilihan) {
+        wadah.innerHTML = '<p style="color:#fff; text-align:center;">Silakan pilih kelas terlebih dahulu.</p>';
+        return;
+      }
+
+      const siswaKelas = dataSiswaGlobal.filter(s => (s[2]||'').trim() === kelasPilihan);
+      let htmlAll = '';
+      siswaKelas.forEach(s => {
+        htmlAll += buatHtmlKartu(s);
+      });
+      wadah.innerHTML = htmlAll;
+    }
+
+    function uploadGambarLokal(event, storageKey) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        localStorage.setItem(storageKey, e.target.result);
+        const mode = document.getElementById('selectMode').value;
+        if (mode === 'single') renderKartuSingle();
+        else renderKartuPerKelas();
+      };
+      reader.readAsDataURL(file);
+    }
   </script>
 </body>
 </html>
