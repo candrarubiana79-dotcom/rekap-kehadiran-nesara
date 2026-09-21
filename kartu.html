@@ -52,6 +52,17 @@
     /* GRID WADAH KARTU */
     .grid-cetak-container {
       display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; max-width: 1200px; margin: 0 auto;
+      transition: all 0.3s ease;
+    }
+
+    /* SKALA PERBESAR KHUSUS PREVIEW SINGLE (1 ORANG) */
+    .grid-cetak-container.preview-single {
+      padding-top: 30px;
+      padding-bottom: 70px;
+    }
+    .grid-cetak-container.preview-single .kartu-container {
+      transform: scale(1.5);
+      transform-origin: top center;
     }
 
     /* DESAIN KARTU PELAJAR PRESISI UKURAN KTP (85.6mm x 53.9mm) */
@@ -136,6 +147,7 @@
       body { background: #ffffff !important; padding: 0 !important; margin: 0 !important; }
       .panel-control { display: none !important; }
       .grid-cetak-container { display: grid !important; grid-template-columns: repeat(2, 85.6mm) !important; gap: 5mm !important; padding: 10mm !important; max-width: 100% !important; justify-content: start !important; }
+      .grid-cetak-container.preview-single .kartu-container { transform: none !important; margin: 0 !important; }
       .kartu-container { box-shadow: none !important; border-color: #000 !important; page-break-inside: avoid !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     }
   </style>
@@ -182,22 +194,22 @@
       <div class="form-group">
         <label>Mode Tampilan:</label>
         <select id="selectMode" onchange="switchModeCetak()">
-          <option value="single">Per Siswa (Preview & Download 1 Kartu)</option>
+          <option value="single">Per Siswa (Preview Besar & Download 1 Kartu)</option>
           <option value="kelas">Per Kelas (Preview, Download Massal & Cetak A4)</option>
         </select>
       </div>
 
-      <div class="form-group" id="grpSelectSiswa">
-        <label>Pilih Siswa:</label>
-        <select id="selectSiswa" onchange="renderKartuSingle()">
-          <option value="">-- Memuat Siswa... --</option>
+      <div class="form-group" id="grpSelectKelas">
+        <label>Pilih Kelas:</label>
+        <select id="selectKelas" onchange="handleKelasChange()">
+          <option value="">-- Pilih Kelas --</option>
         </select>
       </div>
 
-      <div class="form-group hidden" id="grpSelectKelas">
-        <label>Pilih Kelas:</label>
-        <select id="selectKelas" onchange="renderKartuPerKelas()">
-          <option value="">-- Pilih Kelas --</option>
+      <div class="form-group" id="grpSelectSiswa">
+        <label>Pilih Nama Siswa:</label>
+        <select id="selectSiswa" onchange="renderKartuSingle()">
+          <option value="">-- Pilih Kelas Terlebih Dahulu --</option>
         </select>
       </div>
 
@@ -219,7 +231,7 @@
   </div>
 
   <!-- AREA RENDER KARTU PREVIEW -->
-  <div id="wadahCetak" class="grid-cetak-container"></div>
+  <div id="wadahCetak" class="grid-cetak-container preview-single"></div>
 
   <script>
     const sheetID = '1rzj6ucYgbUf4X1x9fcZVsTGwJBxglXPnCaHazl73mSU';
@@ -312,44 +324,84 @@
       statusBox.className = 'status-box ready';
       statusBox.innerHTML = `✅ <b>Data Master Terbaca Sempurna:</b> ${dataSiswaGlobal.length} Siswa (${daftarKelasGlobal.length} Kelas) Siap Di-generate!`;
 
-      // Populate Dropdown Siswa
-      const selSiswa = document.getElementById('selectSiswa');
-      selSiswa.innerHTML = '<option value="">-- Pilih Nama Siswa --</option>';
-      dataSiswaGlobal.forEach((s, i) => {
-        selSiswa.innerHTML += `<option value="${i}">${s[1].trim()} (${(s[0]||'-').trim()}) - Kelas ${(s[2]||'-').trim()}</option>`;
-      });
-
-      // Populate Dropdown Kelas
+      // Populate Dropdown Kelas Utama
       const selKelas = document.getElementById('selectKelas');
       selKelas.innerHTML = '<option value="">-- Pilih Kelas --</option>';
       daftarKelasGlobal.forEach(k => {
         selKelas.innerHTML += `<option value="${k}">Kelas ${k}</option>`;
       });
 
-      if (dataSiswaGlobal.length > 0) {
-        selSiswa.selectedIndex = 1;
-        renderKartuSingle();
+      // Pilih kelas pertama secara otomatis
+      if (daftarKelasGlobal.length > 0) {
+        selKelas.value = daftarKelasGlobal[0];
+        handleKelasChange();
       }
+    }
+
+    function handleKelasChange() {
+      const mode = document.getElementById('selectMode').value;
+      if (mode === 'single') {
+        updateDropdownSiswaPerKelas();
+      } else {
+        renderKartuPerKelas();
+      }
+    }
+
+    function updateDropdownSiswaPerKelas() {
+      const kelasPilihan = document.getElementById('selectKelas').value;
+      const selSiswa = document.getElementById('selectSiswa');
+      const wadah = document.getElementById('wadahCetak');
+      
+      selSiswa.innerHTML = '';
+
+      if (!kelasPilihan) {
+        selSiswa.innerHTML = '<option value="">-- Pilih Kelas Terlebih Dahulu --</option>';
+        wadah.innerHTML = '';
+        return;
+      }
+
+      // Filter siswa hanya yang berada di kelas pilihan
+      const siswaInKelas = [];
+      dataSiswaGlobal.forEach((s, idx) => {
+        if ((s[2] || '').trim() === kelasPilihan) {
+          siswaInKelas.push({ indexGlobal: idx, data: s });
+        }
+      });
+
+      if (siswaInKelas.length === 0) {
+        selSiswa.innerHTML = '<option value="">-- Tidak Ada Siswa di Kelas Ini --</option>';
+        wadah.innerHTML = '';
+        return;
+      }
+
+      siswaInKelas.forEach(item => {
+        const s = item.data;
+        selSiswa.innerHTML += `<option value="${item.indexGlobal}">${s[1].trim()} (${(s[0]||'-').trim()})</option>`;
+      });
+
+      // Otomatis render siswa pertama di kelas tersebut
+      selSiswa.selectedIndex = 0;
+      renderKartuSingle();
     }
 
     function switchModeCetak() {
       const mode = document.getElementById('selectMode').value;
       const grpSiswa = document.getElementById('grpSelectSiswa');
-      const grpKelas = document.getElementById('grpSelectKelas');
       const btnSingle = document.getElementById('btnDownloadSingle');
       const btnKelas = document.getElementById('btnDownloadKelas');
+      const wadah = document.getElementById('wadahCetak');
 
       if (mode === 'single') {
         grpSiswa.classList.remove('hidden');
-        grpKelas.classList.add('hidden');
         btnSingle.classList.remove('hidden');
         btnKelas.classList.add('hidden');
-        renderKartuSingle();
+        wadah.classList.add('preview-single');
+        updateDropdownSiswaPerKelas();
       } else {
         grpSiswa.classList.add('hidden');
-        grpKelas.classList.remove('hidden');
         btnSingle.classList.add('hidden');
         btnKelas.classList.remove('hidden');
+        wadah.classList.remove('preview-single');
         renderKartuPerKelas();
       }
     }
@@ -412,7 +464,7 @@
             <img src="assets/logo-ciamis.png" class="logo-left" alt="Logo Ciamis">
             <img src="assets/logo-smpn1rancah.png" class="logo-right" alt="Logo SMP">
             <h4>PEMERINTAH KABUPATEN CIAMIS</h4>
-            <h3>DINAS PENDIDIKAN</h3>
+            ### DINAS PENDIDIKAN
             <h2>SMP NEGERI 1 RANCAH</h2>
             <p>Jalan Cibeureum Rancah, Kecamatan Rancah – Kabupaten Ciamis</p>
           </div>
@@ -475,6 +527,7 @@
 
     /* FITUR DOWNLOAD KARTU GAMBAR (PNG 300DPI) */
     function downloadPNGSingle() {
+      const wadah = document.getElementById('wadahCetak');
       const kartuElem = document.querySelector('.kartu-container');
       if (!kartuElem) {
         alert('Tidak ada kartu yang dipilih!');
@@ -485,11 +538,19 @@
       const namaSiswa = dataSiswaGlobal[idx] ? dataSiswaGlobal[idx][1].trim() : 'Siswa';
       const nisnSiswa = dataSiswaGlobal[idx] ? dataSiswaGlobal[idx][0].trim() : '000';
 
+      // Lepas skala sementara saat capture agar gambar PNG tetap presisi murni KTP
+      wadah.classList.remove('preview-single');
+
       html2canvas(kartuElem, { scale: 3, useCORS: true }).then(canvas => {
         const link = document.createElement('a');
         link.download = `Kartu_${nisnSiswa}_${namaSiswa.replace(/\s+/g, '_')}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
+        
+        // Kembalikan perbesar preview setelah unduh
+        wadah.classList.add('preview-single');
+      }).catch(() => {
+        wadah.classList.add('preview-single');
       });
     }
 
@@ -512,7 +573,7 @@
             link.href = canvas.toDataURL('image/png');
             link.click();
           });
-        }, index * 600); // Delay 600ms per kartu agar peramban tidak memblokir pop-up download
+        }, index * 600); // Delay 600ms per kartu agar browser tidak memblokir download massal
       });
     }
 
