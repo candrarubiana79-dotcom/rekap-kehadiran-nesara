@@ -184,7 +184,7 @@
       margin: 0;
     }
 
-    /* JUDUL KARTU (DIPERBESAR & DISESUAIKAN) */
+    /* JUDUL KARTU */
     .judul-kartu {
       text-align: center;
       font-size: 9.5px;
@@ -197,7 +197,7 @@
       text-shadow: 0 0.5px 0px rgba(255, 255, 255, 0.8);
     }
 
-    /* KONTEN DATA & FOTO (DISEUAIKAN LEBIH RAPI) */
+    /* KONTEN DATA & FOTO */
     .content {
       display: flex;
       padding: 0 2.8mm;
@@ -217,40 +217,44 @@
       box-shadow: 0 1.5px 4px rgba(0,0,0,0.2);
     }
     
-    /* KOTAK DATA SISWA (DESAIN DIPERBAIKI & LEBIH PROPOSIONAL) */
+    /* KOTAK DATA SISWA (UKURAN TEKS STANDAR E-KTP) */
     .data-box {
       flex-grow: 1;
       background: rgba(255, 255, 255, 0.96);
       border: 0.35mm solid #0284c7;
       border-radius: 1.5mm;
       padding: 1.2mm 1.8mm;
-      font-size: 5.6px;
-      line-height: 1.35;
       box-shadow: 0 1.5px 3px rgba(0, 0, 0, 0.08);
     }
     .data-row { 
       display: flex; 
-      margin-bottom: 0.25mm; 
+      margin-bottom: 0.2mm; 
       align-items: flex-start;
+      line-height: 1.25;
     }
     .data-row:last-child {
       margin-bottom: 0;
     }
     .data-label { 
-      width: 22.5mm; 
+      width: 22mm; 
       color: #334155; 
       font-weight: 700; 
+      font-size: 6.2pt;
       flex-shrink: 0; 
     }
     .data-separator { 
       width: 1.5mm; 
       font-weight: bold; 
       color: #0284c7;
+      font-size: 6.2pt;
       flex-shrink: 0; 
     }
     .data-value { 
       flex: 1; 
       color: #0f172a; 
+      font-size: 6.5pt;
+      font-weight: 600;
+      text-transform: uppercase; /* Format standar kapital e-KTP */
       word-break: break-word; 
     }
     .data-value.bold { 
@@ -258,7 +262,7 @@
       color: #0369a1;
     }
 
-    /* TTD & STEMPEL (INTERAKTIF MODULAR) */
+    /* TTD & STEMPEL */
     .ttd-section {
       position: absolute;
       right: 3mm;
@@ -786,7 +790,7 @@
             <div class="data-box">
               <div class="data-row"><div class="data-label">Nama</div><div class="data-separator">:</div><div class="data-value bold">${nama}</div></div>
               <div class="data-row"><div class="data-label">NISN</div><div class="data-separator">:</div><div class="data-value">${nisn}</div></div>
-              <div class="data-row"><div class="data-label">Tempat dan Tanggal Lahir</div><div class="data-separator">:</div><div class="data-value">${ttl}</div></div>
+              <div class="data-row"><div class="data-label">Tempat Tanggal Lahir</div><div class="data-separator">:</div><div class="data-value">${ttl}</div></div>
               <div class="data-row"><div class="data-label">Jenis Kelamin</div><div class="data-separator">:</div><div class="data-value">${jk || '-'}</div></div>
               <div class="data-row"><div class="data-label">Alamat</div><div class="data-separator">:</div><div class="data-value">${alamat}</div></div>
             </div>
