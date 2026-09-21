@@ -29,13 +29,15 @@
     .status-box.ready { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
     .status-box.error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
     
-    .section-title { font-size: 13px; font-weight: 800; text-transform: uppercase; color: #0284c7; letter-spacing: 0.5px; margin-bottom: 10px; border-bottom: 2px solid #e2e8f0; padding-bottom: 4px; }
+    .section-title { font-size: 13px; font-weight: 800; text-transform: uppercase; color: #0284c7; letter-spacing: 0.5px; margin-bottom: 10px; border-bottom: 2px solid #e2e8f0; padding-bottom: 4px; margin-top: 10px; }
     
     .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 18px; }
     .form-group { display: flex; flex-direction: column; }
-    .form-group label { font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 4px; text-transform: uppercase; }
-    .form-group select, .form-group input { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; font-weight: 600; outline: none; transition: 0.2s; }
+    .form-group label { font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 4px; text-transform: uppercase; display: flex; justify-content: space-between; }
+    .form-group label span { color: #0284c7; font-weight: 800; }
+    .form-group select, .form-group input[type="text"], .form-group input[type="file"] { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; font-weight: 600; outline: none; transition: 0.2s; }
     .form-group select:focus, .form-group input:focus { border-color: #0284c7; box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15); }
+    .form-group input[type="range"] { accent-color: #0284c7; cursor: pointer; margin-top: 4px; }
 
     .action-buttons { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
     .btn {
@@ -47,6 +49,8 @@
     .btn-download:hover { background: #0369a1; }
     .btn-cetak { background: #16a34a; color: #fff; }
     .btn-cetak:hover { background: #15803d; }
+    .btn-reset { background: #64748b; color: #fff; }
+    .btn-reset:hover { background: #475569; }
     .hidden { display: none !important; }
 
     /* GRID WADAH KARTU */
@@ -181,7 +185,7 @@
     .data-value { flex: 1; color: #0f172a; word-break: break-word; }
     .data-value.bold { font-weight: 800; }
 
-    /* TTD & STEMPEL (FORMAT KEDINASAN KIRI) */
+    /* TTD & STEMPEL (INTERAKTIF MODULAR) */
     .ttd-section {
       position: absolute;
       right: 3mm;
@@ -200,23 +204,19 @@
     }
     .img-stempel {
       position: absolute;
-      left: -11mm;
-      top: 1mm;
-      width: 14mm;
       height: auto;
       opacity: 0.88;
       z-index: 2;
       mix-blend-mode: multiply;
       pointer-events: none;
+      transition: all 0.05s ease;
     }
     .img-ttd {
       position: absolute;
-      left: 0.5mm;
-      top: 2.5mm;
-      width: 16mm;
       height: auto;
       z-index: 1;
       pointer-events: none;
+      transition: all 0.05s ease;
     }
     .nama-kepsek {
       font-size: 6.8px;
@@ -263,7 +263,7 @@
     </div>
 
     <!-- TAHAP 1: LEGALITAS & UPLOAD -->
-    <div class="section-title">1. Pengaturan Legalitas & Gambar</div>
+    <div class="section-title">1. Pengaturan Legalitas & File Gambar</div>
     <div class="grid-form">
       <div class="form-group">
         <label>Nama Kepala Sekolah:</label>
@@ -278,17 +278,47 @@
         <input type="text" id="inputTglTtd" value="Rancah, Juli 2026" oninput="updateMetadata()">
       </div>
       <div class="form-group">
-        <label>Upload Cap Stempel (Lokal):</label>
+        <label>Upload Cap Stempel (PNG/JPG):</label>
         <input type="file" id="inputStempel" accept="image/*" onchange="uploadGambarLokal(event, 'stempelData')">
       </div>
       <div class="form-group">
-        <label>Upload TTD Kepsek (Lokal):</label>
+        <label>Upload TTD Kepsek (PNG/JPG):</label>
         <input type="file" id="inputTTD" accept="image/*" onchange="uploadGambarLokal(event, 'ttdData')">
       </div>
     </div>
 
-    <!-- TAHAP 2: GENERATE SISWA / KELAS -->
-    <div class="section-title">2. Mode Tampilan & Pilihan Download</div>
+    <!-- TAHAP 2: EDIT POSISI LIVE CAP & TTD -->
+    <div class="section-title">2. Edit Posisi & Ukuran Cap & TTD (Live Preview)</div>
+    <div class="grid-form">
+      <div class="form-group">
+        <label>Stempel - Geser Horisontal (X): <span id="valStempelX">-11mm</span></label>
+        <input type="range" id="stempelX" min="-30" max="20" step="0.5" value="-11" oninput="updatePosisiLive()">
+      </div>
+      <div class="form-group">
+        <label>Stempel - Geser Vertikal (Y): <span id="valStempelY">1mm</span></label>
+        <input type="range" id="stempelY" min="-10" max="15" step="0.5" value="1" oninput="updatePosisiLive()">
+      </div>
+      <div class="form-group">
+        <label>Stempel - Lebar (Ukuran): <span id="valStempelSize">14mm</span></label>
+        <input type="range" id="stempelSize" min="8" max="25" step="0.5" value="14" oninput="updatePosisiLive()">
+      </div>
+
+      <div class="form-group">
+        <label>TTD - Geser Horisontal (X): <span id="valTtdX">0.5mm</span></label>
+        <input type="range" id="ttdX" min="-20" max="30" step="0.5" value="0.5" oninput="updatePosisiLive()">
+      </div>
+      <div class="form-group">
+        <label>TTD - Geser Vertikal (Y): <span id="valTtdY">2.5mm</span></label>
+        <input type="range" id="ttdY" min="-10" max="15" step="0.5" value="2.5" oninput="updatePosisiLive()">
+      </div>
+      <div class="form-group">
+        <label>TTD - Lebar (Ukuran): <span id="valTtdSize">16mm</span></label>
+        <input type="range" id="ttdSize" min="8" max="30" step="0.5" value="16" oninput="updatePosisiLive()">
+      </div>
+    </div>
+
+    <!-- TAHAP 3: GENERATE SISWA / KELAS -->
+    <div class="section-title">3. Mode Tampilan & Pilihan Download</div>
     <div class="grid-form">
       <div class="form-group">
         <label>Mode Tampilan:</label>
@@ -324,6 +354,9 @@
           <button type="button" onclick="window.print()" class="btn btn-cetak">
             Cetak / PDF (A4)
           </button>
+          <button type="button" onclick="resetPosisiDefault()" class="btn btn-reset">
+            Reset Posisi Default
+          </button>
         </div>
       </div>
     </div>
@@ -339,13 +372,90 @@
     let dataSiswaGlobal = [];
     let daftarKelasGlobal = [];
 
+    // NILAI DEFAULT POSISI
+    const defaultPosisi = {
+      stempelX: '-11', stempelY: '1', stempelSize: '14',
+      ttdX: '0.5', ttdY: '2.5', ttdSize: '16'
+    };
+
     window.onload = function() {
       if (localStorage.getItem('namaKepsek')) document.getElementById('inputNamaKepsek').value = localStorage.getItem('namaKepsek');
       if (localStorage.getItem('nipKepsek')) document.getElementById('inputNipKepsek').value = localStorage.getItem('nipKepsek');
       if (localStorage.getItem('tglTtdData')) document.getElementById('inputTglTtd').value = localStorage.getItem('tglTtdData');
 
+      // Load Slider Posisi dari LocalStorage
+      initSliders();
+
       fetchDataSiswa();
     };
+
+    function initSliders() {
+      document.getElementById('stempelX').value = localStorage.getItem('stempelX') || defaultPosisi.stempelX;
+      document.getElementById('stempelY').value = localStorage.getItem('stempelY') || defaultPosisi.stempelY;
+      document.getElementById('stempelSize').value = localStorage.getItem('stempelSize') || defaultPosisi.stempelSize;
+
+      document.getElementById('ttdX').value = localStorage.getItem('ttdX') || defaultPosisi.ttdX;
+      document.getElementById('ttdY').value = localStorage.getItem('ttdY') || defaultPosisi.ttdY;
+      document.getElementById('ttdSize').value = localStorage.getItem('ttdSize') || defaultPosisi.ttdSize;
+
+      updateLabelPosisi();
+    }
+
+    function updateLabelPosisi() {
+      document.getElementById('valStempelX').innerText = document.getElementById('stempelX').value + 'mm';
+      document.getElementById('valStempelY').innerText = document.getElementById('stempelY').value + 'mm';
+      document.getElementById('valStempelSize').innerText = document.getElementById('stempelSize').value + 'mm';
+
+      document.getElementById('valTtdX').innerText = document.getElementById('ttdX').value + 'mm';
+      document.getElementById('valTtdY').innerText = document.getElementById('ttdY').value + 'mm';
+      document.getElementById('valTtdSize').innerText = document.getElementById('ttdSize').value + 'mm';
+    }
+
+    function updatePosisiLive() {
+      updateLabelPosisi();
+
+      const sX = document.getElementById('stempelX').value;
+      const sY = document.getElementById('stempelY').value;
+      const sSize = document.getElementById('stempelSize').value;
+
+      const tX = document.getElementById('ttdX').value;
+      const tY = document.getElementById('ttdY').value;
+      const tSize = document.getElementById('ttdSize').value;
+
+      localStorage.setItem('stempelX', sX);
+      localStorage.setItem('stempelY', sY);
+      localStorage.setItem('stempelSize', sSize);
+
+      localStorage.setItem('ttdX', tX);
+      localStorage.setItem('ttdY', tY);
+      localStorage.setItem('ttdSize', tSize);
+
+      // Terapkan CSS langsung ke seluruh elemen kartu yang dirender
+      document.querySelectorAll('.img-stempel').forEach(img => {
+        img.style.left = sX + 'mm';
+        img.style.top = sY + 'mm';
+        img.style.width = sSize + 'mm';
+      });
+
+      document.querySelectorAll('.img-ttd').forEach(img => {
+        img.style.left = tX + 'mm';
+        img.style.top = tY + 'mm';
+        img.style.width = tSize + 'mm';
+      });
+    }
+
+    function resetPosisiDefault() {
+      localStorage.setItem('stempelX', defaultPosisi.stempelX);
+      localStorage.setItem('stempelY', defaultPosisi.stempelY);
+      localStorage.setItem('stempelSize', defaultPosisi.stempelSize);
+
+      localStorage.setItem('ttdX', defaultPosisi.ttdX);
+      localStorage.setItem('ttdY', defaultPosisi.ttdY);
+      localStorage.setItem('ttdSize', defaultPosisi.ttdSize);
+
+      initSliders();
+      updatePosisiLive();
+    }
 
     function updateMetadata() {
       const nama = document.getElementById('inputNamaKepsek').value;
@@ -511,6 +621,15 @@
       const stempelBase64 = localStorage.getItem('stempelData') || '';
       const ttdBase64 = localStorage.getItem('ttdData') || '';
 
+      // Posisi Custom
+      const sX = localStorage.getItem('stempelX') || defaultPosisi.stempelX;
+      const sY = localStorage.getItem('stempelY') || defaultPosisi.stempelY;
+      const sSize = localStorage.getItem('stempelSize') || defaultPosisi.stempelSize;
+
+      const tX = localStorage.getItem('ttdX') || defaultPosisi.ttdX;
+      const tY = localStorage.getItem('ttdY') || defaultPosisi.ttdY;
+      const tSize = localStorage.getItem('ttdSize') || defaultPosisi.ttdSize;
+
       const tempatLahir = (s[4] || '').trim();
       const tglLahir = (s[5] || '').trim();
       let ttl = '';
@@ -581,8 +700,8 @@
 
           <div class="ttd-section">
             <div class="ttd-box">
-              ${stempelBase64 ? `<img src="${stempelBase64}" class="img-stempel">` : ''}
-              ${ttdBase64 ? `<img src="${ttdBase64}" class="img-ttd">` : ''}
+              ${stempelBase64 ? `<img src="${stempelBase64}" class="img-stempel" style="left:${sX}mm; top:${sY}mm; width:${sSize}mm;">` : ''}
+              ${ttdBase64 ? `<img src="${ttdBase64}" class="img-ttd" style="left:${tX}mm; top:${tY}mm; width:${tSize}mm;">` : ''}
               <div>${tglTtd}</div>
               <div>Kepala Sekolah</div>
               <div class="ttd-space"></div>
