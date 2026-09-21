@@ -226,7 +226,7 @@
       box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
     .data-row { display: flex; margin-bottom: 0.2mm; }
-    .data-label { width: 14.5mm; color: #334155; font-weight: 600; }
+    .data-label { width: 15mm; color: #334155; font-weight: 600; }
     .data-separator { width: 1.5mm; font-weight: bold; }
     .data-value { flex: 1; color: #0f172a; word-break: break-word; }
     .data-value.bold { font-weight: 800; }
@@ -758,9 +758,9 @@
             <img src="${fotoUrl}" class="foto-box" onerror="this.src='https://via.placeholder.com/108x138?text=Foto'">
             <div class="data-box">
               <div class="data-row"><div class="data-label">Nama</div><div class="data-separator">:</div><div class="data-value bold">${nama}</div></div>
+              <div class="data-row"><div class="data-label">NISN</div><div class="data-separator">:</div><div class="data-value">${nisn}</div></div>
               <div class="data-row"><div class="data-label">TTL</div><div class="data-separator">:</div><div class="data-value">${ttl}</div></div>
               <div class="data-row"><div class="data-label">Jenis Kelamin</div><div class="data-separator">:</div><div class="data-value">${jk || '-'}</div></div>
-              <div class="data-row"><div class="data-label">NISN</div><div class="data-separator">:</div><div class="data-value">${nisn}</div></div>
               <div class="data-row"><div class="data-label">Alamat</div><div class="data-separator">:</div><div class="data-value">${alamat}</div></div>
             </div>
           </div>
