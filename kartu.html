@@ -181,42 +181,43 @@
     .data-value { flex: 1; color: #0f172a; word-break: break-word; }
     .data-value.bold { font-weight: 800; }
 
-    /* TTD & STEMPEL (OVERLAP REALISTIS) */
+    /* TTD & STEMPEL (FORMAT KEDINASAN KIRI) */
     .ttd-section {
       position: absolute;
       right: 3mm;
       bottom: 1.2mm;
-      text-align: center;
-      font-size: 5.8px;
       z-index: 3;
-      line-height: 1.15;
       color: #0f172a;
     }
-    .stempel-ttd-wrapper {
+    .ttd-box {
       position: relative;
-      width: 24mm;
-      height: 7.5mm;
-      margin: 0.1mm auto;
+      text-align: left;
+      font-size: 5.8px;
+      line-height: 1.15;
+    }
+    .ttd-space {
+      height: 5.5mm;
     }
     .img-stempel {
       position: absolute;
-      left: 0.5mm;
-      bottom: -0.5mm;
-      width: 10.5mm;
+      left: -11mm;
+      top: 1mm;
+      width: 14mm;
       height: auto;
       opacity: 0.88;
-      z-index: 2; /* Menutupi sebagian TTD */
+      z-index: 2;
       mix-blend-mode: multiply;
+      pointer-events: none;
     }
     .img-ttd {
       position: absolute;
-      right: 0.5mm;
-      top: -0.5mm;
-      width: 14mm;
+      left: 0.5mm;
+      top: 2.5mm;
+      width: 16mm;
       height: auto;
       z-index: 1;
+      pointer-events: none;
     }
-
     .nama-kepsek {
       font-size: 6.8px;
       font-weight: 800;
@@ -226,6 +227,8 @@
     }
     .nip-kepsek {
       font-size: 5.8px;
+      position: relative;
+      z-index: 3;
     }
 
     /* Background Wave */
@@ -456,7 +459,6 @@
         return;
       }
 
-      // Filter siswa hanya yang berada di kelas pilihan
       const siswaInKelas = [];
       dataSiswaGlobal.forEach((s, idx) => {
         if ((s[2] || '').trim() === kelasPilihan) {
@@ -475,7 +477,6 @@
         selSiswa.innerHTML += `<option value="${item.indexGlobal}">${s[1].trim()} (${(s[0]||'-').trim()})</option>`;
       });
 
-      // Otomatis render siswa pertama di kelas tersebut
       selSiswa.selectedIndex = 0;
       renderKartuSingle();
     }
@@ -579,14 +580,15 @@
           </div>
 
           <div class="ttd-section">
-            <div>${tglTtd}</div>
-            <div>Kepala Sekolah</div>
-            <div class="stempel-ttd-wrapper">
+            <div class="ttd-box">
               ${stempelBase64 ? `<img src="${stempelBase64}" class="img-stempel">` : ''}
               ${ttdBase64 ? `<img src="${ttdBase64}" class="img-ttd">` : ''}
+              <div>${tglTtd}</div>
+              <div>Kepala Sekolah</div>
+              <div class="ttd-space"></div>
+              <div class="nama-kepsek">${namaKepsek}</div>
+              <div class="nip-kepsek">NIP. ${nipKepsek}</div>
             </div>
-            <div class="nama-kepsek">${namaKepsek}</div>
-            <div class="nip-kepsek">NIP. ${nipKepsek}</div>
           </div>
 
           <div class="bg-wave-back"></div>
@@ -634,7 +636,6 @@
       const namaSiswa = dataSiswaGlobal[idx] ? dataSiswaGlobal[idx][1].trim() : 'Siswa';
       const nisnSiswa = dataSiswaGlobal[idx] ? dataSiswaGlobal[idx][0].trim() : '000';
 
-      // Lepas skala sementara saat capture agar gambar PNG tetap presisi murni KTP
       wadah.classList.remove('preview-single');
 
       html2canvas(kartuElem, { scale: 3, useCORS: true }).then(canvas => {
@@ -643,7 +644,6 @@
         link.href = canvas.toDataURL('image/png');
         link.click();
         
-        // Kembalikan perbesar preview setelah unduh
         wadah.classList.add('preview-single');
       }).catch(() => {
         wadah.classList.add('preview-single');
