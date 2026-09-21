@@ -12,38 +12,56 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background-color: #0f172a; padding: 20px; color: #334155; min-height: 100vh; }
     
-    /* Panel Kontrol Admin */
-    .panel-control {
-      max-width: 950px; margin: 0 auto 25px auto; background: #ffffff;
-      padding: 20px 25px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-      border: 1px solid #e2e8f0;
+    /* WADAH UTAMA 2 KOLOM (KIRI PENGATURAN, KANAN PREVIEW) */
+    .app-layout {
+      display: flex;
+      gap: 20px;
+      max-width: 1500px;
+      margin: 0 auto;
+      align-items: flex-start;
     }
-    .panel-control h2 { font-size: 20px; margin-bottom: 12px; color: #1e293b; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+
+    /* PANEL KONTROL KIRI */
+    .panel-control {
+      width: 440px;
+      flex-shrink: 0;
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+      border: 1px solid #e2e8f0;
+      max-height: calc(100vh - 40px);
+      overflow-y: auto;
+      position: sticky;
+      top: 20px;
+    }
+    .panel-control h2 { font-size: 18px; margin-bottom: 12px; color: #1e293b; font-weight: 800; display: flex; align-items: center; gap: 8px; }
     
     /* Indikator Status Data */
     .status-box {
-      padding: 10px 15px; border-radius: 10px; font-size: 13px; font-weight: 700;
-      margin-bottom: 18px; display: flex; align-items: center; gap: 8px;
+      padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700;
+      margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
     }
     .status-box.loading { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
     .status-box.ready { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
     .status-box.error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
     
-    .section-title { font-size: 13px; font-weight: 800; text-transform: uppercase; color: #0284c7; letter-spacing: 0.5px; margin-bottom: 10px; border-bottom: 2px solid #e2e8f0; padding-bottom: 4px; margin-top: 10px; }
+    .section-title { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #0284c7; letter-spacing: 0.5px; margin-bottom: 8px; border-bottom: 2px solid #e2e8f0; padding-bottom: 4px; margin-top: 10px; }
     
-    .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 18px; }
+    .grid-form { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
     .form-group { display: flex; flex-direction: column; }
-    .form-group label { font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 4px; text-transform: uppercase; display: flex; justify-content: space-between; }
+    .form-group.full-width { grid-column: span 2; }
+    .form-group label { font-size: 10.5px; font-weight: 700; color: #64748b; margin-bottom: 3px; text-transform: uppercase; display: flex; justify-content: space-between; }
     .form-group label span { color: #0284c7; font-weight: 800; }
-    .form-group select, .form-group input[type="text"], .form-group input[type="file"] { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; font-weight: 600; outline: none; transition: 0.2s; }
+    .form-group select, .form-group input[type="text"], .form-group input[type="file"] { padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 11px; font-weight: 600; outline: none; transition: 0.2s; }
     .form-group select:focus, .form-group input:focus { border-color: #0284c7; box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15); }
-    .form-group input[type="range"] { accent-color: #0284c7; cursor: pointer; margin-top: 4px; }
+    .form-group input[type="range"] { accent-color: #0284c7; cursor: pointer; margin-top: 2px; }
 
-    .action-buttons { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+    .action-buttons { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
     .btn {
-      padding: 9px 16px; border: none; border-radius: 8px; cursor: pointer;
-      font-weight: 800; font-size: 12px; transition: 0.2s; display: inline-flex;
-      align-items: center; justify-content: center; gap: 6px; height: 38px; text-decoration: none;
+      padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer;
+      font-weight: 800; font-size: 11px; transition: 0.2s; display: inline-flex;
+      align-items: center; justify-content: center; gap: 6px; height: 34px; text-decoration: none; flex: 1;
     }
     .btn-download { background: #0284c7; color: #fff; }
     .btn-download:hover { background: #0369a1; }
@@ -53,19 +71,47 @@
     .btn-reset:hover { background: #475569; }
     .hidden { display: none !important; }
 
+    /* AREA PREVIEW KANAN */
+    .preview-section {
+      flex: 1;
+      min-width: 0;
+      background: #1e293b;
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid #334155;
+      min-height: calc(100vh - 40px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .preview-header {
+      width: 100%;
+      color: #f8fafc;
+      font-size: 14px;
+      font-weight: 800;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #334155;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
     /* GRID WADAH KARTU */
     .grid-cetak-container {
-      display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; max-width: 1200px; margin: 0 auto;
+      display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; width: 100%;
       transition: all 0.3s ease;
     }
 
     /* SKALA PREVIEW SINGLE */
     .grid-cetak-container.preview-single {
-      padding-top: 35px;
+      padding-top: 40px;
       padding-bottom: 80px;
     }
     .grid-cetak-container.preview-single .kartu-container {
-      transform: scale(1.55);
+      transform: scale(1.65);
       transform-origin: top center;
     }
 
@@ -78,7 +124,7 @@
       border-radius: 3.2mm;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.4);
       flex-shrink: 0;
       page-break-inside: avoid;
       box-sizing: border-box;
@@ -241,10 +287,19 @@
       background: #0369a1; clip-path: polygon(0 85%, 100% 30%, 100% 100%, 0% 100%); z-index: 1;
     }
 
+    /* RESPONSIVE DESKTOP/MOBILE */
+    @media (max-width: 900px) {
+      .app-layout { flex-direction: column; }
+      .panel-control { width: 100%; max-height: none; position: static; }
+      .preview-section { width: 100%; min-height: auto; }
+    }
+
     /* MEDIA PRINT A4 STANDAR UKURAN KTP */
     @media print {
       body { background: #ffffff !important; padding: 0 !important; margin: 0 !important; }
-      .panel-control { display: none !important; }
+      .panel-control, .preview-header { display: none !important; }
+      .app-layout { display: block !important; }
+      .preview-section { background: none !important; border: none !important; padding: 0 !important; }
       .grid-cetak-container { display: grid !important; grid-template-columns: repeat(2, 85.6mm) !important; gap: 5mm !important; padding: 10mm !important; max-width: 100% !important; justify-content: start !important; }
       .grid-cetak-container.preview-single .kartu-container { transform: none !important; margin: 0 !important; }
       .kartu-container { box-shadow: none !important; border-color: #000 !important; page-break-inside: avoid !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
@@ -253,117 +308,129 @@
 </head>
 <body>
 
-  <!-- PANEL KONTROL ADMIN -->
-  <div class="panel-control">
-    <h2>Kontrol Generator Kartu Pelajar (Ukuran KTP)</h2>
-    
-    <!-- Status Indikator Data Master -->
-    <div id="statusIndikator" class="status-box loading">
-      Memuat data master siswa dari Google Sheets...
-    </div>
+  <!-- WADAH UTAMA 2 KOLOM -->
+  <div class="app-layout">
 
-    <!-- TAHAP 1: LEGALITAS & UPLOAD -->
-    <div class="section-title">1. Pengaturan Legalitas & File Gambar</div>
-    <div class="grid-form">
-      <div class="form-group">
-        <label>Nama Kepala Sekolah:</label>
-        <input type="text" id="inputNamaKepsek" value="AGUS SUPARMAN S, S.Pd.,M.M." oninput="updateMetadata()">
-      </div>
-      <div class="form-group">
-        <label>NIP Kepala Sekolah:</label>
-        <input type="text" id="inputNipKepsek" value="196608051988031010" oninput="updateMetadata()">
-      </div>
-      <div class="form-group">
-        <label>Tempat & Tanggal TTD:</label>
-        <input type="text" id="inputTglTtd" value="Rancah, Juli 2026" oninput="updateMetadata()">
-      </div>
-      <div class="form-group">
-        <label>Upload Cap Stempel (PNG/JPG):</label>
-        <input type="file" id="inputStempel" accept="image/*" onchange="uploadGambarLokal(event, 'stempelData')">
-      </div>
-      <div class="form-group">
-        <label>Upload TTD Kepsek (PNG/JPG):</label>
-        <input type="file" id="inputTTD" accept="image/*" onchange="uploadGambarLokal(event, 'ttdData')">
-      </div>
-    </div>
-
-    <!-- TAHAP 2: EDIT POSISI LIVE CAP & TTD -->
-    <div class="section-title">2. Edit Posisi & Ukuran Cap & TTD (Live Preview)</div>
-    <div class="grid-form">
-      <div class="form-group">
-        <label>Stempel - Geser Horisontal (X): <span id="valStempelX">-11mm</span></label>
-        <input type="range" id="stempelX" min="-30" max="20" step="0.5" value="-11" oninput="updatePosisiLive()">
-      </div>
-      <div class="form-group">
-        <label>Stempel - Geser Vertikal (Y): <span id="valStempelY">1mm</span></label>
-        <input type="range" id="stempelY" min="-10" max="15" step="0.5" value="1" oninput="updatePosisiLive()">
-      </div>
-      <div class="form-group">
-        <label>Stempel - Lebar (Ukuran): <span id="valStempelSize">14mm</span></label>
-        <input type="range" id="stempelSize" min="8" max="25" step="0.5" value="14" oninput="updatePosisiLive()">
+    <!-- KOLOM KIRI: PANEL KONTROL ADMIN -->
+    <div class="panel-control">
+      <h2>Kontrol Generator Kartu</h2>
+      
+      <!-- Status Indikator Data Master -->
+      <div id="statusIndikator" class="status-box loading">
+        Memuat data master siswa dari Google Sheets...
       </div>
 
-      <div class="form-group">
-        <label>TTD - Geser Horisontal (X): <span id="valTtdX">0.5mm</span></label>
-        <input type="range" id="ttdX" min="-20" max="30" step="0.5" value="0.5" oninput="updatePosisiLive()">
-      </div>
-      <div class="form-group">
-        <label>TTD - Geser Vertikal (Y): <span id="valTtdY">2.5mm</span></label>
-        <input type="range" id="ttdY" min="-10" max="15" step="0.5" value="2.5" oninput="updatePosisiLive()">
-      </div>
-      <div class="form-group">
-        <label>TTD - Lebar (Ukuran): <span id="valTtdSize">16mm</span></label>
-        <input type="range" id="ttdSize" min="8" max="30" step="0.5" value="16" oninput="updatePosisiLive()">
-      </div>
-    </div>
-
-    <!-- TAHAP 3: GENERATE SISWA / KELAS -->
-    <div class="section-title">3. Mode Tampilan & Pilihan Download</div>
-    <div class="grid-form">
-      <div class="form-group">
-        <label>Mode Tampilan:</label>
-        <select id="selectMode" onchange="switchModeCetak()">
-          <option value="single">Per Siswa (Preview Besar & Download 1 Kartu)</option>
-          <option value="kelas">Per Kelas (Preview, Download Massal & Cetak A4)</option>
-        </select>
-      </div>
-
-      <div class="form-group" id="grpSelectKelas">
-        <label>Pilih Kelas:</label>
-        <select id="selectKelas" onchange="handleKelasChange()">
-          <option value="">-- Pilih Kelas --</option>
-        </select>
+      <!-- TAHAP 1: LEGALITAS & UPLOAD -->
+      <div class="section-title">1. Legalitas & File Gambar</div>
+      <div class="grid-form">
+        <div class="form-group full-width">
+          <label>Nama Kepala Sekolah:</label>
+          <input type="text" id="inputNamaKepsek" value="AGUS SUPARMAN S, S.Pd.,M.M." oninput="updateMetadata()">
+        </div>
+        <div class="form-group">
+          <label>NIP Kepsek:</label>
+          <input type="text" id="inputNipKepsek" value="196608051988031010" oninput="updateMetadata()">
+        </div>
+        <div class="form-group">
+          <label>Tempat & Tgl TTD:</label>
+          <input type="text" id="inputTglTtd" value="Rancah, Juli 2026" oninput="updateMetadata()">
+        </div>
+        <div class="form-group">
+          <label>Upload Cap (PNG/JPG):</label>
+          <input type="file" id="inputStempel" accept="image/*" onchange="uploadGambarLokal(event, 'stempelData')">
+        </div>
+        <div class="form-group">
+          <label>Upload TTD (PNG/JPG):</label>
+          <input type="file" id="inputTTD" accept="image/*" onchange="uploadGambarLokal(event, 'ttdData')">
+        </div>
       </div>
 
-      <div class="form-group" id="grpSelectSiswa">
-        <label>Pilih Nama Siswa:</label>
-        <select id="selectSiswa" onchange="renderKartuSingle()">
-          <option value="">-- Pilih Kelas Terlebih Dahulu --</option>
-        </select>
+      <!-- TAHAP 2: EDIT POSISI LIVE CAP & TTD -->
+      <div class="section-title">2. Edit Posisi Live (Cap & TTD)</div>
+      <div class="grid-form">
+        <div class="form-group">
+          <label>Cap - Posisi X: <span id="valStempelX">-11mm</span></label>
+          <input type="range" id="stempelX" min="-30" max="20" step="0.5" value="-11" oninput="updatePosisiLive()">
+        </div>
+        <div class="form-group">
+          <label>Cap - Posisi Y: <span id="valStempelY">1mm</span></label>
+          <input type="range" id="stempelY" min="-10" max="15" step="0.5" value="1" oninput="updatePosisiLive()">
+        </div>
+        <div class="form-group full-width">
+          <label>Cap - Ukuran Lebar: <span id="valStempelSize">14mm</span></label>
+          <input type="range" id="stempelSize" min="8" max="25" step="0.5" value="14" oninput="updatePosisiLive()">
+        </div>
+
+        <div class="form-group">
+          <label>TTD - Posisi X: <span id="valTtdX">0.5mm</span></label>
+          <input type="range" id="ttdX" min="-20" max="30" step="0.5" value="0.5" oninput="updatePosisiLive()">
+        </div>
+        <div class="form-group">
+          <label>TTD - Posisi Y: <span id="valTtdY">2.5mm</span></label>
+          <input type="range" id="ttdY" min="-10" max="15" step="0.5" value="2.5" oninput="updatePosisiLive()">
+        </div>
+        <div class="form-group full-width">
+          <label>TTD - Ukuran Lebar: <span id="valTtdSize">16mm</span></label>
+          <input type="range" id="ttdSize" min="8" max="30" step="0.5" value="16" oninput="updatePosisiLive()">
+        </div>
       </div>
 
-      <div class="form-group" style="justify-content: flex-end;">
-        <label>Aksi Download / Cetak:</label>
-        <div class="action-buttons">
-          <button type="button" id="btnDownloadSingle" onclick="downloadPNGSingle()" class="btn btn-download">
-            Download Gambar (PNG)
-          </button>
-          <button type="button" id="btnDownloadKelas" onclick="downloadPNGKelas()" class="btn btn-download hidden">
-            Download Semua PNG Kelas
-          </button>
-          <button type="button" onclick="window.print()" class="btn btn-cetak">
-            Cetak / PDF (A4)
-          </button>
-          <button type="button" onclick="resetPosisiDefault()" class="btn btn-reset">
-            Reset Posisi Default
-          </button>
+      <!-- TAHAP 3: GENERATE SISWA / KELAS -->
+      <div class="section-title">3. Mode Tampilan & Download</div>
+      <div class="grid-form">
+        <div class="form-group full-width">
+          <label>Mode Tampilan:</label>
+          <select id="selectMode" onchange="switchModeCetak()">
+            <option value="single">Per Siswa (Preview Besar & Download 1 Kartu)</option>
+            <option value="kelas">Per Kelas (Preview, Download Massal & Cetak A4)</option>
+          </select>
+        </div>
+
+        <div class="form-group full-width" id="grpSelectKelas">
+          <label>Pilih Kelas:</label>
+          <select id="selectKelas" onchange="handleKelasChange()">
+            <option value="">-- Pilih Kelas --</option>
+          </select>
+        </div>
+
+        <div class="form-group full-width" id="grpSelectSiswa">
+          <label>Pilih Nama Siswa:</label>
+          <select id="selectSiswa" onchange="renderKartuSingle()">
+            <option value="">-- Pilih Kelas Terlebih Dahulu --</option>
+          </select>
+        </div>
+
+        <div class="form-group full-width">
+          <label>Aksi Cetak / Download:</label>
+          <div class="action-buttons">
+            <button type="button" id="btnDownloadSingle" onclick="downloadPNGSingle()" class="btn btn-download">
+              Download PNG
+            </button>
+            <button type="button" id="btnDownloadKelas" onclick="downloadPNGKelas()" class="btn btn-download hidden">
+              Download PNG Kelas
+            </button>
+            <button type="button" onclick="window.print()" class="btn btn-cetak">
+              Cetak / A4
+            </button>
+            <button type="button" onclick="resetPosisiDefault()" class="btn btn-reset">
+              Reset Posisi
+            </button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- AREA RENDER KARTU PREVIEW -->
-  <div id="wadahCetak" class="grid-cetak-container preview-single"></div>
+    <!-- KOLOM KANAN: AREA LIVE PREVIEW KARTU -->
+    <div class="preview-section">
+      <div class="preview-header">
+        <span>Live Preview Kartu Pelajar</span>
+        <span style="font-size: 11px; opacity: 0.7; font-weight: normal;">Ukuran Standar KTP (85.6mm x 53.9mm)</span>
+      </div>
+
+      <div id="wadahCetak" class="grid-cetak-container preview-single"></div>
+    </div>
+
+  </div>
 
   <script>
     const sheetID = '1rzj6ucYgbUf4X1x9fcZVsTGwJBxglXPnCaHazl73mSU';
@@ -474,7 +541,7 @@
     function fetchDataSiswa() {
       const statusBox = document.getElementById('statusIndikator');
       statusBox.className = 'status-box loading';
-      statusBox.innerHTML = 'Memuat seluruh data master siswa dari Google Sheets...';
+      statusBox.innerHTML = 'Memuat seluruh data master siswa...';
 
       const urlGviz = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
       
@@ -531,7 +598,7 @@
       daftarKelasGlobal = [...new Set(dataSiswaGlobal.map(s => (s[2] || '').trim()))].filter(Boolean).sort();
 
       statusBox.className = 'status-box ready';
-      statusBox.innerHTML = `<b>Data Master Terbaca Sempurna:</b> ${dataSiswaGlobal.length} Siswa (${daftarKelasGlobal.length} Kelas) Siap Di-generate!`;
+      statusBox.innerHTML = `<b>Terbaca Sempurna:</b> ${dataSiswaGlobal.length} Siswa (${daftarKelasGlobal.length} Kelas)`;
 
       // Populate Dropdown Kelas Utama
       const selKelas = document.getElementById('selectKelas');
