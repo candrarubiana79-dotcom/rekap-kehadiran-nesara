@@ -71,7 +71,7 @@
       height: 53.9mm;
       background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
       border: 1px solid #0284c7;
-      border-radius: 3.2mm; /* Radius standar KTP */
+      border-radius: 3.2mm;
       position: relative;
       overflow: hidden;
       box-shadow: 0 6px 16px rgba(0,0,0,0.3);
@@ -81,36 +81,36 @@
       background-clip: padding-box;
     }
 
-    /* HEADER KARTU PROPORSI NATIVE */
+    /* HEADER KARTU DENGAN TEKS LEBIH BESAR & JELAS */
     .header {
       background: linear-gradient(90deg, #0284c7 0%, #0369a1 100%);
       color: white;
       text-align: center;
-      padding: 1.5mm 9.5mm 1.2mm 9.5mm; /* Padding kanan-kiri memberi ruang aman dari logo */
+      padding: 1.2mm 9mm 1.2mm 9mm;
       position: relative;
       border-bottom: 0.5mm solid #0f172a;
     }
     .logo-left {
       position: absolute;
-      left: 1.8mm;
+      left: 1.5mm;
       top: 50%;
       transform: translateY(-50%);
-      width: 8.2mm;
-      height: 8.2mm;
+      width: 8mm;
+      height: 8mm;
       object-fit: contain;
     }
     .logo-right {
       position: absolute;
-      right: 1.8mm;
+      right: 1.5mm;
       top: 50%;
       transform: translateY(-50%);
-      width: 8.2mm;
-      height: 8.2mm;
+      width: 8mm;
+      height: 8mm;
       object-fit: contain;
     }
     
     .header .pemda, .header .dinas {
-      font-size: 4.8px;
+      font-size: 5.8px;
       font-weight: 700;
       letter-spacing: 0.2px;
       line-height: 1.15;
@@ -118,19 +118,19 @@
       text-transform: uppercase;
     }
     .header .sekolah {
-      font-size: 8px;
+      font-size: 9.5px;
       font-weight: 900;
       letter-spacing: 0.3px;
-      margin: 0.3mm 0;
+      margin: 0.2mm 0;
       line-height: 1.1;
       text-shadow: 0 0.5px 1px rgba(0,0,0,0.3);
       text-transform: uppercase;
     }
     .header .alamat {
-      font-size: 3.6px;
+      font-size: 4.3px;
       font-weight: 500;
-      opacity: 0.92;
-      line-height: 1.1;
+      opacity: 0.95;
+      line-height: 1.15;
       margin: 0;
     }
 
@@ -245,7 +245,7 @@
     
     <!-- Status Indikator Data Master -->
     <div id="statusIndikator" class="status-box loading">
-      ⏳ Memuat data master siswa dari Google Sheets...
+      Memuat data master siswa dari Google Sheets...
     </div>
 
     <!-- TAHAP 1: LEGALITAS & UPLOAD -->
@@ -302,13 +302,13 @@
         <label>Aksi Download / Cetak:</label>
         <div class="action-buttons">
           <button type="button" id="btnDownloadSingle" onclick="downloadPNGSingle()" class="btn btn-download">
-            🖼️ Download Gambar (PNG)
+            Download Gambar (PNG)
           </button>
           <button type="button" id="btnDownloadKelas" onclick="downloadPNGKelas()" class="btn btn-download hidden">
-            📦 Download Semua PNG Kelas
+            Download Semua PNG Kelas
           </button>
           <button type="button" onclick="window.print()" class="btn btn-cetak">
-            🖨️ Cetak / PDF (A4)
+            Cetak / PDF (A4)
           </button>
         </div>
       </div>
@@ -350,7 +350,7 @@
     function fetchDataSiswa() {
       const statusBox = document.getElementById('statusIndikator');
       statusBox.className = 'status-box loading';
-      statusBox.innerHTML = '⏳ Memuat seluruh data master siswa dari Google Sheets...';
+      statusBox.innerHTML = 'Memuat seluruh data master siswa dari Google Sheets...';
 
       const urlGviz = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
       
@@ -382,12 +382,12 @@
             prosesDataCsv(results.data);
           } else {
             statusBox.className = 'status-box error';
-            statusBox.innerHTML = '❌ Data di Google Sheets kosong atau tidak dapat diakses.';
+            statusBox.innerHTML = 'Data di Google Sheets kosong atau tidak dapat diakses.';
           }
         },
         error: function(err) {
           statusBox.className = 'status-box error';
-          statusBox.innerHTML = '❌ Gagal mengunduh data dari Google Sheets. Pastikan dokumen dipublikasikan ke publik.';
+          statusBox.innerHTML = 'Gagal mengunduh data dari Google Sheets. Pastikan dokumen dipublikasikan ke publik.';
         }
       });
     }
@@ -400,14 +400,14 @@
 
       if (dataSiswaGlobal.length === 0) {
         statusBox.className = 'status-box error';
-        statusBox.innerHTML = '❌ Tidak ditemukan data siswa pada spreadsheet.';
+        statusBox.innerHTML = 'Tidak ditemukan data siswa pada spreadsheet.';
         return;
       }
 
       daftarKelasGlobal = [...new Set(dataSiswaGlobal.map(s => (s[2] || '').trim()))].filter(Boolean).sort();
 
       statusBox.className = 'status-box ready';
-      statusBox.innerHTML = `✅ <b>Data Master Terbaca Sempurna:</b> ${dataSiswaGlobal.length} Siswa (${daftarKelasGlobal.length} Kelas) Siap Di-generate!`;
+      statusBox.innerHTML = `<b>Data Master Terbaca Sempurna:</b> ${dataSiswaGlobal.length} Siswa (${daftarKelasGlobal.length} Kelas) Siap Di-generate!`;
 
       // Populate Dropdown Kelas Utama
       const selKelas = document.getElementById('selectKelas');
@@ -658,7 +658,7 @@
             link.href = canvas.toDataURL('image/png');
             link.click();
           });
-        }, index * 600); // Delay 600ms per kartu agar browser tidak memblokir download massal
+        }, index * 600);
       });
     }
 
