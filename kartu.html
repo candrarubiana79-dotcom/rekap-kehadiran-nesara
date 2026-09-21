@@ -81,17 +81,20 @@
       background-clip: padding-box;
     }
 
-    /* Header Kartu */
+    /* HEADER KARTU DENGAN HIERARKI FONT PRESISI */
     .header {
       background: linear-gradient(90deg, #0284c7 0%, #0369a1 100%); color: white; text-align: center;
-      padding: 1.5mm 6mm; position: relative; border-bottom: 0.5mm solid #0f172a;
+      padding: 1.2mm 6mm; position: relative; border-bottom: 0.5mm solid #0f172a;
     }
     .logo-left { position: absolute; left: 1.5mm; top: 50%; transform: translateY(-50%); width: 7.5mm; height: 7.5mm; object-fit: contain; }
     .logo-right { position: absolute; right: 1.5mm; top: 50%; transform: translateY(-50%); width: 7.5mm; height: 7.5mm; object-fit: contain; }
-    .header h4 { font-size: 4.8px; font-weight: 700; letter-spacing: 0.2px; opacity: 0.95; line-height: 1; }
-    .header h3 { font-size: 4.5px; font-weight: 700; line-height: 1; }
-    .header h2 { font-size: 7px; font-weight: 900; letter-spacing: 0.2px; margin: 0.3mm 0; line-height: 1; text-shadow: 0 0.5px 1px rgba(0,0,0,0.3); }
-    .header p { font-size: 3.8px; opacity: 0.9; line-height: 1; }
+    
+    /* Government Header Titles (Sama Ukuran) */
+    .header h4 { font-size: 4.5px; font-weight: 700; letter-spacing: 0.2px; line-height: 1.1; margin: 0; }
+    /* Nama Sekolah (Besar & Bold) */
+    .header h2 { font-size: 7.5px; font-weight: 900; letter-spacing: 0.3px; margin: 0.4mm 0; line-height: 1.1; text-shadow: 0 0.5px 1px rgba(0,0,0,0.3); }
+    /* Alamat Instansi (Kecil) */
+    .header p { font-size: 3.2px; font-weight: 500; opacity: 0.95; line-height: 1; margin: 0; }
 
     /* Judul Kartu */
     .judul-kartu {
@@ -464,7 +467,7 @@
             <img src="assets/logo-ciamis.png" class="logo-left" alt="Logo Ciamis">
             <img src="assets/logo-smpn1rancah.png" class="logo-right" alt="Logo SMP">
             <h4>PEMERINTAH KABUPATEN CIAMIS</h4>
-            ### DINAS PENDIDIKAN
+            <h4>DINAS PENDIDIKAN</h4>
             <h2>SMP NEGERI 1 RANCAH</h2>
             <p>Jalan Cibeureum Rancah, Kecamatan Rancah – Kabupaten Ciamis</p>
           </div>
