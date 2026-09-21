@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Generator Kartu Pelajar - SMPN 1 Rancah</title>
-  <!-- Library Parser CSV Profesional -->
+  <!-- Library Parser CSV -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -42,12 +42,12 @@
     .btn-cetak:hover { background: #15803d; }
     .hidden { display: none !important; }
 
-    /* GRID WADAH KARTU (SINGLE & BULK) */
+    /* GRID WADAH KARTU */
     .grid-cetak-container {
       display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; max-width: 1150px; margin: 0 auto;
     }
 
-    /* DESAIN AESTHETIC KARTU PELAJAR (STANDAR CR80) */
+    /* DESAIN KARTU PELAJAR */
     .kartu-container {
       width: 530px; height: 335px; background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
       border: 1.5px solid #0284c7; border-radius: 12px; position: relative; overflow: hidden;
@@ -105,7 +105,7 @@
       position: absolute; right: 10px; top: -6px; width: 75px; height: auto; z-index: 2;
     }
 
-    /* Ombak Background Ganda (Dual Wave) */
+    /* Background Wave */
     .bg-wave-back {
       position: absolute; bottom: 0; right: 0; width: 100%; height: 48%;
       background: #0284c7; clip-path: polygon(0 75%, 100% 15%, 100% 100%, 0% 100%); z-index: 1;
@@ -115,7 +115,7 @@
       background: #0369a1; clip-path: polygon(0 85%, 100% 30%, 100% 100%, 0% 100%); z-index: 1;
     }
 
-    /* METODE CETAK PRINT A4 */
+    /* MEDIA PRINT A4 */
     @media print {
       body { background: #ffffff !important; padding: 0 !important; margin: 0 !important; }
       .panel-control { display: none !important; }
@@ -136,7 +136,7 @@
     </div>
 
     <!-- TAHAP 1: LEGALITAS & UPLOAD -->
-    <div class="section-title">1. Pengaturan Legalitas & Gambar (Tersimpan di Browser)</div>
+    <div class="section-title">1. Pengaturan Legalitas & Gambar</div>
     <div class="grid-form">
       <div class="form-group">
         <label>Nama Kepala Sekolah:</label>
@@ -230,7 +230,6 @@
       statusBox.className = 'status-box loading';
       statusBox.innerHTML = '⏳ Memuat seluruh data master siswa dari Google Sheets...';
 
-      // Menggunakan GVIZ API CSV
       const urlGviz = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
       
       Papa.parse(urlGviz, {
@@ -266,7 +265,7 @@
         },
         error: function(err) {
           statusBox.className = 'status-box error';
-          statusBox.innerHTML = '❌ Gagal mengunduh data dari Google Sheets. Pastikan dokumen dipublikasikan ke publik (File > Bagikan > Publikasikan ke web).';
+          statusBox.innerHTML = '❌ Gagal mengunduh data dari Google Sheets. Pastikan dokumen dipublikasikan ke publik.';
         }
       });
     }
@@ -274,7 +273,7 @@
     function prosesDataCsv(rowsAll) {
       const statusBox = document.getElementById('statusIndikator');
       
-      // Baris 0 = Header. Ambil baris 1 ke bawah yang memiliki Nama (kolom indeks 1)
+      // Baris 0 adalah Header, ambil baris 1 ke bawah yang punya Nama (kolom indeks 1)
       const rows = rowsAll.slice(1);
       dataSiswaGlobal = rows.filter(r => r && r[1] && r[1].trim() !== '');
 
@@ -284,10 +283,9 @@
         return;
       }
 
-      // Ambil daftar kelas unik
+      // Ambil daftar kelas unik dari kolom KELAS (indeks 2)
       daftarKelasGlobal = [...new Set(dataSiswaGlobal.map(s => (s[2] || '').trim()))].filter(Boolean).sort();
 
-      // Update Indikator Status Berhasil
       statusBox.className = 'status-box ready';
       statusBox.innerHTML = `✅ <b>Data Master Terbaca Sempurna:</b> ${dataSiswaGlobal.length} Siswa (${daftarKelasGlobal.length} Kelas) Siap Di-generate!`;
 
@@ -335,23 +333,57 @@
       const stempelBase64 = localStorage.getItem('stempelData') || '';
       const ttdBase64 = localStorage.getItem('ttdData') || '';
 
+      // Tempat & Tanggal Lahir (E & F -> indeks 4 & 5)
       const tempatLahir = (s[4] || '').trim();
       const tglLahir = (s[5] || '').trim();
       let ttl = '';
       if (tempatLahir && tglLahir) ttl = `${tempatLahir}, ${tglLahir}`;
       else ttl = tempatLahir || tglLahir || '-';
 
+      // Jenis Kelamin (G -> indeks 6)
       const jk = (s[6] || '').trim();
 
-      // Format Alamat Lengkap
-      let alamat = '';
-      if (s[9] && s[9].trim()) alamat += 'Dsn. ' + s[9].trim() + ' ';
-      if ((s[7] && s[7].trim()) || (s[8] && s[8].trim())) alamat += 'RT ' + (s[7]||'0').trim() + '/RW ' + (s[8]||'0').trim() + ' ';
-      if (s[10] && s[10].trim()) alamat += 'Ds. ' + s[10].trim() + ' ';
-      if (s[11] && s[11].trim()) alamat += 'Kec. ' + s[11].trim();
-      if (!alamat.trim()) alamat = '-';
+      // PEMBENTUKAN ALAMAT PRESISI SESUAI SPREADSHEET (H, I, J, K, L -> indeks 7, 8, 9, 10, 11)
+      const dsn = (s[7] || '').trim();
+      const rt = (s[8] || '').trim();
+      const rw = (s[9] || '').trim();
+      const desa = (s[10] || '').trim();
+      const kec = (s[11] || '').trim();
 
-      // Link Foto
+      let bagianAlamat = [];
+
+      if (dsn) {
+        // Cek apakah data dusun sudah memiliki kata "Dusun"
+        if (/^d(sn|usun)\.?\s+/i.test(dsn)) {
+          bagianAlamat.push(dsn);
+        } else {
+          bagianAlamat.push(`Dsn. ${dsn}`);
+        }
+      }
+
+      if (rt || rw) {
+        bagianAlamat.push(`RT ${rt || '0'}/RW ${rw || '0'}`);
+      }
+
+      if (desa) {
+        if (/^d(esa|s)\.?\s+/i.test(desa)) {
+          bagianAlamat.push(desa);
+        } else {
+          bagianAlamat.push(`Ds. ${desa}`);
+        }
+      }
+
+      if (kec) {
+        if (/^kec(amatan)?\.?\s+/i.test(kec)) {
+          bagianAlamat.push(kec);
+        } else {
+          bagianAlamat.push(`Kec. ${kec}`);
+        }
+      }
+
+      const alamat = bagianAlamat.join(' ') || '-';
+
+      // Foto dari URL Google Drive / path lokal
       const fotoRaw = (s[12] || '').trim();
       const fotoUrl = (fotoRaw.startsWith('http')) ? fotoRaw : `assets/foto_${(s[0]||'').trim()}.jpg`;
 
