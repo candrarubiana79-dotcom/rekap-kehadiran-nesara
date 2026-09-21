@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistem Presensi & ID Card - SMPN 1 RANCAH</title>
+  <title>Sistem Presensi - SMPN 1 RANCAH</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -12,21 +12,8 @@
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <!-- Library tambahan untuk ID Card, QR Code & File Download -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
-    
-    /* Ukuran ID Card Standar Portrait */
-    .id-card {
-      width: 250px;
-      height: 410px;
-      box-sizing: border-box;
-    }
   </style>
 </head>
 <body class="bg-slate-900 text-slate-800 min-h-screen flex items-center justify-center p-3 sm:p-4 md:p-6 relative overflow-x-hidden selection:bg-indigo-500 selection:text-white">
@@ -85,8 +72,8 @@
       <span>Sedang memuat data master siswa...</span>
     </div>
 
-    <!-- TAB MENU PILIHAN (4 TAB RESPONSIVE) -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 bg-slate-100/80 p-1.5 rounded-2xl text-[11px] font-bold">
+    <!-- TAB MENU PILIHAN (3 TAB RESPONSIVE) -->
+    <div class="grid grid-cols-3 gap-1.5 bg-slate-100/80 p-1.5 rounded-2xl text-[11px] font-bold">
       <button id="tabTidakHadir" type="button" onclick="switchMenu('tidak_hadir')"
         class="py-2.5 px-2 rounded-xl transition-all text-center flex items-center justify-center gap-1.5 bg-white text-indigo-600 shadow-sm font-extrabold">
         <i class="fa-solid fa-user-xmark"></i>
@@ -97,15 +84,10 @@
         <i class="fa-solid fa-clock-rotate-left"></i>
         <span>2. Lupa Absen</span>
       </button>
-      <button id="tabCetakQr" type="button" onclick="switchMenu('cetak_qr')"
-        class="py-2.5 px-2 rounded-xl transition-all text-center flex items-center justify-center gap-1.5 text-slate-500 hover:text-slate-800 font-semibold">
-        <i class="fa-solid fa-id-card"></i>
-        <span>3. ID Card</span>
-      </button>
       <a href="tools.html"
         class="py-2.5 px-2 rounded-xl transition-all text-center flex items-center justify-center gap-1.5 text-slate-500 hover:text-indigo-600 font-semibold">
         <i class="fa-solid fa-screwdriver-wrench"></i>
-        <span>4. Tools</span>
+        <span>3. Tools</span>
       </a>
     </div>
 
@@ -187,55 +169,6 @@
       </button>
     </form>
 
-    <!-- KONTEN MENU 3: CETAK & DOWNLOAD ID CARD QR SISWA -->
-    <div id="sectionCetakQr" class="hidden space-y-6">
-      <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-4">
-        <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
-          <div class="sm:col-span-5">
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Pilih Kelas ID Card</label>
-            <select id="selectKelasQr"
-              class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-              <option value="">-- Pilih Kelas --</option>
-            </select>
-          </div>
-
-          <div class="sm:col-span-4">
-            <button type="button" onclick="generateCards()" class="w-full bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition shadow-md shadow-indigo-500/20 flex items-center justify-center gap-2">
-              <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Card
-            </button>
-          </div>
-
-          <div class="sm:col-span-3">
-            <button type="button" id="btnDownloadZip" onclick="downloadAllZip()" disabled 
-              class="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-bold py-2.5 px-3 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
-              <i class="fa-solid fa-file-zipper"></i> ZIP All
-            </button>
-          </div>
-        </div>
-
-        <div id="progressBox" class="hidden p-3 rounded-xl bg-indigo-50 border border-indigo-200 text-xs text-indigo-900 font-mono text-center font-bold">
-          ⏳ Mengonversi: <span id="progressText">0</span> / <span id="totalText">0</span> ID Card...
-        </div>
-      </div>
-
-      <div id="cardSummaryBox" class="hidden flex items-center justify-between text-xs font-bold px-4 py-2.5 bg-slate-100 rounded-xl text-slate-700 border border-slate-200">
-        <span id="cardSummaryText">Menampilkan ID Card Siswa...</span>
-        <span class="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full uppercase tracking-wider">Ready to Download</span>
-      </div>
-
-      <div id="cardContainer" class="flex flex-wrap gap-6 justify-center max-h-[520px] overflow-y-auto p-4 border border-slate-200/60 rounded-2xl bg-slate-50/50">
-        <div id="emptyCardState" class="text-center py-12 px-4 space-y-3">
-          <div class="w-16 h-16 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto text-2xl">
-            <i class="fa-solid fa-id-card"></i>
-          </div>
-          <div>
-            <h4 class="text-sm font-bold text-slate-700">Belum Ada Kartu Dibuat</h4>
-            <p class="text-xs text-slate-400 mt-1 max-w-xs mx-auto">Silakan pilih kelas terlebih dahulu, lalu klik tombol <b>Generate Card</b>.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
   </div>
 
   <script>
@@ -243,7 +176,6 @@
     const TOKEN_BENAR = "GURU2026";
     let masterSiswa = [];
     let currentMode = "tidak_hadir";
-    let generatedSiswaList = [];
 
     document.addEventListener("DOMContentLoaded", () => {
       const now = new Date();
@@ -252,7 +184,6 @@
       const dd = String(now.getDate()).padStart(2, '0');
       document.getElementById("inputTanggal").value = `${yyyy}-${mm}-${dd}`;
 
-      // Cek status login saat halaman diakses
       if (localStorage.getItem("isLoggedIn") === "true") {
         document.getElementById("loginSection").classList.add("hidden");
         document.getElementById("formSection").classList.remove("hidden");
@@ -264,7 +195,7 @@
       e.preventDefault();
       const token = document.getElementById("inputToken").value.trim();
       if (token === TOKEN_BENAR) {
-        localStorage.setItem("isLoggedIn", "true"); // Simpan status sesi login
+        localStorage.setItem("isLoggedIn", "true");
         document.getElementById("loginSection").classList.add("hidden");
         document.getElementById("formSection").classList.remove("hidden");
         loadMasterData();
@@ -274,7 +205,7 @@
     }
 
     function logout() {
-      localStorage.removeItem("isLoggedIn"); // Hapus status sesi login
+      localStorage.removeItem("isLoggedIn");
       document.getElementById("formSection").classList.add("hidden");
       document.getElementById("loginSection").classList.remove("hidden");
       document.getElementById("inputToken").value = "";
@@ -282,46 +213,32 @@
 
     function switchMenu(mode) {
       currentMode = mode;
-      const tabs = ['tabTidakHadir', 'tabLupaAbsen', 'tabCetakQr'];
-      const sections = ['sectionTidakHadir', 'sectionLupaAbsen', 'sectionCetakQr'];
+      const tabs = ['tabTidakHadir', 'tabLupaAbsen'];
+      const sections = ['sectionTidakHadir', 'sectionLupaAbsen'];
       
       const mainForm = document.getElementById("mainForm");
-      const formContainer = document.getElementById("formSection");
       const title = document.getElementById("sectionTitle");
 
-      // Reset style semua tab
       tabs.forEach(tabId => {
         const elem = document.getElementById(tabId);
         if(elem) elem.className = "py-2.5 px-2 rounded-xl transition-all text-center flex items-center justify-center gap-1.5 text-slate-500 hover:text-slate-800 font-semibold";
       });
 
-      // Sembunyikan semua section khusus
       sections.forEach(secId => {
         const elem = document.getElementById(secId);
         if(elem) elem.classList.add("hidden");
       });
 
       if (mode === 'tidak_hadir') {
-        formContainer.className = "w-full max-w-2xl bg-white/95 backdrop-blur-xl p-5 sm:p-6 md:p-8 rounded-3xl shadow-2xl border border-white/20 space-y-6";
         title.textContent = "Input Presensi Manual";
         document.getElementById("tabTidakHadir").className = "py-2.5 px-2 rounded-xl transition-all text-center flex items-center justify-center gap-1.5 bg-white text-indigo-600 shadow-sm font-extrabold";
-        
         mainForm.classList.remove("hidden");
         document.getElementById("sectionTidakHadir").classList.remove("hidden");
       } else if (mode === 'lupa_absen') {
-        formContainer.className = "w-full max-w-2xl bg-white/95 backdrop-blur-xl p-5 sm:p-6 md:p-8 rounded-3xl shadow-2xl border border-white/20 space-y-6";
         title.textContent = "Input Presensi Susulan";
         document.getElementById("tabLupaAbsen").className = "py-2.5 px-2 rounded-xl transition-all text-center flex items-center justify-center gap-1.5 bg-white text-amber-600 shadow-sm font-extrabold";
-        
         mainForm.classList.remove("hidden");
         document.getElementById("sectionLupaAbsen").classList.remove("hidden");
-      } else if (mode === 'cetak_qr') {
-        formContainer.className = "w-full max-w-4xl bg-white/95 backdrop-blur-xl p-5 sm:p-6 md:p-8 rounded-3xl shadow-2xl border border-white/20 space-y-6";
-        title.textContent = "Cetak & Download ID Card QR";
-        document.getElementById("tabCetakQr").className = "py-2.5 px-2 rounded-xl transition-all text-center flex items-center justify-center gap-1.5 bg-white text-emerald-600 shadow-sm font-extrabold";
-        
-        mainForm.classList.add("hidden");
-        document.getElementById("sectionCetakQr").classList.remove("hidden");
       }
     }
 
@@ -357,29 +274,16 @@
 
     function populateKelas() {
       const selectKelas = document.getElementById("selectKelas");
-      const selectKelasQr = document.getElementById("selectKelasQr");
-      
       let setKelas = new Set();
       masterSiswa.forEach(s => { if(s.kelas) setKelas.add(s.kelas); });
       
       selectKelas.innerHTML = '<option value="">-- Pilih Kelas --</option>';
-      selectKelasQr.innerHTML = '<option value="">-- Pilih Kelas --</option>';
-
-      const optSemua = document.createElement("option");
-      optSemua.value = "SEMUA";
-      optSemua.textContent = "🌟 Tampilkan Semua Kelas";
-      selectKelasQr.appendChild(optSemua);
 
       [...setKelas].sort().forEach(k => {
         const opt1 = document.createElement("option");
         opt1.value = k;
         opt1.textContent = `Kelas ${k}`;
         selectKelas.appendChild(opt1);
-
-        const opt2 = document.createElement("option");
-        opt2.value = k;
-        opt2.textContent = `Kelas ${k}`;
-        selectKelasQr.appendChild(opt2);
       });
     }
 
@@ -478,135 +382,6 @@
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Simpan Presensi';
         setTimeout(() => notif.classList.add("hidden"), 4000);
-      });
-    }
-
-    // ==========================================
-    // LOGIKA GENERATOR & DOWNLOAD ID CARD SISWA
-    // ==========================================
-
-    function generateCards() {
-      const container = document.getElementById("cardContainer");
-      const filterKelas = document.getElementById("selectKelasQr").value;
-      const btnDownloadZip = document.getElementById("btnDownloadZip");
-      const summaryBox = document.getElementById("cardSummaryBox");
-      const summaryText = document.getElementById("cardSummaryText");
-
-      if (!filterKelas) {
-        alert("Silakan pilih kelas terlebih dahulu sebelum membuat ID Card!");
-        return;
-      }
-
-      container.innerHTML = "";
-
-      if (filterKelas === "SEMUA") {
-        generatedSiswaList = masterSiswa;
-      } else {
-        generatedSiswaList = masterSiswa.filter(s => s.kelas === filterKelas);
-      }
-
-      if (generatedSiswaList.length === 0) {
-        container.innerHTML = `
-          <div class="text-center py-10">
-            <i class="fa-solid fa-folder-open text-slate-300 text-3xl mb-2"></i>
-            <p class="text-xs text-slate-500 font-semibold">Tidak ada data siswa ditemukan untuk kelas ini.</p>
-          </div>`;
-        btnDownloadZip.disabled = true;
-        summaryBox.classList.add("hidden");
-        return;
-      }
-
-      summaryBox.classList.remove("hidden");
-      summaryText.textContent = `Menampilkan ${generatedSiswaList.length} ID Card (${filterKelas === 'SEMUA' ? 'Semua Kelas' : 'Kelas ' + filterKelas})`;
-      btnDownloadZip.disabled = false;
-
-      generatedSiswaList.forEach((siswa, index) => {
-        const wrapper = document.createElement("div");
-        wrapper.className = "flex flex-col items-center gap-2.5 transition-all transform hover:-translate-y-1";
-
-        wrapper.innerHTML = `
-          <div id="card-${index}" class="id-card bg-gradient-to-b from-slate-900 via-indigo-950 to-slate-900 rounded-2xl border-2 border-indigo-500/80 p-4 shadow-xl flex flex-col justify-between items-center text-center relative overflow-hidden">
-            <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-indigo-500/10 rounded-full blur-xl pointer-events-none"></div>
-
-            <div class="w-full border-b border-indigo-400/30 pb-2 z-10">
-              <h2 class="text-[11px] font-black tracking-widest text-indigo-300 uppercase leading-normal">SMPN 1 RANCAH</h2>
-              <p class="text-[8px] text-slate-300 font-bold tracking-wider uppercase leading-normal">Kartu Presensi Siswa</p>
-            </div>
-
-            <div class="bg-white p-2.5 rounded-xl shadow-lg my-auto border border-indigo-300 z-10">
-              <div id="qrcode-${index}"></div>
-            </div>
-
-            <div class="w-full bg-slate-900/90 p-3 rounded-xl border border-slate-700/80 flex flex-col items-center justify-center z-10">
-              <h3 class="text-xs font-extrabold text-white uppercase tracking-wide leading-normal px-1 py-0.5 break-words w-full">${siswa.nama}</h3>
-              <p class="text-[10px] text-indigo-400 font-mono font-bold mt-0.5 leading-normal">NISN: ${siswa.nisn}</p>
-              
-              <div class="mt-2 flex justify-center w-full">
-                <span style="display: inline-flex; align-items: center; justify-content: center; background-color: #4f46e5; color: #ffffff; font-weight: 800; font-size: 10px; height: 24px; padding: 0 14px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; line-height: 1;">
-                  KELAS ${siswa.kelas}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <button type="button" onclick="downloadSingleCard(${index}, '${siswa.nama}')" 
-            class="w-full text-[11px] bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700/80 px-3 py-1.5 rounded-xl font-bold transition flex items-center justify-center gap-1.5 shadow-sm">
-            <i class="fa-solid fa-download text-xs"></i> Unduh PNG
-          </button>
-        `;
-
-        container.appendChild(wrapper);
-
-        new QRCode(document.getElementById(`qrcode-${index}`), {
-          text: String(siswa.nisn),
-          width: 95,
-          height: 95,
-          colorDark: "#000000",
-          colorLight: "#ffffff",
-          correctLevel: QRCode.CorrectLevel.H
-        });
-      });
-    }
-
-    function downloadSingleCard(index, namaSiswa) {
-      const cardElem = document.getElementById(`card-${index}`);
-      html2canvas(cardElem, { scale: 3, useCORS: true, logging: false }).then(canvas => {
-        const link = document.createElement("a");
-        link.download = `ID_CARD_${namaSiswa.replace(/\s+/g, "_")}.png`;
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-      });
-    }
-
-    async function downloadAllZip() {
-      const filterKelas = document.getElementById("selectKelasQr").value;
-      if (generatedSiswaList.length === 0) return;
-
-      const zip = new JSZip();
-      const progressBox = document.getElementById("progressBox");
-      const progressText = document.getElementById("progressText");
-      const totalText = document.getElementById("totalText");
-
-      progressBox.classList.remove("hidden");
-      totalText.textContent = generatedSiswaList.length;
-
-      for (let i = 0; i < generatedSiswaList.length; i++) {
-        const siswa = generatedSiswaList[i];
-        const cardElem = document.getElementById(`card-${i}`);
-
-        if (cardElem) {
-          const canvas = await html2canvas(cardElem, { scale: 3, useCORS: true, logging: false });
-          const imgData = canvas.toDataURL("image/png").split(",")[1];
-          const fileName = `Kelas_${siswa.kelas}/${siswa.nisn}_${siswa.nama.replace(/\s+/g, "_")}.png`;
-          zip.file(fileName, imgData, { base64: true });
-        }
-        progressText.textContent = i + 1;
-      }
-
-      progressBox.innerHTML = "⚡ Menyusun file ZIP, harap tunggu sebentar...";
-      zip.generateAsync({ type: "blob" }).then(content => {
-        saveAs(content, `ID_Card_Siswa_${filterKelas || 'Master'}.zip`);
-        progressBox.classList.add("hidden");
       });
     }
   </script>
