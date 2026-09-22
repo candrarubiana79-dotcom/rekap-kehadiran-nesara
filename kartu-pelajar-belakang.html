@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kartu Pelajar Bagian Belakang - SMPN 1 Rancah</title>
+  <!-- Library Parser CSV & HTML2Canvas -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- Library Generator QR Code -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: #0f172a; padding: 20px; color: #334155; min-height: 100vh; }
+    
+    .app-layout { display: flex; gap: 20px; max-width: 1500px; margin: 0 auto; align-items: flex-start; }
+
+    /* PANEL KONTROL KIRI */
+    .panel-control {
+      width: 440px; flex-shrink: 0; background: #ffffff; padding: 20px;
+      border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+      border: 1px solid #e2e8f0; max-height: calc(100vh - 40px); overflow-y: auto;
+      position: sticky; top: 20px;
+    }
+    .panel-control h2 { font-size: 18px; margin-bottom: 12px; color: #1e293b; font-weight: 800; }
+    
+    .status-box { padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; margin-bottom: 14px; }
+    .status-box.loading { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .status-box.ready { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .status-box.error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+    
+    .section-title { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #0284c7; letter-spacing: 0.5px; margin-bottom: 8px; border-bottom: 2px solid #e2e8f0; padding-bottom: 4px; margin-top: 10px; }
+    
+    .grid-form { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
+    .form-group { display: flex; flex-direction: column; }
+    .form-group.full-width { grid-column: span 2; }
+    .form-group label { font-size: 10.5px; font-weight: 700; color: #64748b; margin-bottom: 3px; text-transform: uppercase; }
+    .form-group select, .form-group textarea, .form-group input { padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 11px; font-weight: 600; outline: none; }
+    .form-group textarea { height: 90px; resize: vertical; }
+
+    .action-buttons { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+    .btn { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: 800; font-size: 11px; flex: 1; height: 34px; text-align: center; }
+    .btn-download { background: #0284c7; color: #fff; }
+    .btn-cetak { background: #16a34a; color: #fff; }
+    .hidden { display: none !important; }
+
+    /* AREA PREVIEW KANAN */
+    .preview-section { flex: 1; background: #1e293b; border-radius: 16px; padding: 20px; border: 1px solid #334155; min-height: calc(100vh - 40px); display: flex; flex-direction: column; align-items: center; }
+    .preview-header { width: 100%; color: #f8fafc; font-size: 14px; font-weight: 800; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; }
+
+    .grid-cetak-container { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; width: 100%; }
+    .grid-cetak-container.preview-single { padding-top: 40px; padding-bottom: 80px; }
+    .grid-cetak-container.preview-single .kartu-container { transform: scale(1.65); transform-origin: top center; }
+
+    /* DESAIN KARTU BELAKANG PRESISI KTP (85.6mm x 53.9mm) */
+    .kartu-container {
+      width: 85.6mm; height: 53.9mm;
+      background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+      border: 1px solid #0284c7; border-radius: 3.2mm;
+      position: relative; overflow: hidden;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+      flex-shrink: 0; page-break-inside: avoid; box-sizing: border-box;
+      padding: 2.5mm 3mm; display: flex; flex-direction: column; justify-content: space-between;
+    }
+
+    .header-belakang {
+      text-align: center; border-bottom: 0.4mm solid #0284c7; padding-bottom: 1mm; margin-bottom: 1mm;
+    }
+    .header-belakang .title { font-size: 7.5pt; font-weight: 900; color: #0369a1; letter-spacing: 0.5px; text-transform: uppercase; }
+    .header-belakang .sub { font-size: 4.5pt; font-weight: 700; color: #475569; text-transform: uppercase; }
+
+    .body-belakang { display: flex; gap: 2.5mm; flex: 1; align-items: center; }
+    .rules-list { flex: 1; font-size: 4.2pt; color: #1e293b; line-height: 1.35; padding-left: 3mm; margin: 0; }
+    .rules-list li { margin-bottom: 0.4mm; font-weight: 600; }
+
+    .qr-section { width: 22mm; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #fff; padding: 1mm; border: 0.3mm solid #cbd5e1; border-radius: 1.5mm; }
+    .qr-box { width: 18mm; height: 18mm; }
+    
+    /* LABEL NAMA - NISN DENGAN WRAPPING RAPI */
+    .qr-label { 
+      font-size: 3.6pt; 
+      font-weight: 800; 
+      color: #0369a1; 
+      margin-top: 0.8mm; 
+      text-align: center; 
+      word-break: break-word; 
+      line-height: 1.15;
+      max-width: 100%;
+      text-transform: uppercase;
+    }
+
+    .footer-belakang {
+      background: #0284c7; color: #ffffff; text-align: center; font-size: 4pt; font-weight: 600;
+      padding: 0.8mm 1mm; border-radius: 1mm; margin-top: 1mm;
+    }
+
+    /* MEDIA PRINT A4 PRESISI */
+    @media print {
+      body { background: #ffffff !important; padding: 0 !important; margin: 0 !important; }
+      .panel-control, .preview-header { display: none !important; }
+      .app-layout { display: block !important; }
+      .preview-section { background: none !important; border: none !important; padding: 0 !important; }
+      .grid-cetak-container {
+        display: grid !important; grid-template-columns: repeat(2, 85.6mm) !important;
+        gap: 5mm !important; padding: 10mm !important; justify-content: start !important;
+      }
+      .grid-cetak-container.preview-single .kartu-container { transform: none !important; margin: 0 !important; }
+      .kartu-container { box-shadow: none !important; border-color: #000 !important; page-break-inside: avoid !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-layout">
+    <!-- PANEL KONTROL KIRI -->
+    <div class="panel-control">
+      <h2>Kontrol Sisi Belakang Kartu</h2>
+      
+      <div id="statusIndikator" class="status-box loading">Memuat data siswa...</div>
+
+      <div class="section-title">1. Isi Tata Tertib & Ketentuan</div>
+      <div class="grid-form">
+        <div class="form-group full-width">
+          <label>Teks Tata Tertib (1 per baris):</label>
+          <textarea id="inputRules" oninput="updateRulesLive()">1. Kartu ini milik SMPN 1 Rancah & wajib dibawa setiap hari.
+2. Dilarang meminjamkan kartu kepada orang lain.
+3. Kartu ini berfungsi sebagai alat presensi digital sekolah.
+4. Apabila menemukan kartu ini, harap mengembalikan ke pihak sekolah.</textarea>
+        </div>
+        <div class="form-group full-width">
+          <label>Teks Catatan Footer:</label>
+          <input type="text" id="inputFooterText" value="Alamat: Jl. Cibeureum Rancah, Kab. Ciamis | Telp: (0265) xxxxxx" oninput="renderPerMode()">
+        </div>
+      </div>
+
+      <div class="section-title">2. Mode Tampilan & Cetak</div>
+      <div class="grid-form">
+        <div class="form-group full-width">
+          <label>Mode Tampilan:</label>
+          <select id="selectMode" onchange="switchModeCetak()">
+            <option value="single">Per Siswa (Preview Single)</option>
+            <option value="kelas">Per Kelas (Cetak A4 / Massal)</option>
+          </select>
+        </div>
+
+        <div class="form-group full-width" id="grpSelectKelas">
+          <label>Pilih Kelas:</label>
+          <select id="selectKelas" onchange="handleKelasChange()"><option value="">-- Pilih Kelas --</option></select>
+        </div>
+
+        <div class="form-group full-width" id="grpSelectSiswa">
+          <label>Pilih Siswa:</label>
+          <select id="selectSiswa" onchange="renderKartuSingle()"><option value="">-- Pilih Kelas Terlebih Dahulu --</option></select>
+        </div>
+
+        <div class="form-group full-width">
+          <div class="action-buttons">
+            <button type="button" id="btnDownloadSingle" onclick="downloadPNGSingle()" class="btn btn-download">Download PNG</button>
+            <button type="button" id="btnDownloadKelas" onclick="downloadPNGKelas()" class="btn btn-download hidden">Download PNG Kelas</button>
+            <button type="button" onclick="window.print()" class="btn btn-cetak">Cetak / A4</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AREA PREVIEW KANAN -->
+    <div class="preview-section">
+      <div class="preview-header">
+        <span>Preview Belakang Kartu</span>
+        <span style="font-size: 11px; opacity: 0.7; font-weight: normal;">Presisi Ukuran KTP (85.6mm x 53.9mm)</span>
+      </div>
+      <div id="wadahCetak" class="grid-cetak-container preview-single"></div>
+    </div>
+  </div>
+
+  <script>
+    const sheetID = '1rzj6ucYgbUf4X1x9fcZVsTGwJBxglXPnCaHazl73mSU';
+    const sheetName = 'data master siswa';
+    let dataSiswaGlobal = [];
+    let daftarKelasGlobal = [];
+
+    window.onload = function() {
+      fetchDataSiswa();
+    };
+
+    function fetchDataSiswa() {
+      const statusBox = document.getElementById('statusIndikator');
+      const urlGviz = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+      
+      Papa.parse(urlGviz, {
+        download: true, skipEmptyLines: true,
+        complete: function(results) {
+          if (results.data && results.data.length >= 2) prosesDataCsv(results.data);
+          else statusBox.innerHTML = 'Gagal memuat data dari spreadsheet.';
+        }
+      });
+    }
+
+    function prosesDataCsv(rowsAll) {
+      const statusBox = document.getElementById('statusIndikator');
+      const rows = rowsAll.slice(1);
+      dataSiswaGlobal = rows.filter(r => r && r[1] && r[1].trim() !== '');
+
+      daftarKelasGlobal = [...new Set(dataSiswaGlobal.map(s => (s[2] || '').trim()))].filter(Boolean).sort();
+
+      statusBox.className = 'status-box ready';
+      statusBox.innerHTML = `<b>Terbaca:</b> ${dataSiswaGlobal.length} Siswa (${daftarKelasGlobal.length} Kelas)`;
+
+      const selKelas = document.getElementById('selectKelas');
+      selKelas.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+      daftarKelasGlobal.forEach(k => { selKelas.innerHTML += `<option value="${k}">Kelas ${k}</option>`; });
+
+      if (daftarKelasGlobal.length > 0) {
+        selKelas.value = daftarKelasGlobal[0];
+        handleKelasChange();
+      }
+    }
+
+    function handleKelasChange() {
+      const mode = document.getElementById('selectMode').value;
+      if (mode === 'single') updateDropdownSiswaPerKelas();
+      else renderKartuPerKelas();
+    }
+
+    function updateDropdownSiswaPerKelas() {
+      const kelasPilihan = document.getElementById('selectKelas').value;
+      const selSiswa = document.getElementById('selectSiswa');
+      selSiswa.innerHTML = '';
+
+      if (!kelasPilihan) return;
+
+      dataSiswaGlobal.forEach((s, idx) => {
+        if ((s[2] || '').trim() === kelasPilihan) {
+          selSiswa.innerHTML += `<option value="${idx}">${s[1].trim()} (${(s[0]||'-').trim()})</option>`;
+        }
+      });
+      selSiswa.selectedIndex = 0;
+      renderKartuSingle();
+    }
+
+    function switchModeCetak() {
+      const mode = document.getElementById('selectMode').value;
+      const grpSiswa = document.getElementById('grpSelectSiswa');
+      const btnSingle = document.getElementById('btnDownloadSingle');
+      const btnKelas = document.getElementById('btnDownloadKelas');
+      const wadah = document.getElementById('wadahCetak');
+
+      if (mode === 'single') {
+        grpSiswa.classList.remove('hidden');
+        btnSingle.classList.remove('hidden');
+        btnKelas.classList.add('hidden');
+        wadah.classList.add('preview-single');
+        updateDropdownSiswaPerKelas();
+      } else {
+        grpSiswa.classList.add('hidden');
+        btnSingle.classList.add('hidden');
+        btnKelas.classList.remove('hidden');
+        wadah.classList.remove('preview-single');
+        renderKartuPerKelas();
+      }
+    }
+
+    function buatHtmlKartuBelakang(s) {
+      const nisn = (s[0] || '').trim();
+      const nama = (s[1] || '').trim();
+      const footerText = document.getElementById('inputFooterText').value;
+
+      const rawRules = document.getElementById('inputRules').value.split('\n');
+      const listRulesHtml = rawRules.filter(r => r.trim() !== '').map(r => `<li>${r.trim()}</li>`).join('');
+
+      return `
+        <div class="kartu-container" id="kartu-belakang-${nisn}">
+          <div class="header-belakang">
+            <div class="title">TATA TERTIB KARTU PELAJAR</div>
+            <div class="sub">SMP NEGERI 1 RANCAH</div>
+          </div>
+
+          <div class="body-belakang">
+            <ol class="rules-list">${listRulesHtml}</ol>
+            <div class="qr-section">
+              <div class="qr-box" id="qr-${nisn}"></div>
+              <div class="qr-label">${nama} - ${nisn}</div>
+            </div>
+          </div>
+
+          <div class="footer-belakang">${footerText}</div>
+        </div>
+      `;
+    }
+
+    function generateQRCodes() {
+      const mode = document.getElementById('selectMode').value;
+      let targetSiswa = [];
+
+      if (mode === 'single') {
+        const idx = document.getElementById('selectSiswa').value;
+        if (dataSiswaGlobal[idx]) targetSiswa.push(dataSiswaGlobal[idx]);
+      } else {
+        const kelasPilihan = document.getElementById('selectKelas').value;
+        targetSiswa = dataSiswaGlobal.filter(s => (s[2]||'').trim() === kelasPilihan);
+      }
+
+      targetSiswa.forEach(s => {
+        const nisn = (s[0] || '').trim();
+        const elBox = document.getElementById(`qr-${nisn}`);
+        if (elBox) {
+          elBox.innerHTML = '';
+          new QRCode(elBox, {
+            text: nisn,
+            width: 68,
+            height: 68,
+            correctLevel: QRCode.CorrectLevel.M
+          });
+        }
+      });
+    }
+
+    function renderKartuSingle() {
+      const idx = document.getElementById('selectSiswa').value;
+      const wadah = document.getElementById('wadahCetak');
+      if (idx === '' || !dataSiswaGlobal[idx]) { wadah.innerHTML = ''; return; }
+      
+      wadah.innerHTML = buatHtmlKartuBelakang(dataSiswaGlobal[idx]);
+      generateQRCodes();
+    }
+
+    function renderKartuPerKelas() {
+      const kelasPilihan = document.getElementById('selectKelas').value;
+      const wadah = document.getElementById('wadahCetak');
+      if (!kelasPilihan) { wadah.innerHTML = ''; return; }
+
+      const siswaKelas = dataSiswaGlobal.filter(s => (s[2]||'').trim() === kelasPilihan);
+      let htmlAll = '';
+      siswaKelas.forEach(s => { htmlAll += buatHtmlKartuBelakang(s); });
+      wadah.innerHTML = htmlAll;
+      generateQRCodes();
+    }
+
+    function updateRulesLive() {
+      renderPerMode();
+    }
+
+    function renderPerMode() {
+      const mode = document.getElementById('selectMode').value;
+      if (mode === 'single') renderKartuSingle();
+      else renderKartuPerKelas();
+    }
+
+    function downloadPNGSingle() {
+      const wadah = document.getElementById('wadahCetak');
+      const kartuElem = document.querySelector('.kartu-container');
+      if (!kartuElem) return;
+
+      const idx = document.getElementById('selectSiswa').value;
+      const nisnSiswa = dataSiswaGlobal[idx] ? dataSiswaGlobal[idx][0].trim() : '000';
+
+      wadah.classList.remove('preview-single');
+      html2canvas(kartuElem, { scale: 3, useCORS: true }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `Kartu_Belakang_${nisnSiswa}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        wadah.classList.add('preview-single');
+      });
+    }
+
+    function downloadPNGKelas() {
+      const elemenKartuAll = document.querySelectorAll('.kartu-container');
+      if (elemenKartuAll.length === 0) return;
+
+      elemenKartuAll.forEach((elem, index) => {
+        setTimeout(() => {
+          const nisn = elem.id.replace('kartu-belakang-', '');
+          html2canvas(elem, { scale: 3, useCORS: true }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `Kartu_Belakang_${nisn}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+          });
+        }, index * 600);
+      });
+    }
+  </script>
+</body>
+</html>
