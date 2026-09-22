@@ -5,13 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kartu Pelajar Bagian Belakang - SMPN 1 Rancah</title>
 
-  <!-- SKRIP PENGAMAN AKSES INSTAN -->
-  <script>
-    if (localStorage.getItem("isLoggedIn") !== "true") {
-      alert("Akses ditolak! Silakan login terlebih dahulu melalui portal.");
-      window.location.href = "imput.html";
-    }
-  </script>
+  <!-- SKRIP PENGAMAN & AUTO LOGOUT -->
+  <script src="auth-guard.js"></script>
 
   <!-- Library Parser CSV & HTML2Canvas -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
