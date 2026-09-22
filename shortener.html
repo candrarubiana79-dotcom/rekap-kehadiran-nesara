@@ -5,13 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pemendek URL - SMPN 1 RANCAH</title>
   
-  <!-- SKRIP PENGAMAN AKSES INSTAN -->
-  <script>
-    if (localStorage.getItem("isLoggedIn") !== "true") {
-      alert("Akses ditolak! Silakan login terlebih dahulu melalui portal.");
-      window.location.href = "imput.html";
-    }
-  </script>
+  <!-- SKRIP PENGAMAN & AUTO LOGOUT -->
+  <script src="auth-guard.js"></script>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
