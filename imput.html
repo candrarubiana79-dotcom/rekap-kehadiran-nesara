@@ -174,8 +174,30 @@
   <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzq05A9BpVJFjNkHn7p2QDjbaY2ajsWjVXk5sVDkH3rStFaAC5XgEkndZSg39zOLX_2/exec";
     const TOKEN_BENAR = "GURU2026";
+    const WAKTU_INAKTIF = 2 * 60 * 60 * 1000; // 2 Jam (ms)
+
     let masterSiswa = [];
     let currentMode = "tidak_hadir";
+
+    // --- MANAJEMEN SESI & INAKTIVITAS ---
+    function catatAktivitas() {
+      if (localStorage.getItem("isLoggedIn") === "true") {
+        localStorage.setItem("lastActivity", Date.now().toString());
+      }
+    }
+
+    function cekStatusAktivitas() {
+      const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+      const lastActivity = parseInt(localStorage.getItem("lastActivity") || "0", 10);
+      const sekarang = Date.now();
+
+      if (isLoggedIn && lastActivity > 0 && (sekarang - lastActivity > WAKTU_INAKTIF)) {
+        alert("Sesi kamu telah berakhir karena tidak ada aktivitas selama 2 jam. Silakan login kembali.");
+        logout();
+        return true;
+      }
+      return false;
+    }
 
     document.addEventListener("DOMContentLoaded", () => {
       const now = new Date();
@@ -185,10 +207,19 @@
       document.getElementById("inputTanggal").value = `${yyyy}-${mm}-${dd}`;
 
       if (localStorage.getItem("isLoggedIn") === "true") {
-        document.getElementById("loginSection").classList.add("hidden");
-        document.getElementById("formSection").classList.remove("hidden");
-        loadMasterData();
+        if (!cekStatusAktivitas()) {
+          document.getElementById("loginSection").classList.add("hidden");
+          document.getElementById("formSection").classList.remove("hidden");
+          loadMasterData();
+          catatAktivitas();
+        }
       }
+
+      ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(evt => {
+        window.addEventListener(evt, catatAktivitas, { passive: true });
+      });
+
+      setInterval(cekStatusAktivitas, 60000);
     });
 
     function handleLogin(e) {
@@ -196,6 +227,7 @@
       const token = document.getElementById("inputToken").value.trim();
       if (token === TOKEN_BENAR) {
         localStorage.setItem("isLoggedIn", "true");
+        catatAktivitas();
         document.getElementById("loginSection").classList.add("hidden");
         document.getElementById("formSection").classList.remove("hidden");
         loadMasterData();
@@ -206,6 +238,7 @@
 
     function logout() {
       localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("lastActivity");
       document.getElementById("formSection").classList.add("hidden");
       document.getElementById("loginSection").classList.remove("hidden");
       document.getElementById("inputToken").value = "";
