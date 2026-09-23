@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kelola Hari Libur - SMPN 1 RANCAH</title>
+  
+  <!-- SKRIP PENGAMAN & AUTO LOGOUT -->
+  <script src="auth-guard.js"></script>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-800 min-h-screen flex items-center justify-center p-3 sm:p-4 md:p-6 relative overflow-x-hidden selection:bg-indigo-500 selection:text-white">
+
+  <!-- Background Decorative Orbs -->
+  <div class="fixed -top-32 -left-32 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="fixed -bottom-32 -right-32 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl pointer-events-none"></div>
+
+  <!-- CONTAINER UTAMA -->
+  <div class="w-full max-w-3xl bg-white/95 backdrop-blur-xl p-5 sm:p-6 md:p-8 rounded-3xl shadow-2xl border border-white/20 space-y-6 relative z-10">
+    
+    <!-- Header -->
+    <div class="flex items-center justify-between border-b pb-5 border-slate-100">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center text-lg font-bold">
+          <i class="fa-solid fa-calendar-xmark"></i>
+        </div>
+        <div>
+          <h2 class="text-lg font-extrabold text-slate-900 leading-tight">Manajemen Hari Libur</h2>
+          <p class="text-xs font-bold text-indigo-600 uppercase tracking-wider">SMPN 1 RANCAH</p>
+        </div>
+      </div>
+      <a href="tools.html" class="text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-2 rounded-xl transition flex items-center gap-1.5">
+        <i class="fa-solid fa-arrow-left"></i> Kembali
+      </a>
+    </div>
+
+    <!-- FORM INPUT TANGGAL LIBUR -->
+    <form onsubmit="tambahHariLibur(event)" class="bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200/80 space-y-4">
+      <h3 class="text-xs font-bold uppercase tracking-wider text-slate-600">Tambah Tanggal Libur Baru</h3>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+        <div class="sm:col-span-4">
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Tanggal</label>
+          <input type="date" id="inputTglLibur" required
+            class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        </div>
+        <div class="sm:col-span-5">
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Keterangan Libur</label>
+          <input type="text" id="inputKetLibur" placeholder="Contoh: HUT RI / Cuti Bersama" required
+            class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        </div>
+        <div class="sm:col-span-3">
+          <button type="submit" id="btnSimpanLibur"
+            class="w-full bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition shadow-md shadow-indigo-500/20 flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-plus"></i> Simpan
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <!-- DAFTAR HARI LIBUR TERDAFTAR -->
+    <div class="space-y-3">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-600">Daftar Libur Terdaftar</h3>
+        <span id="totalLiburText" class="text-[10px] font-bold bg-indigo-100 text-indigo-700 px-2.5 py-0.5 rounded-full">0 Hari</span>
+      </div>
+
+      <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead>
+            <tr class="bg-slate-100 text-slate-600 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200">
+              <th class="p-3">No</th>
+              <th class="p-3">Tanggal</th>
+              <th class="p-3">Keterangan</th>
+              <th class="p-3 text-center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tabelLiburBody" class="divide-y divide-slate-100">
+            <tr>
+              <td colspan="4" class="p-6 text-center text-slate-400 font-medium">
+                <i class="fa-solid fa-spinner fa-spin text-indigo-600 mr-2"></i> Memuat data libur...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzq05A9BpVJFjNkHn7p2QDjbaY2ajsWjVXk5sVDkH3rStFaAC5XgEkndZSg39zOLX_2/exec";
+    const TOKEN_BENAR = "GURU2026";
+    let listLibur = [];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      loadDataLibur();
+    });
+
+    function loadDataLibur() {
+      const tbody = document.getElementById("tabelLiburBody");
+      
+      fetch(WEB_APP_URL)
+        .then(res => res.json())
+        .then(data => {
+          listLibur = data.libur || [];
+          renderTabelLibur();
+        })
+        .catch(err => {
+          tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-rose-500 font-bold">Gagal memuat data dari server!</td></tr>`;
+        });
+    }
+
+    function renderTabelLibur() {
+      const tbody = document.getElementById("tabelLiburBody");
+      const totalText = document.getElementById("totalLiburText");
+
+      totalText.textContent = `${listLibur.length} Hari`;
+
+      if (listLibur.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-400 font-medium italic">Belum ada hari libur terdaftar.</td></tr>`;
+        return;
+      }
+
+      let html = "";
+      listLibur.forEach((item, index) => {
+        html += `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="p-3 text-slate-400 font-medium">${index + 1}</td>
+            <td class="p-3 font-mono font-bold text-slate-700">${item.tanggal}</td>
+            <td class="p-3 font-semibold text-slate-800">${item.keterangan}</td>
+            <td class="p-3 text-center">
+              <button onclick="hapusHariLibur('${item.tanggal}')" class="text-rose-600 bg-rose-50 hover:bg-rose-100 p-1.5 rounded-lg transition" title="Hapus">
+                <i class="fa-solid fa-trash-can text-xs"></i>
+              </button>
+            </td>
+          </tr>`;
+      });
+      tbody.innerHTML = html;
+    }
+
+    function tambahHariLibur(e) {
+      e.preventDefault();
+      const tgl = document.getElementById("inputTglLibur").value;
+      const ket = document.getElementById("inputKetLibur").value.trim();
+      const btn = document.getElementById("btnSimpanLibur");
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+
+      const payload = {
+        tipe: "tambah_libur",
+        tanggal: tgl,
+        keterangan: ket,
+        token: TOKEN_BENAR
+      };
+
+      fetch(WEB_APP_URL, {
+        method: "POST",
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.status === "success") {
+          document.getElementById("inputTglLibur").value = "";
+          document.getElementById("inputKetLibur").value = "";
+          loadDataLibur();
+        } else {
+          alert(res.message || "Gagal menyimpan data!");
+        }
+      })
+      .catch(err => alert("Terjadi kesalahan koneksi!"))
+      .finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-plus"></i> Simpan';
+      });
+    }
+
+    function hapusHariLibur(tanggal) {
+      if (!confirm(`Yakin ingin menghapus hari libur tanggal ${tanggal}?`)) return;
+
+      const payload = {
+        tipe: "hapus_libur",
+        tanggal: tanggal,
+        token: TOKEN_BENAR
+      };
+
+      fetch(WEB_APP_URL, {
+        method: "POST",
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json())
+      .then(res => {
+        loadDataLibur();
+      })
+      .catch(err => alert("Gagal menghapus data!"));
+    }
+  </script>
+</body>
+</html>
