@@ -135,7 +135,7 @@
     let rawMaster = [];
     let rawLogs = [];
     let rawLibur = [];
-    let tanggalMulaiSistem = ""; // Otomatis dibaca dari database Apps Script
+    let tanggalMulaiSistem = ""; 
     let currentMode = "harian";
 
     // --- REALTIME DIGITAL CLOCK ---
@@ -150,15 +150,22 @@
     setInterval(updateLiveClock, 1000);
     updateLiveClock();
 
-    // --- INITIALIZATION ---
-    document.addEventListener("DOMContentLoaded", () => {
+    // FUNGSI MENDAPATKAN TANGGAL HARI INI (YYYY-MM-DD)
+    function getTodayString() {
       const now = new Date();
       const yyyy = now.getFullYear();
       const mm = String(now.getMonth() + 1).padStart(2, '0');
       const dd = String(now.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    // --- INITIALIZATION ---
+    document.addEventListener("DOMContentLoaded", () => {
+      const todayStr = getTodayString();
+      const ym = todayStr.substring(0, 7);
       
-      document.getElementById("filterTanggal").value = `${yyyy}-${mm}-${dd}`;
-      document.getElementById("filterBulan").value = `${yyyy}-${mm}`;
+      document.getElementById("filterTanggal").value = todayStr;
+      document.getElementById("filterBulan").value = ym;
       
       loadData();
     });
@@ -245,6 +252,7 @@
     // --- REKAP HARIAN RENDER ---
     function renderRekapHarian(kelasSelected) {
       const tgl = document.getElementById("filterTanggal").value;
+      const todayStr = getTodayString();
       const infoLibur = rawLibur.find(l => l.tanggal === tgl);
 
       document.getElementById("judulRekap").textContent = `REKAP HARIAN PRESENSI SISWA (${tgl})`;
@@ -253,6 +261,8 @@
         document.getElementById("subJudulRekap").innerHTML = `<span class="inline-block mt-1 px-3 py-1 bg-purple-100 text-purple-800 rounded-full font-bold text-xs">🎉 Hari Libur: ${infoLibur.keterangan}</span>`;
       } else if (tanggalMulaiSistem && tgl < tanggalMulaiSistem) {
         document.getElementById("subJudulRekap").innerHTML = `<span class="inline-block mt-1 px-3 py-1 bg-slate-100 text-slate-600 rounded-full font-bold text-xs">ℹ️ Sistem Belum Dimulai (Aktif Per ${tanggalMulaiSistem})</span>`;
+      } else if (tgl > todayStr) {
+        document.getElementById("subJudulRekap").innerHTML = `<span class="inline-block mt-1 px-3 py-1 bg-slate-100 text-slate-500 rounded-full font-bold text-xs">⏳ Tanggal Belum Berjalan</span>`;
       } else {
         document.getElementById("subJudulRekap").textContent = kelasSelected ? `Kelas: ${kelasSelected}` : "Seluruh Kelas";
       }
@@ -338,6 +348,9 @@
         } else if (tanggalMulaiSistem && tgl < tanggalMulaiSistem) {
           statusBadge = '<span class="inline-block px-2.5 py-1 bg-slate-100 text-slate-500 rounded-full font-bold text-xs">Belum Dimulai</span>';
           bgRow = "";
+        } else if (tgl > todayStr) {
+          statusBadge = '<span class="inline-block px-2.5 py-1 bg-slate-100 text-slate-400 rounded-full font-bold text-xs">Belum Berjalan</span>';
+          bgRow = "";
         }
 
         html += `
@@ -359,6 +372,7 @@
     // --- REKAP BULANAN RENDER ---
     function renderRekapBulanan(kelasSelected) {
       const ym = document.getElementById("filterBulan").value;
+      const todayStr = getTodayString();
       const [year, month] = ym.split("-").map(Number);
       const totalDays = new Date(year, month, 0).getDate();
 
@@ -421,6 +435,12 @@
           if (tanggalMulaiSistem && dateStr < tanggalMulaiSistem) {
             html += `<td class="p-1 border border-slate-200 text-slate-400 font-medium text-xs" title="Sistem Belum Dimulai">-</td>`;
             continue;
+          }
+
+          // 3. Cek Tanggal Masa Depan (Belum Terjadi)
+          if (dateStr > todayStr) {
+            html += `<td class="p-1 border border-slate-200 text-slate-300 font-medium text-xs" title="Tanggal Belum Berjalan">-</td>`;
+            continue; // LOMPATI, TIDAK DIHITUNG ALPA
           }
 
           const studentLogs = rawLogs.filter(l => {
