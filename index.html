@@ -31,9 +31,8 @@
 
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 relative z-10">
         
-        <!-- BAGIAN KIRI: LOGO (UKURAN DIPERBESAR) & JUDUL -->
+        <!-- BAGIAN KIRI: LOGO & JUDUL -->
         <div class="flex items-center gap-4 sm:gap-6">
-          <!-- Logo Sekolah (Ukuran Diperbesar) -->
           <img src="assets/logo-smpn1rancah.png" alt="Logo SMPN 1 Rancah" class="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 object-contain drop-shadow-xl flex-shrink-0">
           
           <div>
@@ -135,6 +134,7 @@
 
     let rawMaster = [];
     let rawLogs = [];
+    let rawLibur = [];
     let currentMode = "harian";
 
     // --- REALTIME DIGITAL CLOCK ---
@@ -194,6 +194,7 @@
         .then(data => {
           rawMaster = data.master || [];
           rawLogs = data.logs || [];
+          rawLibur = data.libur || [];
 
           if (rawMaster.length === 0 && rawLogs.length === 0) {
             document.getElementById("tabelUtama").innerHTML = '<tr><td class="p-6 text-rose-500 font-semibold">Data masih kosong di spreadsheet!</td></tr>';
@@ -242,8 +243,15 @@
     // --- REKAP HARIAN RENDER ---
     function renderRekapHarian(kelasSelected) {
       const tgl = document.getElementById("filterTanggal").value;
+      const infoLibur = rawLibur.find(l => l.tanggal === tgl);
+
       document.getElementById("judulRekap").textContent = `REKAP HARIAN PRESENSI SISWA (${tgl})`;
-      document.getElementById("subJudulRekap").textContent = kelasSelected ? `Kelas: ${kelasSelected}` : "Seluruh Kelas";
+      
+      if (infoLibur) {
+        document.getElementById("subJudulRekap").innerHTML = `<span class="inline-block mt-1 px-3 py-1 bg-purple-100 text-purple-800 rounded-full font-bold text-xs">🎉 Hari Libur: ${infoLibur.keterangan}</span>`;
+      } else {
+        document.getElementById("subJudulRekap").textContent = kelasSelected ? `Kelas: ${kelasSelected}` : "Seluruh Kelas";
+      }
 
       let sourceList = rawMaster.length > 0 ? rawMaster : rawLogs;
       let filteredMaster = kelasSelected ? sourceList.filter(m => m.kelas === kelasSelected) : sourceList;
@@ -320,6 +328,9 @@
             statusBadge = '<span class="inline-block px-2.5 py-1 bg-emerald-200 text-emerald-900 rounded-full font-bold text-xs">Hadir Lengkap</span>';
             bgRow = "bg-emerald-50/80";
           }
+        } else if (infoLibur) {
+          statusBadge = `<span class="inline-block px-2.5 py-1 bg-purple-100 text-purple-800 rounded-full font-bold text-xs">Libur (${infoLibur.keterangan})</span>`;
+          bgRow = "bg-purple-50/30";
         }
 
         html += `
@@ -366,9 +377,14 @@
       let html = `<thead><tr class="bg-slate-100 font-bold text-xs border-b border-slate-200"><th class="p-2 border border-slate-200">No</th><th class="p-2 border border-slate-200 text-left min-w-[150px]">Nama Siswa</th>`;
 
       for (let d = 1; d <= totalDays; d++) {
+        const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
         const dayOfWeek = new Date(year, month - 1, d).getDay();
-        let bgHeader = (dayOfWeek === 0 || dayOfWeek === 6) ? "bg-rose-200 text-rose-800" : "text-slate-600";
-        html += `<th class="p-1 border border-slate-200 min-w-[26px] ${bgHeader}">${d}</th>`;
+        const infoLibur = rawLibur.find(l => l.tanggal === dateStr);
+
+        let bgHeader = (dayOfWeek === 0 || dayOfWeek === 6) ? "bg-rose-200 text-rose-800" : (infoLibur ? "bg-purple-200 text-purple-800" : "text-slate-600");
+        let titleHeader = infoLibur ? infoLibur.keterangan : (dayOfWeek === 0 || dayOfWeek === 6 ? "Libur Akhir Pekan" : "");
+        
+        html += `<th class="p-1 border border-slate-200 min-w-[26px] ${bgHeader}" title="${titleHeader}">${d}</th>`;
       }
 
       html += `<th class="p-2 border border-slate-200 bg-emerald-100 text-emerald-800">H</th>
@@ -384,10 +400,14 @@
         for (let d = 1; d <= totalDays; d++) {
           const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
           const dayOfWeek = new Date(year, month - 1, d).getDay();
+          const infoLibur = rawLibur.find(l => l.tanggal === dateStr);
 
-          if (dayOfWeek === 0 || dayOfWeek === 6) {
-            html += `<td class="p-1 border border-slate-200 bg-rose-100 text-rose-500 font-bold text-xs">L</td>`;
-            continue;
+          // 1. Cek Hari Sabtu/Minggu ATAU Hari Libur Terdaftar
+          if (dayOfWeek === 0 || dayOfWeek === 6 || infoLibur) {
+            let bgLibur = infoLibur ? "bg-purple-100 text-purple-700 font-bold" : "bg-rose-100 text-rose-500 font-bold";
+            let tooltipText = infoLibur ? infoLibur.keterangan : "Libur Akhir Pekan";
+            html += `<td class="p-1 border border-slate-200 ${bgLibur} text-xs" title="${tooltipText}">L</td>`;
+            continue; // Tidak dihitung Alpa/Presensi
           }
 
           const studentLogs = rawLogs.filter(l => {
@@ -400,8 +420,8 @@
           const logMasuk = studentLogs.find(l => l.keterangan === "Masuk" || l.keterangan === "Terlambat Masuk");
           const logManual = studentLogs.find(l => ["Izin", "Sakit", "Alpa"].includes(l.keterangan));
 
-          let code = "-";
-          let bgCell = "";
+          let code = "A";
+          let bgCell = "bg-rose-100 text-rose-800 font-bold";
 
           if (logManual) {
             if (logManual.keterangan === "Izin") { code = "I"; countI++; bgCell = "bg-blue-100 text-blue-800 font-bold"; }
@@ -409,6 +429,8 @@
             else { code = "A"; countA++; bgCell = "bg-rose-100 text-rose-800 font-bold"; }
           } else if (logMasuk) {
             code = "H"; countH++; bgCell = "bg-emerald-100 text-emerald-800 font-bold";
+          } else {
+            countA++; // Jika bukan hari libur dan tidak ada scan/manual, dihitung Alpa
           }
 
           html += `<td class="p-1 border border-slate-200 ${bgCell}">${code}</td>`;
@@ -417,7 +439,7 @@
         html += `<td class="p-2 border border-slate-200 font-black bg-emerald-50 text-emerald-700">${countH}</td>
                  <td class="p-2 border border-slate-200 font-black bg-blue-50 text-blue-700">${countI}</td>
                  <td class="p-2 border border-slate-200 font-black bg-amber-50 text-amber-700">${countS}</td>
-                 <td class="p-2 border border-slate-200 font-black bg-rose-700 text-rose-700">${countA}</td></tr>`;
+                 <td class="p-2 border border-slate-200 font-black bg-rose-50 text-rose-700">${countA}</td></tr>`;
       });
 
       html += `</tbody>`;
