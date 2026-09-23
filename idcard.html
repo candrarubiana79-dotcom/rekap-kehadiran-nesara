@@ -279,16 +279,16 @@
               </span>
             </div>
 
-            <!-- Body Kartu: QR & Info Siswa -->
-            <div class="flex items-center gap-2.5 my-auto z-10">
-              <div class="bg-white p-1.5 rounded-lg shadow-md border border-indigo-300 flex-shrink-0">
+            <!-- Body Kartu: QR Berada Lebih ke Tengah dengan Ukuran Lebih Besar -->
+            <div class="flex items-center gap-3 my-auto z-10 pl-2">
+              <div class="bg-white p-1 rounded-lg shadow-md border border-indigo-300 flex-shrink-0">
                 <div id="qrcode-${index}"></div>
               </div>
-              <div class="flex-1 min-w-0 text-left space-y-0.5">
+              <div class="flex-1 min-w-0 text-left space-y-0.5 pr-1">
                 <p class="text-[6.5px] font-bold text-indigo-400 uppercase tracking-wider">Nama Siswa</p>
-                <h3 class="text-[9.5px] font-extrabold text-white uppercase leading-tight truncate">${siswa.nama}</h3>
-                <p class="text-[6.5px] font-bold text-indigo-400 uppercase tracking-wider mt-1">NISN</p>
-                <p class="text-[9px] font-mono font-bold text-slate-200 leading-tight">${siswa.nisn}</p>
+                <h3 class="text-[9px] font-extrabold text-white uppercase leading-tight truncate">${siswa.nama}</h3>
+                <p class="text-[6.5px] font-bold text-indigo-400 uppercase tracking-wider mt-0.5">NISN</p>
+                <p class="text-[8.5px] font-mono font-bold text-slate-200 leading-tight">${siswa.nisn}</p>
               </div>
             </div>
 
@@ -307,10 +307,11 @@
 
         container.appendChild(wrapper);
 
+        // QR Code diperbesar ke 78x78 pixel
         new QRCode(document.getElementById(`qrcode-${index}`), {
           text: String(siswa.nisn),
-          width: 65,
-          height: 65,
+          width: 78,
+          height: 78,
           colorDark: "#000000",
           colorLight: "#ffffff",
           correctLevel: QRCode.CorrectLevel.H
