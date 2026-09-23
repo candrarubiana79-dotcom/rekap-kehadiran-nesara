@@ -150,7 +150,6 @@
     setInterval(updateLiveClock, 1000);
     updateLiveClock();
 
-    // FUNGSI MENDAPATKAN TANGGAL HARI INI (YYYY-MM-DD)
     function getTodayString() {
       const now = new Date();
       const yyyy = now.getFullYear();
@@ -413,6 +412,14 @@
                <th class="p-2 border border-slate-200 bg-amber-100 text-amber-800">S</th>
                <th class="p-2 border border-slate-200 bg-rose-100 text-rose-800">A</th></tr></thead><tbody>`;
 
+      if (filteredMaster.length === 0) {
+        html += `<tr><td colspan="${totalDays + 6}" class="p-6 text-slate-400 italic">Tidak ada data siswa.</td></tr></tbody>`;
+        tabel.innerHTML = html;
+        return;
+      }
+
+      const totalStudents = filteredMaster.length;
+
       filteredMaster.forEach((siswa, index) => {
         let countH = 0, countI = 0, countS = 0, countA = 0;
 
@@ -425,9 +432,25 @@
 
           // 1. Cek Hari Sabtu/Minggu ATAU Hari Libur Terdaftar
           if (dayOfWeek === 0 || dayOfWeek === 6 || infoLibur) {
-            let bgLibur = infoLibur ? "bg-purple-100 text-purple-700 font-bold" : "bg-rose-100 text-rose-500 font-bold";
-            let tooltipText = infoLibur ? infoLibur.keterangan : "Libur Akhir Pekan";
-            html += `<td class="p-1 border border-slate-200 ${bgLibur} text-xs" title="${tooltipText}">L</td>`;
+            // Hanya render pada baris siswa pertama (index 0) dengan rowspan!
+            if (index === 0) {
+              let textLibur = "";
+              let bgLibur = "";
+
+              if (infoLibur) {
+                textLibur = infoLibur.keterangan.toUpperCase();
+                bgLibur = "bg-purple-100 text-purple-800 border-purple-200";
+              } else if (dayOfWeek === 6) {
+                textLibur = "SABTU";
+                bgLibur = "bg-rose-100 text-rose-700 border-rose-200";
+              } else if (dayOfWeek === 0) {
+                textLibur = "MINGGU";
+                bgLibur = "bg-rose-100 text-rose-700 border-rose-200";
+              }
+
+              html += `<td rowspan="${totalStudents}" class="p-1 border ${bgLibur} text-[10px] font-extrabold text-center align-middle tracking-wider" style="writing-mode: vertical-rl; transform: rotate(180deg); whitespace: nowrap;">${textLibur}</td>`;
+            }
+            // Baris siswa selanjutnya (index > 0) dilewati
             continue;
           }
 
@@ -440,7 +463,7 @@
           // 3. Cek Tanggal Masa Depan (Belum Terjadi)
           if (dateStr > todayStr) {
             html += `<td class="p-1 border border-slate-200 text-slate-300 font-medium text-xs" title="Tanggal Belum Berjalan">-</td>`;
-            continue; // LOMPATI, TIDAK DIHITUNG ALPA
+            continue;
           }
 
           const studentLogs = rawLogs.filter(l => {
