@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kelola Hari Libur - SMPN 1 RANCAH</title>
+  <title>Kelola Hari Libur & Tanggal Mulai - SMPN 1 RANCAH</title>
   
   <!-- SKRIP PENGAMAN & AUTO LOGOUT -->
   <script src="auth-guard.js"></script>
@@ -32,10 +32,10 @@
     <div class="flex items-center justify-between border-b pb-5 border-slate-100">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center text-lg font-bold">
-          <i class="fa-solid fa-calendar-xmark"></i>
+          <i class="fa-solid fa-calendar-gear"></i>
         </div>
         <div>
-          <h2 class="text-lg font-extrabold text-slate-900 leading-tight">Manajemen Hari Libur</h2>
+          <h2 class="text-lg font-extrabold text-slate-900 leading-tight">Pengaturan Kalender & Sistem</h2>
           <p class="text-xs font-bold text-indigo-600 uppercase tracking-wider">SMPN 1 RANCAH</p>
         </div>
       </div>
@@ -44,13 +44,40 @@
       </a>
     </div>
 
+    <!-- PENGATURAN TANGGAL MULAI SISTEM -->
+    <form onsubmit="simpanTanggalMulai(event)" class="bg-indigo-50/70 p-4 sm:p-5 rounded-2xl border border-indigo-100 space-y-3">
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-flag-checkered text-indigo-600"></i>
+        <h3 class="text-xs font-extrabold uppercase tracking-wider text-indigo-950">Tanggal Mulai Operasional Presensi</h3>
+      </div>
+      <p class="text-[11px] text-slate-600 leading-relaxed">
+        Sistem tidak akan menghitung siswa <strong>Alpa</strong> pada tanggal-tanggal sebelum tanggal dimulainya presensi resmi di bawah ini.
+      </p>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end pt-1">
+        <div class="sm:col-span-8">
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Set Tanggal Mulai</label>
+          <input type="date" id="inputTglMulai" required
+            class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        </div>
+        <div class="sm:col-span-4">
+          <button type="submit" id="btnSimpanMulai"
+            class="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition shadow-md shadow-emerald-600/20 flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-floppy-disk"></i> Simpan Tanggal
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <hr class="border-slate-100">
+
     <!-- FORM INPUT TANGGAL LIBUR -->
     <form onsubmit="tambahHariLibur(event)" class="bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200/80 space-y-4">
       <h3 class="text-xs font-bold uppercase tracking-wider text-slate-600">Tambah Tanggal Libur Baru</h3>
       
       <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
         <div class="sm:col-span-4">
-          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Tanggal</label>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Tanggal Libur</label>
           <input type="date" id="inputTglLibur" required
             class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
         </div>
@@ -62,7 +89,7 @@
         <div class="sm:col-span-3">
           <button type="submit" id="btnSimpanLibur"
             class="w-full bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition shadow-md shadow-indigo-500/20 flex items-center justify-center gap-1.5">
-            <i class="fa-solid fa-plus"></i> Simpan
+            <i class="fa-solid fa-plus"></i> Simpan Libur
           </button>
         </div>
       </div>
@@ -88,7 +115,7 @@
           <tbody id="tabelLiburBody" class="divide-y divide-slate-100">
             <tr>
               <td colspan="4" class="p-6 text-center text-slate-400 font-medium">
-                <i class="fa-solid fa-spinner fa-spin text-indigo-600 mr-2"></i> Memuat data libur...
+                <i class="fa-solid fa-spinner fa-spin text-indigo-600 mr-2"></i> Memuat data...
               </td>
             </tr>
           </tbody>
@@ -104,21 +131,53 @@
     let listLibur = [];
 
     document.addEventListener("DOMContentLoaded", () => {
-      loadDataLibur();
+      loadData();
     });
 
-    function loadDataLibur() {
+    function loadData() {
       const tbody = document.getElementById("tabelLiburBody");
       
       fetch(WEB_APP_URL)
         .then(res => res.json())
         .then(data => {
           listLibur = data.libur || [];
+          if (data.tanggal_mulai) {
+            document.getElementById("inputTglMulai").value = data.tanggal_mulai;
+          }
           renderTabelLibur();
         })
         .catch(err => {
           tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-rose-500 font-bold">Gagal memuat data dari server!</td></tr>`;
         });
+    }
+
+    function simpanTanggalMulai(e) {
+      e.preventDefault();
+      const tglMulai = document.getElementById("inputTglMulai").value;
+      const btn = document.getElementById("btnSimpanMulai");
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+
+      const payload = {
+        tipe: "simpan_tanggal_mulai",
+        tanggal: tglMulai,
+        token: TOKEN_BENAR
+      };
+
+      fetch(WEB_APP_URL, {
+        method: "POST",
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json())
+      .then(res => {
+        alert(res.message || "Tanggal mulai berhasil disimpan!");
+      })
+      .catch(err => alert("Terjadi kesalahan koneksi!"))
+      .finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan Tanggal';
+      });
     }
 
     function renderTabelLibur() {
@@ -174,7 +233,7 @@
         if (res.status === "success") {
           document.getElementById("inputTglLibur").value = "";
           document.getElementById("inputKetLibur").value = "";
-          loadDataLibur();
+          loadData();
         } else {
           alert(res.message || "Gagal menyimpan data!");
         }
@@ -182,7 +241,7 @@
       .catch(err => alert("Terjadi kesalahan koneksi!"))
       .finally(() => {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-plus"></i> Simpan';
+        btn.innerHTML = '<i class="fa-solid fa-plus"></i> Simpan Libur';
       });
     }
 
@@ -201,7 +260,7 @@
       })
       .then(res => res.json())
       .then(res => {
-        loadDataLibur();
+        loadData();
       })
       .catch(err => alert("Gagal menghapus data!"));
     }
