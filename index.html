@@ -46,13 +46,17 @@
           </div>
         </div>
 
-        <!-- Live Digital Clock Badge -->
+        <!-- Live Digital Clock Badge + Indikator Sync -->
         <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 md:p-4 text-left md:text-right self-start md:self-auto min-w-[200px]">
           <div class="text-xs text-blue-200 font-medium flex items-center gap-1.5 justify-start md:justify-end">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Waktu Server (WIB)
           </div>
           <div id="liveClock" class="text-xl md:text-2xl font-black font-mono mt-0.5 text-white">00:00:00</div>
           <div id="liveDate" class="text-xs text-blue-100 font-medium">Memuat tanggal...</div>
+          <!-- Status Auto Sync -->
+          <div id="lastSync" class="text-[10px] text-emerald-300 font-semibold mt-1 flex items-center gap-1 justify-start md:justify-end">
+            <i class="fa-solid fa-arrows-rotate fa-spin text-[9px]"></i> Menghubungkan server...
+          </div>
         </div>
       </div>
     </header>
@@ -60,7 +64,7 @@
     <!-- MAIN CONTAINER CARD -->
     <main class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 md:p-6 space-y-6">
 
-      <!-- MENU TABS & BUTTON EXCEL -->
+      <!-- MENU TABS & ACTION BUTTONS -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
         <!-- Navigation Tabs -->
         <div class="flex bg-slate-100 p-1 rounded-xl w-full sm:w-auto">
@@ -72,10 +76,17 @@
           </button>
         </div>
 
-        <!-- Export Button -->
-        <button onclick="downloadExcel()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold py-2.5 px-5 rounded-xl transition duration-150 shadow-sm flex items-center justify-center gap-2 text-sm">
-          <i class="fa-solid fa-file-excel text-base"></i> Download Excel
-        </button>
+        <!-- Tombol Aksi: Segarkan & Download Excel -->
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <button onclick="manualRefresh()" title="Segarkan Data Sekarang" class="bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold py-2.5 px-4 rounded-xl transition duration-150 shadow-sm flex items-center justify-center gap-2 text-sm">
+            <i id="iconRefresh" class="fa-solid fa-rotate"></i>
+            <span class="inline">Segarkan Data</span>
+          </button>
+
+          <button onclick="downloadExcel()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold py-2.5 px-5 rounded-xl transition duration-150 shadow-sm flex items-center justify-center gap-2 text-sm">
+            <i class="fa-solid fa-file-excel text-base"></i> Download Excel
+          </button>
+        </div>
       </div>
 
       <!-- FILTER CONTROLS -->
@@ -166,7 +177,13 @@
       document.getElementById("filterTanggal").value = todayStr;
       document.getElementById("filterBulan").value = ym;
       
-      loadData();
+      // Ambil data pertama kali
+      loadData(false);
+
+      // Auto-refresh di background setiap 10 detik
+      setInterval(() => {
+        loadData(true);
+      }, 10000);
     });
 
     // --- TAB SWITCHING LOGIC ---
@@ -192,9 +209,20 @@
       renderTable();
     }
 
+    // --- MANUAL REFRESH BUTTON TRIGGER ---
+    function manualRefresh() {
+      loadData(false);
+    }
+
     // --- FETCH DATA FROM APPS SCRIPT ---
-    function loadData() {
-      document.getElementById("tabelUtama").innerHTML = '<tr><td class="p-8 text-slate-400 font-medium"><i class="fa-solid fa-spinner fa-spin text-blue-600 mr-2"></i> Mengambil data dari server...</td></tr>';
+    function loadData(isSilent = false) {
+      const iconRefresh = document.getElementById("iconRefresh");
+      if (iconRefresh) iconRefresh.classList.add("fa-spin");
+
+      // Jika bukan pembaruan latar belakang, tampilkan pesan loading di tabel
+      if (!isSilent && rawMaster.length === 0) {
+        document.getElementById("tabelUtama").innerHTML = '<tr><td class="p-8 text-slate-400 font-medium"><i class="fa-solid fa-spinner fa-spin text-blue-600 mr-2"></i> Mengambil data dari server...</td></tr>';
+      }
       
       fetch(WEB_APP_URL)
         .then(res => res.json())
@@ -211,10 +239,23 @@
 
           initKelasDropdown();
           renderTable();
+
+          // Update Jam Terakhir Diperbarui
+          const now = new Date();
+          const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: 'Asia/Jakarta' });
+          const lastSyncEl = document.getElementById("lastSync");
+          if (lastSyncEl) {
+            lastSyncEl.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> Update: ${timeStr} WIB`;
+          }
         })
         .catch(err => {
           console.error(err);
-          document.getElementById("tabelUtama").innerHTML = `<tr class="text-rose-600"><td class="p-6">Gagal mengambil data dari Google Sheets.<br><small class="text-slate-400">${err}</small></td></tr>`;
+          if (!isSilent) {
+            document.getElementById("tabelUtama").innerHTML = `<tr class="text-rose-600"><td class="p-6">Gagal mengambil data dari Google Sheets.<br><small class="text-slate-400">${err}</small></td></tr>`;
+          }
+        })
+        .finally(() => {
+          if (iconRefresh) iconRefresh.classList.remove("fa-spin");
         });
     }
 
@@ -432,7 +473,6 @@
 
           // 1. Cek Hari Sabtu/Minggu ATAU Hari Libur Terdaftar
           if (dayOfWeek === 0 || dayOfWeek === 6 || infoLibur) {
-            // Hanya render pada baris siswa pertama (index 0) dengan rowspan!
             if (index === 0) {
               let textLibur = "";
               let bgLibur = "";
@@ -450,7 +490,6 @@
 
               html += `<td rowspan="${totalStudents}" class="p-1 border ${bgLibur} text-[10px] font-extrabold text-center align-middle tracking-wider" style="writing-mode: vertical-rl; transform: rotate(180deg); whitespace: nowrap;">${textLibur}</td>`;
             }
-            // Baris siswa selanjutnya (index > 0) dilewati
             continue;
           }
 
