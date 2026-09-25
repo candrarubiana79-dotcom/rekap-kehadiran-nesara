@@ -26,12 +26,11 @@
 
     <!-- HEADER & JAM REAL-TIME -->
     <header class="bg-gradient-to-r from-blue-700 via-indigo-700 to-indigo-800 text-white rounded-2xl p-5 md:p-8 shadow-lg relative overflow-hidden">
-      <!-- Background Ornament -->
       <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
 
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 relative z-10">
         
-        <!-- BAGIAN KIRI: LOGO & JUDUL -->
+        <!-- LOGO & JUDUL -->
         <div class="flex items-center gap-4 sm:gap-6">
           <img src="assets/logo-smpn1rancah.png" alt="Logo SMPN 1 Rancah" class="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 object-contain drop-shadow-xl flex-shrink-0">
           
@@ -53,7 +52,6 @@
           </div>
           <div id="liveClock" class="text-xl md:text-2xl font-black font-mono mt-0.5 text-white">00:00:00</div>
           <div id="liveDate" class="text-xs text-blue-100 font-medium">Memuat tanggal...</div>
-          <!-- Status Auto Sync -->
           <div id="lastSync" class="text-[10px] text-emerald-300 font-semibold mt-1 flex items-center gap-1 justify-start md:justify-end">
             <i class="fa-solid fa-arrows-rotate fa-spin text-[9px]"></i> Menghubungkan server...
           </div>
@@ -113,14 +111,14 @@
             <i class="fa-solid fa-users text-blue-600"></i> Pilih Kelas:
           </label>
           <select id="filterKelas" onchange="renderTable()" class="w-full bg-white px-3.5 py-2 border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
-            <option value="">-- Semua Kelas --</option>
+            <option value="">-- Pilih Kelas --</option>
           </select>
         </div>
       </div>
 
       <!-- TITLE INFORMER -->
       <div class="text-center py-2 border-b border-slate-100">
-        <h2 id="judulRekap" class="text-lg md:text-xl font-extrabold text-slate-800"></h2>
+        <h2 id="judulRekap" class="text-lg md:text-xl font-extrabold text-slate-800">REKAPITULASI PRESENSI SISWA</h2>
         <p id="subJudulRekap" class="text-xs md:text-sm font-medium text-slate-500 mt-0.5"></p>
       </div>
 
@@ -219,7 +217,6 @@
       const iconRefresh = document.getElementById("iconRefresh");
       if (iconRefresh) iconRefresh.classList.add("fa-spin");
 
-      // Jika bukan pembaruan latar belakang, tampilkan pesan loading di tabel
       if (!isSilent && rawMaster.length === 0) {
         document.getElementById("tabelUtama").innerHTML = '<tr><td class="p-8 text-slate-400 font-medium"><i class="fa-solid fa-spinner fa-spin text-blue-600 mr-2"></i> Mengambil data dari server...</td></tr>';
       }
@@ -269,7 +266,7 @@
       
       const kelasList = [...kelasSet].sort();
 
-      select.innerHTML = '<option value="">-- Semua Kelas --</option>';
+      select.innerHTML = '<option value="">-- Pilih Kelas --</option>';
       kelasList.forEach(k => {
         const opt = document.createElement("option");
         opt.value = k;
@@ -281,6 +278,27 @@
 
     function renderTable() {
       const kelas = document.getElementById("filterKelas").value;
+
+      // JIKA KELAS BELUM DIPILIH
+      if (!kelas) {
+        document.getElementById("judulRekap").textContent = currentMode === "bulanan" 
+          ? `REKAP BULANAN PRESENSI SISWA (${document.getElementById("filterBulan").value})` 
+          : `REKAP HARIAN PRESENSI SISWA (${document.getElementById("filterTanggal").value})`;
+        
+        document.getElementById("subJudulRekap").innerHTML = `<span class="inline-block mt-1 px-3 py-1 bg-amber-100 text-amber-800 rounded-full font-bold text-xs">⚠️ Silakan pilih kelas terlebih dahulu</span>`;
+        
+        document.getElementById("tabelUtama").innerHTML = `
+          <tr>
+            <td class="p-10 text-center text-slate-400 font-medium">
+              <div class="flex flex-col items-center justify-center gap-2">
+                <i class="fa-solid fa-users-rectangle text-4xl text-blue-500/70 animate-bounce"></i>
+                <p class="text-slate-600 font-bold text-sm mt-1">Data Belum Ditampilkan</p>
+                <p class="text-xs text-slate-400">Silakan pilih kelas pada opsi dropdown filter di atas untuk melihat data presensi.</p>
+              </div>
+            </td>
+          </tr>`;
+        return;
+      }
 
       if (currentMode === "bulanan") {
         renderRekapBulanan(kelas);
@@ -304,11 +322,11 @@
       } else if (tgl > todayStr) {
         document.getElementById("subJudulRekap").innerHTML = `<span class="inline-block mt-1 px-3 py-1 bg-slate-100 text-slate-500 rounded-full font-bold text-xs">⏳ Tanggal Belum Berjalan</span>`;
       } else {
-        document.getElementById("subJudulRekap").textContent = kelasSelected ? `Kelas: ${kelasSelected}` : "Seluruh Kelas";
+        document.getElementById("subJudulRekap").textContent = `Kelas: ${kelasSelected}`;
       }
 
       let sourceList = rawMaster.length > 0 ? rawMaster : rawLogs;
-      let filteredMaster = kelasSelected ? sourceList.filter(m => m.kelas === kelasSelected) : sourceList;
+      let filteredMaster = sourceList.filter(m => m.kelas === kelasSelected);
 
       if (rawMaster.length === 0) {
         let uniqueMap = new Map();
@@ -338,7 +356,7 @@
         <tbody class="divide-y divide-slate-200">`;
 
       if (filteredMaster.length === 0) {
-        html += `<tr><td colspan="7" class="p-6 text-slate-400 italic">Tidak ada data presensi siswa pada kelas/tanggal ini.</td></tr></tbody>`;
+        html += `<tr><td colspan="7" class="p-6 text-slate-400 italic">Tidak ada data siswa terdaftar pada Kelas ${kelasSelected}.</td></tr></tbody>`;
         tabel.innerHTML = html;
         return;
       }
@@ -417,10 +435,10 @@
       const totalDays = new Date(year, month, 0).getDate();
 
       document.getElementById("judulRekap").textContent = `REKAP BULANAN PRESENSI SISWA (${ym})`;
-      document.getElementById("subJudulRekap").textContent = kelasSelected ? `Kelas: ${kelasSelected}` : "Seluruh Kelas";
+      document.getElementById("subJudulRekap").textContent = `Kelas: ${kelasSelected}`;
 
       let sourceList = rawMaster.length > 0 ? rawMaster : rawLogs;
-      let filteredMaster = kelasSelected ? sourceList.filter(m => m.kelas === kelasSelected) : sourceList;
+      let filteredMaster = sourceList.filter(m => m.kelas === kelasSelected);
 
       if (rawMaster.length === 0) {
         let uniqueMap = new Map();
@@ -454,7 +472,7 @@
                <th class="p-2 border border-slate-200 bg-rose-100 text-rose-800">A</th></tr></thead><tbody>`;
 
       if (filteredMaster.length === 0) {
-        html += `<tr><td colspan="${totalDays + 6}" class="p-6 text-slate-400 italic">Tidak ada data siswa.</td></tr></tbody>`;
+        html += `<tr><td colspan="${totalDays + 6}" class="p-6 text-slate-400 italic">Tidak ada data siswa terdaftar pada Kelas ${kelasSelected}.</td></tr></tbody>`;
         tabel.innerHTML = html;
         return;
       }
@@ -543,10 +561,16 @@
 
     // --- EXPORT TO EXCEL ---
     function downloadExcel() {
+      const kelas = document.getElementById("filterKelas").value;
+      if (!kelas) {
+        alert("Pilih kelas terlebih dahulu sebelum mengunduh file Excel!");
+        return;
+      }
+
       const table = document.getElementById("tabelUtama");
       const filename = currentMode === "harian" 
-        ? `Rekap_Harian_${document.getElementById("filterTanggal").value}.xlsx`
-        : `Rekap_Bulanan_${document.getElementById("filterBulan").value}.xlsx`;
+        ? `Rekap_Harian_Kelas_${kelas}_${document.getElementById("filterTanggal").value}.xlsx`
+        : `Rekap_Bulanan_Kelas_${kelas}_${document.getElementById("filterBulan").value}.xlsx`;
 
       const wb = XLSX.utils.table_to_book(table, { sheet: "Rekap Presensi" });
       XLSX.writeFile(wb, filename);
