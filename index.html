@@ -18,6 +18,23 @@
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
     }
+
+    /* ANIMASI TEKS LIBUR BERGERAK */
+    @keyframes textGlider {
+      0%, 100% {
+        transform: rotate(180deg) translateY(0);
+      }
+      50% {
+        transform: rotate(180deg) translateY(-12px);
+      }
+    }
+
+    .animate-text-libur {
+      display: inline-block;
+      writing-mode: vertical-rl;
+      white-space: nowrap;
+      animation: textGlider 2.5s ease-in-out infinite;
+    }
   </style>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen p-3 md:p-6">
@@ -175,10 +192,8 @@
       document.getElementById("filterTanggal").value = todayStr;
       document.getElementById("filterBulan").value = ym;
       
-      // Ambil data pertama kali
       loadData(false);
 
-      // Auto-refresh di background setiap 10 detik
       setInterval(() => {
         loadData(true);
       }, 10000);
@@ -207,12 +222,10 @@
       renderTable();
     }
 
-    // --- MANUAL REFRESH BUTTON TRIGGER ---
     function manualRefresh() {
       loadData(false);
     }
 
-    // --- FETCH DATA FROM APPS SCRIPT ---
     function loadData(isSilent = false) {
       const iconRefresh = document.getElementById("iconRefresh");
       if (iconRefresh) iconRefresh.classList.add("fa-spin");
@@ -237,7 +250,6 @@
           initKelasDropdown();
           renderTable();
 
-          // Update Jam Terakhir Diperbarui
           const now = new Date();
           const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: 'Asia/Jakarta' });
           const lastSyncEl = document.getElementById("lastSync");
@@ -279,7 +291,6 @@
     function renderTable() {
       const kelas = document.getElementById("filterKelas").value;
 
-      // JIKA KELAS BELUM DIPILIH
       if (!kelas) {
         document.getElementById("judulRekap").textContent = currentMode === "bulanan" 
           ? `REKAP BULANAN PRESENSI SISWA (${document.getElementById("filterBulan").value})` 
@@ -506,7 +517,10 @@
                 bgLibur = "bg-rose-100 text-rose-700 border-rose-200";
               }
 
-              html += `<td rowspan="${totalStudents}" class="p-1 border ${bgLibur} text-[10px] font-extrabold text-center align-middle tracking-wider" style="writing-mode: vertical-rl; transform: rotate(180deg); whitespace: nowrap;">${textLibur}</td>`;
+              // TEKS LIBUR BERGERAK DENGAN CLASS ANIMASI
+              html += `<td rowspan="${totalStudents}" class="p-1 border ${bgLibur} text-[10px] font-extrabold text-center align-middle tracking-wider overflow-hidden">
+                        <span class="animate-text-libur">${textLibur}</span>
+                      </td>`;
             }
             continue;
           }
