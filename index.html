@@ -18,6 +18,14 @@
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
     }
+
+    /* FORMAT TEKS VERTIKAL KOLOM LIBUR */
+    .libur-text-vertical {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      white-space: nowrap;
+      display: inline-block;
+    }
   </style>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen p-3 md:p-6">
@@ -122,8 +130,8 @@
         <p id="subJudulRekap" class="text-xs md:text-sm font-medium text-slate-500 mt-0.5"></p>
       </div>
 
-      <!-- TABLE AREA (SCROLLABLE ON HP) -->
-      <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm bg-white max-h-[75vh]">
+      <!-- TABLE AREA (RESPONSIF SISI DENGAN TAMPILAN FULL TANPA TERPOTONG HINGGA BAWAH) -->
+      <div id="containerTabel" class="overflow-x-auto border border-slate-200 shadow-sm bg-white rounded-xl">
         <table id="tabelUtama" class="w-full text-center border-collapse text-xs md:text-sm">
           <!-- Digenerate via JS -->
         </table>
@@ -337,14 +345,14 @@
 
       let html = `
         <thead>
-          <tr class="bg-slate-100 text-slate-700 font-bold uppercase text-xs tracking-wider border-b border-slate-200">
-            <th class="p-3 border border-slate-200">No</th>
-            <th class="p-3 border border-slate-200">NISN</th>
-            <th class="p-3 border border-slate-200 text-left">Nama Siswa</th>
-            <th class="p-3 border border-slate-200">Kelas</th>
-            <th class="p-3 border border-slate-200">Jam Masuk</th>
-            <th class="p-3 border border-slate-200">Jam Pulang</th>
-            <th class="p-3 border border-slate-200">Status</th>
+          <tr class="bg-slate-200 text-slate-700 font-bold uppercase text-xs tracking-wider border-b border-slate-300">
+            <th class="p-3 border border-slate-300">No</th>
+            <th class="p-3 border border-slate-300">NISN</th>
+            <th class="p-3 border border-slate-300 text-left min-w-[160px]">Nama Siswa</th>
+            <th class="p-3 border border-slate-300">Kelas</th>
+            <th class="p-3 border border-slate-300">Jam Masuk</th>
+            <th class="p-3 border border-slate-300">Jam Pulang</th>
+            <th class="p-3 border border-slate-300">Status</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-200">`;
@@ -421,7 +429,7 @@
       tabel.innerHTML = html;
     }
 
-    // --- REKAP BULANAN RENDER (HEADER BERTINGKAT & STICKY LIBUR) ---
+    // --- REKAP BULANAN RENDER ---
     function renderRekapBulanan(kelasSelected) {
       const ym = document.getElementById("filterBulan").value;
       const todayStr = getTodayString();
@@ -447,7 +455,7 @@
 
       const tabel = document.getElementById("tabelUtama");
 
-      // HEADER ROW 1: 'TANGGAL' & 'KETERANGAN'
+      // HEADER ROW 1: TANGGAL & KETERANGAN
       let html = `<thead>
         <tr class="bg-slate-200 font-extrabold text-xs text-slate-700 border-b border-slate-300">
           <th rowspan="2" class="p-2 border border-slate-300 align-middle">No</th>
@@ -466,7 +474,7 @@
         let bgHeader = (dayOfWeek === 0 || dayOfWeek === 6) ? "bg-rose-200 text-rose-800" : (infoLibur ? "bg-purple-200 text-purple-800" : "text-slate-600");
         let titleHeader = infoLibur ? infoLibur.keterangan : (dayOfWeek === 0 || dayOfWeek === 6 ? "Libur Akhir Pekan" : "");
         
-        html += `<th class="p-1 border border-slate-200 min-w-[26px] ${bgHeader}" title="${titleHeader}">${d}</th>`;
+        html += `<th class="p-1 border border-slate-200 min-w-[28px] ${bgHeader}" title="${titleHeader}">${d}</th>`;
       }
 
       // HEADER ROW 2: H, I, S, A
@@ -489,7 +497,9 @@
       filteredMaster.forEach((siswa, index) => {
         let countH = 0, countI = 0, countS = 0, countA = 0;
 
-        html += `<tr><td class="p-2 border border-slate-200 text-slate-500">${index + 1}</td><td class="p-2 border border-slate-200 text-left font-bold text-slate-800 whitespace-nowrap">${siswa.nama}</td>`;
+        html += `<tr>
+                  <td class="p-2 border border-slate-200 text-slate-500">${index + 1}</td>
+                  <td class="p-2 border border-slate-200 text-left font-bold text-slate-800 whitespace-nowrap">${siswa.nama}</td>`;
 
         for (let d = 1; d <= totalDays; d++) {
           const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
@@ -513,11 +523,9 @@
                 bgLibur = "bg-rose-100 text-rose-700 border-rose-200";
               }
 
-              // TEKS LIBUR STICKY (MEMANJANG DAN IKUT SCROLL DI DALAM KOLOM)
-              html += `<td rowspan="${totalStudents}" class="p-1 border ${bgLibur} text-[10px] font-extrabold text-center align-top tracking-wider relative">
-                        <div class="sticky top-12 py-3 flex items-center justify-center">
-                          <span style="writing-mode: vertical-rl; transform: rotate(180deg);" class="whitespace-nowrap">${textLibur}</span>
-                        </div>
+              // TEKS LIBUR VERTIKAL TAMPIL UTUH SEPANJANG KOLOM
+              html += `<td rowspan="${totalStudents}" class="p-1 border ${bgLibur} text-[10px] font-extrabold text-center align-middle tracking-wider">
+                        <span class="libur-text-vertical">${textLibur}</span>
                       </td>`;
             }
             continue;
