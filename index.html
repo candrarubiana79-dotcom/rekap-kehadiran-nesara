@@ -18,23 +18,6 @@
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
     }
-
-    /* ANIMASI TEKS LIBUR BERGERAK */
-    @keyframes textGlider {
-      0%, 100% {
-        transform: rotate(180deg) translateY(0);
-      }
-      50% {
-        transform: rotate(180deg) translateY(-12px);
-      }
-    }
-
-    .animate-text-libur {
-      display: inline-block;
-      writing-mode: vertical-rl;
-      white-space: nowrap;
-      animation: textGlider 2.5s ease-in-out infinite;
-    }
   </style>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen p-3 md:p-6">
@@ -140,7 +123,7 @@
       </div>
 
       <!-- TABLE AREA (SCROLLABLE ON HP) -->
-      <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm bg-white">
+      <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm bg-white max-h-[75vh]">
         <table id="tabelUtama" class="w-full text-center border-collapse text-xs md:text-sm">
           <!-- Digenerate via JS -->
         </table>
@@ -438,7 +421,7 @@
       tabel.innerHTML = html;
     }
 
-    // --- REKAP BULANAN RENDER ---
+    // --- REKAP BULANAN RENDER (HEADER BERTINGKAT & STICKY LIBUR) ---
     function renderRekapBulanan(kelasSelected) {
       const ym = document.getElementById("filterBulan").value;
       const todayStr = getTodayString();
@@ -464,8 +447,17 @@
 
       const tabel = document.getElementById("tabelUtama");
 
-      let html = `<thead><tr class="bg-slate-100 font-bold text-xs border-b border-slate-200"><th class="p-2 border border-slate-200">No</th><th class="p-2 border border-slate-200 text-left min-w-[150px]">Nama Siswa</th>`;
+      // HEADER ROW 1: 'TANGGAL' & 'KETERANGAN'
+      let html = `<thead>
+        <tr class="bg-slate-200 font-extrabold text-xs text-slate-700 border-b border-slate-300">
+          <th rowspan="2" class="p-2 border border-slate-300 align-middle">No</th>
+          <th rowspan="2" class="p-2 border border-slate-300 text-left min-w-[160px] align-middle">Nama Siswa</th>
+          <th colspan="${totalDays}" class="p-1.5 border border-slate-300 bg-blue-100 text-blue-900 text-center uppercase tracking-wider font-extrabold">Tanggal</th>
+          <th colspan="4" class="p-1.5 border border-slate-300 bg-indigo-100 text-indigo-900 text-center uppercase tracking-wider font-extrabold">Keterangan</th>
+        </tr>
+        <tr class="bg-slate-100 font-bold text-xs border-b border-slate-200">`;
 
+      // HEADER ROW 2: ANGKA TANGGAL (1-31)
       for (let d = 1; d <= totalDays; d++) {
         const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
         const dayOfWeek = new Date(year, month - 1, d).getDay();
@@ -477,10 +469,14 @@
         html += `<th class="p-1 border border-slate-200 min-w-[26px] ${bgHeader}" title="${titleHeader}">${d}</th>`;
       }
 
-      html += `<th class="p-2 border border-slate-200 bg-emerald-100 text-emerald-800">H</th>
-               <th class="p-2 border border-slate-200 bg-blue-100 text-blue-800">I</th>
-               <th class="p-2 border border-slate-200 bg-amber-100 text-amber-800">S</th>
-               <th class="p-2 border border-slate-200 bg-rose-100 text-rose-800">A</th></tr></thead><tbody>`;
+      // HEADER ROW 2: H, I, S, A
+      html += `<th class="p-2 border border-slate-200 bg-emerald-100 text-emerald-800" title="Hadir">H</th>
+               <th class="p-2 border border-slate-200 bg-blue-100 text-blue-800" title="Izin">I</th>
+               <th class="p-2 border border-slate-200 bg-amber-100 text-amber-800" title="Sakit">S</th>
+               <th class="p-2 border border-slate-200 bg-rose-100 text-rose-800" title="Alpa">A</th>
+             </tr>
+           </thead>
+           <tbody>`;
 
       if (filteredMaster.length === 0) {
         html += `<tr><td colspan="${totalDays + 6}" class="p-6 text-slate-400 italic">Tidak ada data siswa terdaftar pada Kelas ${kelasSelected}.</td></tr></tbody>`;
@@ -517,9 +513,11 @@
                 bgLibur = "bg-rose-100 text-rose-700 border-rose-200";
               }
 
-              // TEKS LIBUR BERGERAK DENGAN CLASS ANIMASI
-              html += `<td rowspan="${totalStudents}" class="p-1 border ${bgLibur} text-[10px] font-extrabold text-center align-middle tracking-wider overflow-hidden">
-                        <span class="animate-text-libur">${textLibur}</span>
+              // TEKS LIBUR STICKY (MEMANJANG DAN IKUT SCROLL DI DALAM KOLOM)
+              html += `<td rowspan="${totalStudents}" class="p-1 border ${bgLibur} text-[10px] font-extrabold text-center align-top tracking-wider relative">
+                        <div class="sticky top-12 py-3 flex items-center justify-center">
+                          <span style="writing-mode: vertical-rl; transform: rotate(180deg);" class="whitespace-nowrap">${textLibur}</span>
+                        </div>
                       </td>`;
             }
             continue;
