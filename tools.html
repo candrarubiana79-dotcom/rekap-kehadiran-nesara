@@ -48,21 +48,41 @@
     <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 flex items-center gap-3">
       <i class="fa-solid fa-circle-info text-indigo-600 text-xl"></i>
       <p class="text-xs text-slate-600 font-medium">
-        Pilih salah satu alat di bawah ini untuk mengelola QR Code, pemendekan link, cetak ID Card, Kartu Pelajar, atau manajemen hari libur.
+        Pilih salah satu alat di bawah ini untuk melihat laporan harian, mengelola QR Code, pemendekan link, cetak ID Card, Kartu Pelajar, atau manajemen hari libur.
       </p>
     </div>
 
     <!-- GRID DAFTAR MENU TOOLS -->
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-      <!-- MENU 1: PEMBUAT QR CUSTOM -->
+      <!-- MENU 1: LAPORAN HARIAN KETIDAKHADIRAN -->
+      <a href="laporan_harian.html" class="group bg-white hover:bg-amber-50/50 p-5 rounded-2xl border border-slate-200 hover:border-amber-300 transition-all shadow-sm hover:shadow-md flex flex-col justify-between space-y-4">
+        <div class="flex items-start gap-3.5">
+          <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-xl font-bold group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-clipboard-user"></i>
+          </div>
+          <div>
+            <span class="text-[10px] font-extrabold text-amber-600 tracking-wider uppercase">Fitur 01</span>
+            <h3 class="text-base font-extrabold text-slate-900 group-hover:text-amber-600 transition-colors">Laporan Harian Ketidakhadiran</h3>
+            <p class="text-xs text-slate-500 font-medium mt-1 leading-relaxed">
+              Rekap data siswa Sakit, Izin, dan Alpa per kelas secara harian serta fitur salin rekap ke WhatsApp.
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center justify-end text-xs font-bold text-amber-600 group-hover:translate-x-1 transition-transform">
+          <span>Buka Fitur</span>
+          <i class="fa-solid fa-chevron-right ml-1 text-[10px]"></i>
+        </div>
+      </a>
+
+      <!-- MENU 2: PEMBUAT QR CUSTOM -->
       <a href="qr-custom.html" class="group bg-white hover:bg-indigo-50/50 p-5 rounded-2xl border border-slate-200 hover:border-indigo-300 transition-all shadow-sm hover:shadow-md flex flex-col justify-between space-y-4">
         <div class="flex items-start gap-3.5">
           <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center text-xl font-bold group-hover:scale-110 transition-transform">
             <i class="fa-solid fa-qrcode"></i>
           </div>
           <div>
-            <span class="text-[10px] font-extrabold text-indigo-600 tracking-wider uppercase">Fitur 01</span>
+            <span class="text-[10px] font-extrabold text-indigo-600 tracking-wider uppercase">Fitur 02</span>
             <h3 class="text-base font-extrabold text-slate-900 group-hover:text-indigo-600 transition-colors">Pembuat QR Custom</h3>
             <p class="text-xs text-slate-500 font-medium mt-1 leading-relaxed">
               Buat kode QR dengan tambahan logo sekolah, warna custom, serta teks atas dan bawah.
@@ -75,14 +95,14 @@
         </div>
       </a>
 
-      <!-- MENU 2: PEMENDEK URL -->
+      <!-- MENU 3: PEMENDEK URL -->
       <a href="shortener.html" class="group bg-white hover:bg-emerald-50/50 p-5 rounded-2xl border border-slate-200 hover:border-emerald-300 transition-all shadow-sm hover:shadow-md flex flex-col justify-between space-y-4">
         <div class="flex items-start gap-3.5">
           <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-xl font-bold group-hover:scale-110 transition-transform">
             <i class="fa-solid fa-link"></i>
           </div>
           <div>
-            <span class="text-[10px] font-extrabold text-emerald-600 tracking-wider uppercase">Fitur 02</span>
+            <span class="text-[10px] font-extrabold text-emerald-600 tracking-wider uppercase">Fitur 03</span>
             <h3 class="text-base font-extrabold text-slate-900 group-hover:text-emerald-600 transition-colors">Pemendek URL</h3>
             <p class="text-xs text-slate-500 font-medium mt-1 leading-relaxed">
               Ubah link URL yang panjang menjadi tautan pendek TinyURL dengan custom alias unik.
@@ -95,14 +115,14 @@
         </div>
       </a>
 
-      <!-- MENU 3: QR ID CARD -->
+      <!-- MENU 4: QR ID CARD -->
       <a href="idcard.html" class="group bg-white hover:bg-blue-50/50 p-5 rounded-2xl border border-slate-200 hover:border-blue-300 transition-all shadow-sm hover:shadow-md flex flex-col justify-between space-y-4">
         <div class="flex items-start gap-3.5">
           <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-xl font-bold group-hover:scale-110 transition-transform">
             <i class="fa-solid fa-id-card"></i>
           </div>
           <div>
-            <span class="text-[10px] font-extrabold text-blue-600 tracking-wider uppercase">Fitur 03</span>
+            <span class="text-[10px] font-extrabold text-blue-600 tracking-wider uppercase">Fitur 04</span>
             <h3 class="text-base font-extrabold text-slate-900 group-hover:text-blue-600 transition-colors">QR ID Card</h3>
             <p class="text-xs text-slate-500 font-medium mt-1 leading-relaxed">
               Generate dan unduh kartu ID Card presensi ber-QR Code untuk siswa per kelas secara kolektif.
@@ -115,14 +135,14 @@
         </div>
       </a>
 
-      <!-- MENU 4: KARTU PELAJAR (DEPAN) -->
+      <!-- MENU 5: KARTU PELAJAR (DEPAN) -->
       <a href="kartu-pelajar.html" class="group bg-white hover:bg-amber-50/50 p-5 rounded-2xl border border-slate-200 hover:border-amber-300 transition-all shadow-sm hover:shadow-md flex flex-col justify-between space-y-4">
         <div class="flex items-start gap-3.5">
           <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-xl font-bold group-hover:scale-110 transition-transform">
             <i class="fa-solid fa-address-card"></i>
           </div>
           <div>
-            <span class="text-[10px] font-extrabold text-amber-600 tracking-wider uppercase">Fitur 04</span>
+            <span class="text-[10px] font-extrabold text-amber-600 tracking-wider uppercase">Fitur 05</span>
             <h3 class="text-base font-extrabold text-slate-900 group-hover:text-amber-600 transition-colors">Kartu Pelajar (Depan)</h3>
             <p class="text-xs text-slate-500 font-medium mt-1 leading-relaxed">
               Cetak dan kelola desain sisi depan Kartu Tanda Pelajar resmi sekolah.
@@ -135,14 +155,14 @@
         </div>
       </a>
 
-      <!-- MENU 5: KARTU PELAJAR (BELAKANG) -->
+      <!-- MENU 6: KARTU PELAJAR (BELAKANG) -->
       <a href="kartu-pelajar-belakang.html" class="group bg-white hover:bg-purple-50/50 p-5 rounded-2xl border border-slate-200 hover:border-purple-300 transition-all shadow-sm hover:shadow-md flex flex-col justify-between space-y-4">
         <div class="flex items-start gap-3.5">
           <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center text-xl font-bold group-hover:scale-110 transition-transform">
             <i class="fa-solid fa-id-card-clip"></i>
           </div>
           <div>
-            <span class="text-[10px] font-extrabold text-purple-600 tracking-wider uppercase">Fitur 05</span>
+            <span class="text-[10px] font-extrabold text-purple-600 tracking-wider uppercase">Fitur 06</span>
             <h3 class="text-base font-extrabold text-slate-900 group-hover:text-purple-600 transition-colors">Kartu Pelajar (Belakang)</h3>
             <p class="text-xs text-slate-500 font-medium mt-1 leading-relaxed">
               Cetak dan kelola sisi belakang Kartu Pelajar yang berisi tata tertib dan QR Code NISN.
@@ -155,14 +175,14 @@
         </div>
       </a>
 
-      <!-- MENU 6: KELOLA HARI LIBUR -->
-      <a href="kelola-libur.html" class="group bg-white hover:bg-rose-50/50 p-5 rounded-2xl border border-slate-200 hover:border-rose-300 transition-all shadow-sm hover:shadow-md flex flex-col justify-between space-y-4">
+      <!-- MENU 7: KELOLA HARI LIBUR -->
+      <a href="kelola_libur.html" class="group bg-white hover:bg-rose-50/50 p-5 rounded-2xl border border-slate-200 hover:border-rose-300 transition-all shadow-sm hover:shadow-md flex flex-col justify-between space-y-4">
         <div class="flex items-start gap-3.5">
           <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center text-xl font-bold group-hover:scale-110 transition-transform">
             <i class="fa-solid fa-calendar-xmark"></i>
           </div>
           <div>
-            <span class="text-[10px] font-extrabold text-rose-600 tracking-wider uppercase">Fitur 06</span>
+            <span class="text-[10px] font-extrabold text-rose-600 tracking-wider uppercase">Fitur 07</span>
             <h3 class="text-base font-extrabold text-slate-900 group-hover:text-rose-600 transition-colors">Kelola Hari Libur</h3>
             <p class="text-xs text-slate-500 font-medium mt-1 leading-relaxed">
               Input dan atur kalender hari libur sekolah atau cuti bersama agar rekap presensi tetap akurat.
