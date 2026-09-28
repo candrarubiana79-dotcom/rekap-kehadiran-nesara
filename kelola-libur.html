@@ -2,8 +2,8 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kelola Hari Libur & Tanggal Mulai - SMPN 1 RANCAH</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Kelola Hari Libur & Tanggal Mulai - SMPN 1 RANCAH (v3.0)</title>
   
   <!-- SKRIP PENGAMAN & AUTO LOGOUT -->
   <script src="auth-guard.js"></script>
@@ -17,120 +17,164 @@
 
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    input, button, select { font-size: 12px !important; }
   </style>
 </head>
-<body class="bg-slate-900 text-slate-800 min-h-screen flex items-center justify-center p-3 sm:p-4 md:p-6 relative overflow-x-hidden selection:bg-indigo-500 selection:text-white">
+<body class="bg-slate-900 text-slate-800 min-h-screen flex flex-col justify-between p-2.5 sm:p-4 md:p-6 relative overflow-x-hidden selection:bg-indigo-500 selection:text-white">
 
-  <!-- Background Decorative Orbs -->
-  <div class="fixed -top-32 -left-32 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none"></div>
-  <div class="fixed -bottom-32 -right-32 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl pointer-events-none"></div>
+  <!-- Background Decorative Light Orbs -->
+  <div class="fixed -top-20 -left-20 w-64 h-64 bg-indigo-600/20 rounded-full blur-2xl pointer-events-none"></div>
+  <div class="fixed -bottom-20 -right-20 w-64 h-64 bg-blue-600/20 rounded-full blur-2xl pointer-events-none"></div>
 
   <!-- CONTAINER UTAMA -->
-  <div class="w-full max-w-3xl bg-white/95 backdrop-blur-xl p-5 sm:p-6 md:p-8 rounded-3xl shadow-2xl border border-white/20 space-y-6 relative z-10">
+  <div class="w-full max-w-2xl mx-auto my-auto bg-white/95 backdrop-blur-xl p-4 sm:p-6 rounded-3xl shadow-2xl border border-white/20 space-y-4 relative z-10">
     
     <!-- Header -->
-    <div class="flex items-center justify-between border-b pb-5 border-slate-100">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center text-lg font-bold">
+    <div class="flex items-center justify-between border-b pb-3 border-slate-100">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center text-base font-bold shadow-sm">
           <i class="fa-solid fa-calendar-gear"></i>
         </div>
         <div>
-          <h2 class="text-lg font-extrabold text-slate-900 leading-tight">Pengaturan Kalender & Sistem</h2>
-          <p class="text-xs font-bold text-indigo-600 uppercase tracking-wider">SMPN 1 RANCAH</p>
+          <div class="flex items-center gap-1.5">
+            <h2 class="text-sm sm:text-base font-extrabold text-slate-900 leading-tight">Pengaturan Kalender & Sistem</h2>
+            <span class="text-[9px] font-extrabold bg-indigo-500/10 text-indigo-600 border border-indigo-500/20 px-1.5 py-0.5 rounded-full">v3.0</span>
+          </div>
+          <p class="text-[9px] font-bold text-indigo-600 uppercase tracking-wider">SMPN 1 RANCAH</p>
         </div>
       </div>
-      <a href="tools.html" class="text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-2 rounded-xl transition flex items-center gap-1.5">
-        <i class="fa-solid fa-arrow-left"></i> Kembali
+      <a href="tools.html" class="text-[11px] font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 active:scale-95">
+        <i class="fa-solid fa-arrow-left text-[10px]"></i> Kembali
       </a>
     </div>
 
-    <!-- PENGATURAN TANGGAL MULAI SISTEM -->
-    <form onsubmit="simpanTanggalMulai(event)" class="bg-indigo-50/70 p-4 sm:p-5 rounded-2xl border border-indigo-100 space-y-3">
+    <!-- NOTIFIKASI TOAST -->
+    <div id="notif" class="hidden p-3 rounded-xl text-xs font-bold text-center border transition-all duration-300"></div>
+
+    <!-- 1. PENGATURAN TANGGAL MULAI SISTEM -->
+    <form onsubmit="simpanTanggalMulai(event)" class="bg-indigo-50/70 p-3.5 sm:p-4 rounded-2xl border border-indigo-100 space-y-2.5">
       <div class="flex items-center gap-2">
-        <i class="fa-solid fa-flag-checkered text-indigo-600"></i>
-        <h3 class="text-xs font-extrabold uppercase tracking-wider text-indigo-950">Tanggal Mulai Operasional Presensi</h3>
+        <i class="fa-solid fa-flag-checkered text-indigo-600 text-xs"></i>
+        <h3 class="text-[11px] font-extrabold uppercase tracking-wider text-indigo-950">Tanggal Mulai Operasional Presensi</h3>
       </div>
-      <p class="text-[11px] text-slate-600 leading-relaxed">
-        Sistem tidak akan menghitung siswa <strong>Alpa</strong> pada tanggal-tanggal sebelum tanggal dimulainya presensi resmi di bawah ini.
+      <p class="text-[10px] text-slate-600 leading-relaxed">
+        Sistem tidak akan menghitung siswa <strong>Alpa</strong> pada tanggal sebelum tanggal dimulainya presensi di bawah ini.
       </p>
       
-      <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end pt-1">
+      <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-end pt-0.5">
         <div class="sm:col-span-8">
-          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Set Tanggal Mulai</label>
+          <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Set Tanggal Mulai</label>
           <input type="date" id="inputTglMulai" required
-            class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
         </div>
         <div class="sm:col-span-4">
           <button type="submit" id="btnSimpanMulai"
-            class="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition shadow-md shadow-emerald-600/20 flex items-center justify-center gap-1.5">
-            <i class="fa-solid fa-floppy-disk"></i> Simpan Tanggal
+            class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold py-2 px-3 rounded-xl transition shadow-md shadow-emerald-600/20 flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-floppy-disk text-xs"></i> Simpan Tanggal
           </button>
         </div>
       </div>
     </form>
 
-    <hr class="border-slate-100">
-
-    <!-- BARIS SINKRONISASI AUTO & FORM MANUAL -->
-    <div class="bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200/80 space-y-4">
+    <!-- 2. BARIS SINKRONISASI AUTO & FORM MANUAL (SINGLE/RANGE) -->
+    <div class="bg-slate-50 p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 space-y-3">
       
       <!-- TOMBOL SINKRON NASIONAL AUTO -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-rose-50 p-3.5 rounded-xl border border-rose-100">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-rose-50 p-3 rounded-xl border border-rose-100">
         <div>
           <h4 class="text-xs font-extrabold text-rose-900 flex items-center gap-1.5">
             <i class="fa-solid fa-cloud-arrow-down text-rose-600"></i> Auto Sync Hari Libur Nasional
           </h4>
-          <p class="text-[11px] text-rose-700 mt-0.5">
+          <p class="text-[10px] text-rose-700 mt-0.5">
             Tarik otomatis daftar tanggal merah & cuti bersama resmi Indonesia.
           </p>
         </div>
         <button type="button" onclick="sinkronLiburNasional()" id="btnSinkronLibur"
-          class="bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white font-bold py-2 px-3.5 rounded-xl text-xs transition shadow-md shadow-rose-600/20 flex items-center justify-center gap-1.5 whitespace-nowrap">
-          <i class="fa-solid fa-rotate"></i> Sinkron Kalender
+          class="bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-bold py-2 px-3 rounded-xl transition shadow-md shadow-rose-600/20 flex items-center justify-center gap-1.5 whitespace-nowrap">
+          <i class="fa-solid fa-rotate text-xs"></i> Sinkron Kalender
         </button>
       </div>
 
       <!-- FORM INPUT TANGGAL LIBUR MANUAL -->
-      <form onsubmit="tambahHariLibur(event)" class="space-y-3 pt-2">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-600">Atur Libur Khusus Sekolah (Manual)</h3>
+      <form onsubmit="tambahHariLibur(event)" class="space-y-2.5 pt-1">
+        <div class="flex items-center justify-between">
+          <h3 class="text-[11px] font-bold uppercase tracking-wider text-slate-600">Atur Libur Khusus Sekolah</h3>
+          
+          <!-- TOGGLE MODE INPUT (SINGLE vs RENTANG) -->
+          <div class="flex bg-slate-200 p-0.5 rounded-lg text-[10px] font-bold">
+            <button type="button" id="btnModeSingle" onclick="setModeInput('single')" class="px-2 py-0.5 rounded-md bg-white text-indigo-600 shadow-sm">1 Hari</button>
+            <button type="button" id="btnModeRange" onclick="setModeInput('range')" class="px-2 py-0.5 rounded-md text-slate-600 hover:text-slate-900">Rentang Tanggal</button>
+          </div>
+        </div>
         
-        <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+        <!-- INPUT TANGGAL TUNGGAL (MODE 1 HARI) -->
+        <div id="wrapperSingle" class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-end">
           <div class="sm:col-span-4">
-            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Tanggal Libur</label>
-            <input type="date" id="inputTglLibur" required
-              class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Tanggal Libur</label>
+            <input type="date" id="inputTglLibur"
+              class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
           </div>
           <div class="sm:col-span-5">
-            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Keterangan Libur</label>
-            <input type="text" id="inputKetLibur" placeholder="Contoh: Libur Semester / Classmeeting" required
-              class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Keterangan Libur</label>
+            <input type="text" id="inputKetLibur" placeholder="Contoh: Libur Isro Mi'raj"
+              class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
           </div>
           <div class="sm:col-span-3">
             <button type="submit" id="btnSimpanLibur"
-              class="w-full bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition shadow-md shadow-indigo-500/20 flex items-center justify-center gap-1.5">
-              <i class="fa-solid fa-plus"></i> Simpan Manual
+              class="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold py-2 px-3 rounded-xl transition shadow-md shadow-indigo-500/20 flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-plus text-xs"></i> Simpan
             </button>
           </div>
         </div>
+
+        <!-- INPUT RENTANG TANGGAL (MODE RENTANG 5 - 15) -->
+        <div id="wrapperRange" class="hidden space-y-2">
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Dari Tanggal</label>
+              <input type="date" id="inputTglMulaiRange"
+                class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Sampai Tanggal</label>
+              <input type="date" id="inputTglSelesaiRange"
+                class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-end">
+            <div class="sm:col-span-8">
+              <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Keterangan Libur Rentang</label>
+              <input type="text" id="inputKetRange" placeholder="Contoh: Libur Semester / Classmeeting"
+                class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            </div>
+            <div class="sm:col-span-4">
+              <button type="submit" id="btnSimpanRange"
+                class="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold py-2 px-3 rounded-xl transition shadow-md shadow-indigo-500/20 flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-layer-group text-xs"></i> Simpan Rentang
+              </button>
+            </div>
+          </div>
+        </div>
+
       </form>
 
     </div>
 
-    <!-- DAFTAR HARI LIBUR TERDAFTAR -->
-    <div class="space-y-3">
+    <!-- 3. DAFTAR HARI LIBUR TERDAFTAR -->
+    <div class="space-y-2">
       <div class="flex items-center justify-between">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-600">Daftar Libur Terdaftar</h3>
-        <span id="totalLiburText" class="text-[10px] font-bold bg-indigo-100 text-indigo-700 px-2.5 py-0.5 rounded-full">0 Hari</span>
+        <h3 class="text-[11px] font-bold uppercase tracking-wider text-slate-600">Daftar Libur Terdaftar</h3>
+        <span id="totalLiburText" class="text-[10px] font-extrabold bg-indigo-100 text-indigo-700 px-2.5 py-0.5 rounded-full">0 Hari</span>
       </div>
 
-      <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+      <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm max-h-60 overflow-y-auto">
         <table class="w-full text-left border-collapse text-xs">
-          <thead>
-            <tr class="bg-slate-100 text-slate-600 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200">
-              <th class="p-3">No</th>
-              <th class="p-3">Tanggal</th>
-              <th class="p-3">Keterangan</th>
-              <th class="p-3 text-center">Aksi</th>
+          <thead class="sticky top-0 bg-slate-100 shadow-sm z-10">
+            <tr class="text-slate-600 font-bold uppercase text-[9px] tracking-wider border-b border-slate-200">
+              <th class="p-2.5 w-10 text-center">No</th>
+              <th class="p-2.5 w-32">Tanggal</th>
+              <th class="p-2.5">Keterangan</th>
+              <th class="p-2.5 w-16 text-center">Aksi</th>
             </tr>
           </thead>
           <tbody id="tabelLiburBody" class="divide-y divide-slate-100">
@@ -146,14 +190,54 @@
 
   </div>
 
+  <!-- FOOTER -->
+  <footer class="text-center text-[10px] text-slate-400 py-1.5 relative z-10">
+    Presensi Digital • SMPN 1 Rancah <span class="font-bold text-slate-300">v3.0</span>
+  </footer>
+
   <script>
+    const APP_VERSION = "v3.0";
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzq05A9BpVJFjNkHn7p2QDjbaY2ajsWjVXk5sVDkH3rStFaAC5XgEkndZSg39zOLX_2/exec";
     const TOKEN_BENAR = "GURU2026";
     let listLibur = [];
+    let modeInputActive = "single"; // 'single' atau 'range'
 
     document.addEventListener("DOMContentLoaded", () => {
       loadData();
     });
+
+    function setModeInput(mode) {
+      modeInputActive = mode;
+      const btnSingle = document.getElementById("btnModeSingle");
+      const btnRange = document.getElementById("btnModeRange");
+      const wrapperSingle = document.getElementById("wrapperSingle");
+      const wrapperRange = document.getElementById("wrapperRange");
+
+      if (mode === "single") {
+        btnSingle.className = "px-2 py-0.5 rounded-md bg-white text-indigo-600 shadow-sm font-extrabold";
+        btnRange.className = "px-2 py-0.5 rounded-md text-slate-600 hover:text-slate-900";
+        wrapperSingle.classList.remove("hidden");
+        wrapperRange.classList.add("hidden");
+      } else {
+        btnRange.className = "px-2 py-0.5 rounded-md bg-white text-indigo-600 shadow-sm font-extrabold";
+        btnSingle.className = "px-2 py-0.5 rounded-md text-slate-600 hover:text-slate-900";
+        wrapperRange.classList.remove("hidden");
+        wrapperSingle.classList.add("hidden");
+      }
+    }
+
+    function showNotif(pesan, status = "success") {
+      const notif = document.getElementById("notif");
+      notif.classList.remove("hidden");
+      if (status === "success") {
+        notif.className = "p-2.5 rounded-xl text-xs font-bold text-center bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-sm";
+        notif.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i> ${pesan}`;
+      } else {
+        notif.className = "p-2.5 rounded-xl text-xs font-bold text-center bg-rose-50 text-rose-800 border border-rose-200 shadow-sm";
+        notif.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-rose-600 mr-1"></i> ${pesan}`;
+      }
+      setTimeout(() => notif.classList.add("hidden"), 4000);
+    }
 
     function loadData() {
       const tbody = document.getElementById("tabelLiburBody");
@@ -172,7 +256,6 @@
         });
     }
 
-    // FUNGSI SINKRONISASI OTOMATIS LIBUR NASIONAL
     function sinkronLiburNasional() {
       if (!confirm("Tarik data hari libur nasional & cuti bersama secara otomatis dari server kalender?")) return;
 
@@ -180,21 +263,16 @@
       btn.disabled = true;
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menarik Data...';
 
-      const payload = {
-        tipe: "sinkron_libur_nasional",
-        token: TOKEN_BENAR
-      };
-
       fetch(WEB_APP_URL, {
         method: "POST",
-        body: JSON.stringify(payload)
+        body: JSON.stringify({ tipe: "sinkron_libur_nasional", token: TOKEN_BENAR })
       })
       .then(res => res.json())
       .then(res => {
-        alert(res.message || "Proses sinkronisasi selesai!");
+        showNotif(res.message || "Proses sinkronisasi selesai!", "success");
         loadData();
       })
-      .catch(err => alert("Gagal menyinkronkan data! Periksa koneksi internet."))
+      .catch(err => showNotif("Gagal menyinkronkan data!", "error"))
       .finally(() => {
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-rotate"></i> Sinkron Kalender';
@@ -209,25 +287,28 @@
       btn.disabled = true;
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
 
-      const payload = {
-        tipe: "simpan_tanggal_mulai",
-        tanggal: tglMulai,
-        token: TOKEN_BENAR
-      };
-
       fetch(WEB_APP_URL, {
         method: "POST",
-        body: JSON.stringify(payload)
+        body: JSON.stringify({ tipe: "simpan_tanggal_mulai", tanggal: tglMulai, token: TOKEN_BENAR })
       })
       .then(res => res.json())
       .then(res => {
-        alert(res.message || "Tanggal mulai berhasil disimpan!");
+        showNotif(res.message || "Tanggal mulai berhasil disimpan!", "success");
       })
-      .catch(err => alert("Terjadi kesalahan koneksi!"))
+      .catch(err => showNotif("Terjadi kesalahan koneksi!", "error"))
       .finally(() => {
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan Tanggal';
       });
+    }
+
+    function formatTanggalIndo(tglStr) {
+      if (!tglStr) return "";
+      const parts = tglStr.split("-");
+      if (parts.length !== 3) return tglStr;
+      
+      const bulan = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agt", "Sep", "Okt", "Nov", "Des"];
+      return `${parseInt(parts[2], 10)} ${bulan[parseInt(parts[1], 10) - 1] || ''} ${parts[0]}`;
     }
 
     function renderTabelLibur() {
@@ -237,19 +318,24 @@
       totalText.textContent = `${listLibur.length} Hari`;
 
       if (listLibur.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-400 font-medium italic">Belum ada hari libur terdaftar.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="p-5 text-center text-slate-400 font-medium italic">Belum ada hari libur terdaftar.</td></tr>`;
         return;
       }
+
+      listLibur.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
 
       let html = "";
       listLibur.forEach((item, index) => {
         html += `
           <tr class="hover:bg-slate-50 transition">
-            <td class="p-3 text-slate-400 font-medium">${index + 1}</td>
-            <td class="p-3 font-mono font-bold text-slate-700">${item.tanggal}</td>
-            <td class="p-3 font-semibold text-slate-800">${item.keterangan}</td>
-            <td class="p-3 text-center">
-              <button onclick="hapusHariLibur('${item.tanggal}')" class="text-rose-600 bg-rose-50 hover:bg-rose-100 p-1.5 rounded-lg transition" title="Hapus">
+            <td class="p-2.5 text-center text-slate-400 font-medium text-[11px]">${index + 1}</td>
+            <td class="p-2.5">
+              <div class="font-bold text-slate-800 text-[11px]">${formatTanggalIndo(item.tanggal)}</div>
+              <div class="text-[9px] font-mono text-slate-400">${item.tanggal}</div>
+            </td>
+            <td class="p-2.5 font-semibold text-slate-700 text-[11px]">${item.keterangan}</td>
+            <td class="p-2.5 text-center">
+              <button onclick="hapusHariLibur('${item.tanggal}')" class="text-rose-600 bg-rose-50 hover:bg-rose-100 p-1.5 rounded-lg transition active:scale-95" title="Hapus">
                 <i class="fa-solid fa-trash-can text-xs"></i>
               </button>
             </td>
@@ -258,61 +344,110 @@
       tbody.innerHTML = html;
     }
 
-    function tambahHariLibur(e) {
+    // FUNGSI SIMPAN LIBUR (PROSES SINGLE MAUPUN RENTANG MULTI-HARI)
+    async function tambahHariLibur(e) {
       e.preventDefault();
-      const tgl = document.getElementById("inputTglLibur").value;
-      const ket = document.getElementById("inputKetLibur").value.trim();
-      const btn = document.getElementById("btnSimpanLibur");
 
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+      if (modeInputActive === "single") {
+        const tgl = document.getElementById("inputTglLibur").value;
+        const ket = document.getElementById("inputKetLibur").value.trim();
+        const btn = document.getElementById("btnSimpanLibur");
 
-      const payload = {
-        tipe: "tambah_libur",
-        tanggal: tgl,
-        keterangan: ket,
-        token: TOKEN_BENAR
-      };
+        if (!tgl || !ket) { alert("Lengkapi tanggal dan keterangan!"); return; }
 
-      fetch(WEB_APP_URL, {
-        method: "POST",
-        body: JSON.stringify(payload)
-      })
-      .then(res => res.json())
-      .then(res => {
-        if (res.status === "success") {
-          document.getElementById("inputTglLibur").value = "";
-          document.getElementById("inputKetLibur").value = "";
-          loadData();
-        } else {
-          alert(res.message || "Gagal menyimpan data!");
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>...';
+
+        try {
+          const res = await fetch(WEB_APP_URL, {
+            method: "POST",
+            body: JSON.stringify({ tipe: "tambah_libur", tanggal: tgl, keterangan: ket, token: TOKEN_BENAR })
+          }).then(r => r.json());
+
+          if (res.status === "success") {
+            showNotif("Hari libur berhasil disimpan!", "success");
+            document.getElementById("inputTglLibur").value = "";
+            document.getElementById("inputKetLibur").value = "";
+            loadData();
+          } else {
+            showNotif(res.message || "Gagal menyimpan data!", "error");
+          }
+        } catch(err) {
+          showNotif("Terjadi kesalahan koneksi!", "error");
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-plus text-xs"></i> Simpan';
         }
-      })
-      .catch(err => alert("Terjadi kesalahan koneksi!"))
-      .finally(() => {
+
+      } else {
+        // MODE RENTANG TANGGAL (MULTIPLE DATES)
+        const tglAwalStr = document.getElementById("inputTglMulaiRange").value;
+        const tglAkhirStr = document.getElementById("inputTglSelesaiRange").value;
+        const ket = document.getElementById("inputKetRange").value.trim();
+        const btn = document.getElementById("btnSimpanRange");
+
+        if (!tglAwalStr || !tglAkhirStr || !ket) { alert("Lengkapi tanggal awal, tanggal akhir, dan keterangan!"); return; }
+
+        const tglAwal = new Date(tglAwalStr);
+        const tglAkhir = new Date(tglAkhirStr);
+
+        if (tglAwal > tglAkhir) {
+          alert("Tanggal awal tidak boleh lebih besar dari tanggal selesai!");
+          return;
+        }
+
+        // Generate daftar tanggal dari tglAwal s.d tglAkhir
+        let listDates = [];
+        let curr = new Date(tglAwal);
+        while (curr <= tglAkhir) {
+          let yyyy = curr.getFullYear();
+          let mm = String(curr.getMonth() + 1).padStart(2, '0');
+          let dd = String(curr.getDate()).padStart(2, '0');
+          listDates.push(`${yyyy}-${mm}-${dd}`);
+          curr.setDate(curr.getDate() + 1);
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> (0/${listDates.length})`;
+
+        let suksesCount = 0;
+        for (let i = 0; i < listDates.length; i++) {
+          btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> (${i + 1}/${listDates.length})`;
+          try {
+            await fetch(WEB_APP_URL, {
+              method: "POST",
+              body: JSON.stringify({ tipe: "tambah_libur", tanggal: listDates[i], keterangan: ket, token: TOKEN_BENAR })
+            });
+            suksesCount++;
+          } catch(err) {
+            console.log("Gagal simpan tgl: " + listDates[i]);
+          }
+        }
+
         btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-plus"></i> Simpan Manual';
-      });
+        btn.innerHTML = '<i class="fa-solid fa-layer-group text-xs"></i> Simpan Rentang';
+
+        showNotif(`Berhasil menambahkan ${suksesCount} hari libur!`, "success");
+        document.getElementById("inputTglMulaiRange").value = "";
+        document.getElementById("inputTglSelesaiRange").value = "";
+        document.getElementById("inputKetRange").value = "";
+        loadData();
+      }
     }
 
     function hapusHariLibur(tanggal) {
       if (!confirm(`Yakin ingin menghapus hari libur tanggal ${tanggal}?`)) return;
 
-      const payload = {
-        tipe: "hapus_libur",
-        tanggal: tanggal,
-        token: TOKEN_BENAR
-      };
-
       fetch(WEB_APP_URL, {
         method: "POST",
-        body: JSON.stringify(payload)
+        body: JSON.stringify({ tipe: "hapus_libur", tanggal: tanggal, token: TOKEN_BENAR })
       })
       .then(res => res.json())
       .then(res => {
+        showNotif("Hari libur berhasil dihapus!", "success");
         loadData();
       })
-      .catch(err => alert("Gagal menghapus data!"));
+      .catch(err => showNotif("Gagal menghapus data!", "error"));
     }
   </script>
 </body>
