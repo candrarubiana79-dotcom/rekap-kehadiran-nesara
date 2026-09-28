@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Kelola Hari Libur & Tanggal Mulai - SMPN 1 RANCAH (v3.0)</title>
+  <title>Pengaturan Kalender & Sistem - SMPN 1 RANCAH (v3.0)</title>
   
   <!-- SKRIP PENGAMAN & AUTO LOGOUT -->
   <script src="auth-guard.js"></script>
@@ -51,41 +51,90 @@
     <!-- NOTIFIKASI TOAST -->
     <div id="notif" class="hidden p-3 rounded-xl text-xs font-bold text-center border transition-all duration-300"></div>
 
-    <!-- 1. PENGATURAN TANGGAL MULAI SISTEM -->
-    <form onsubmit="simpanTanggalMulai(event)" class="bg-indigo-50/70 p-3.5 sm:p-4 rounded-2xl border border-indigo-100 space-y-2.5">
-      <div class="flex items-center justify-between flex-wrap gap-1">
-        <div class="flex items-center gap-2">
-          <i class="fa-solid fa-flag-checkered text-indigo-600 text-xs"></i>
-          <h3 class="text-[11px] font-extrabold uppercase tracking-wider text-indigo-950">Tanggal Mulai Operasional Presensi</h3>
-        </div>
-      </div>
-
-      <p class="text-[10px] text-slate-600 leading-relaxed">
-        Sistem tidak akan menghitung siswa <strong>Alpa</strong> pada tanggal sebelum tanggal dimulainya presensi di bawah ini[cite: 1].
-      </p>
-
-      <!-- TAMPILAN TEXT PENANDA STATUS AKTIF -->
-      <div id="infoTglMulai" class="hidden p-2.5 rounded-xl bg-emerald-100/80 border border-emerald-300 text-[11px] font-bold text-emerald-900 flex items-center gap-2">
-        <i class="fa-solid fa-circle-check text-emerald-600 text-xs"></i>
-        <span id="textStatusMulai">Sistem bekerja mulai tanggal --/--/----</span>
-      </div>
+    <!-- GRID DUA KOLOM PENGATURAN SISTEM -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
       
-      <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-end pt-0.5">
-        <div class="sm:col-span-8">
-          <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Set Tanggal Mulai Baru</label>
-          <input type="date" id="inputTglMulai" required
-            class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+      <!-- 1. PENGATURAN TANGGAL MULAI OPERASIONAL -->
+      <form onsubmit="simpanTanggalMulai(event)" class="bg-indigo-50/70 p-3.5 rounded-2xl border border-indigo-100 space-y-2.5 flex flex-col justify-between">
+        <div class="space-y-2">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-flag-checkered text-indigo-600 text-xs"></i>
+            <h3 class="text-[11px] font-extrabold uppercase tracking-wider text-indigo-950">Tanggal Mulai Presensi</h3>
+          </div>
+          
+          <p class="text-[10px] text-slate-600 leading-relaxed">
+            Sistem tidak menghitung siswa <strong>Alpa</strong> sebelum tanggal ini.[cite: 1]
+          </p>
+
+          <div id="infoTglMulai" class="hidden p-2 rounded-xl bg-emerald-100/80 border border-emerald-300 text-[10px] font-bold text-emerald-900 flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-check text-emerald-600 text-xs shrink-0"></i>
+            <span id="textStatusMulai">Aktif: --/--/----</span>
+          </div>
         </div>
-        <div class="sm:col-span-4">
+
+        <div class="space-y-2 pt-1">
+          <div>
+            <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Set Tanggal Mulai</label>
+            <input type="date" id="inputTglMulai" required
+              class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
           <button type="submit" id="btnSimpanMulai"
             class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold py-2 px-3 rounded-xl transition shadow-md shadow-emerald-600/20 flex items-center justify-center gap-1.5">
             <i class="fa-solid fa-floppy-disk text-xs"></i> Simpan Tanggal
           </button>
         </div>
-      </div>
-    </form>
+      </form>
 
-    <!-- 2. BARIS SINKRONISASI AUTO & FORM INPUT LIBUR -->
+      <!-- 2. PENGATURAN JAM OPERASIONAL & KESIANGAN (SESUAI APP SCRIPT) -->
+      <form onsubmit="simpanJamOperasional(event)" class="bg-amber-50/70 p-3.5 rounded-2xl border border-amber-200/80 space-y-2.5 flex flex-col justify-between">
+        <div class="space-y-2">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-clock text-amber-600 text-xs"></i>
+            <h3 class="text-[11px] font-extrabold uppercase tracking-wider text-amber-950">Aturan Jam & Kesiangan</h3>
+          </div>
+
+          <div class="p-2 rounded-xl bg-white/80 border border-amber-200 text-[9px] text-slate-700 space-y-1">
+            <div class="flex justify-between"><span>Masuk Tepat Waktu:</span> <strong class="text-emerald-700">s.d <span id="lblJamTepat">07:00</span></strong></div>
+            <div class="flex justify-between"><span>Terlambat Masuk (Kesiangan):</span> <strong class="text-rose-700"><span id="lblJamTepat2">07:01</span> - <span id="lblJamBatas">08:00</span></strong></div>
+            <div class="flex justify-between"><span>Pulang Senin-Kamis:</span> <strong class="text-indigo-700">Mulai <span id="lblPulangBiasa">13:00</span></strong></div>
+            <div class="flex justify-between"><span>Pulang Hari Jumat:</span> <strong class="text-amber-700">Mulai <span id="lblPulangJumat">11:00</span></strong></div>
+          </div>
+        </div>
+
+        <div class="space-y-2 pt-1">
+          <div class="grid grid-cols-2 gap-1.5">
+            <div>
+              <label class="block text-[9px] font-bold uppercase text-slate-500 mb-0.5">Batas Tepat Waktu</label>
+              <input type="time" id="inputJamMasukTepat" value="07:00" required
+                class="w-full px-2 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-[9px] font-bold uppercase text-slate-500 mb-0.5">Batas Maksimal Scan</label>
+              <input type="time" id="inputJamMasukBatas" value="08:00" required
+                class="w-full px-2 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-[9px] font-bold uppercase text-slate-500 mb-0.5">Pulang (Senin-Kamis)</label>
+              <input type="time" id="inputJamPulangBiasa" value="13:00" required
+                class="w-full px-2 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-[9px] font-bold uppercase text-slate-500 mb-0.5">Pulang (Jumat)</label>
+              <input type="time" id="inputJamPulangJumat" value="11:00" required
+                class="w-full px-2 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+            </div>
+          </div>
+
+          <button type="submit" id="btnSimpanJam"
+            class="w-full bg-amber-600 hover:bg-amber-700 active:scale-95 text-white font-bold py-2 px-3 rounded-xl transition shadow-md shadow-amber-600/20 flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-floppy-disk text-xs"></i> Simpan Aturan Jam
+          </button>
+        </div>
+      </form>
+
+    </div>
+
+    <!-- 3. BARIS SINKRONISASI AUTO & FORM INPUT LIBUR -->
     <div class="bg-slate-50 p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 space-y-3">
       
       <!-- TOMBOL SINKRON NASIONAL AUTO -->
@@ -109,7 +158,6 @@
         <div class="flex items-center justify-between">
           <h3 class="text-[11px] font-bold uppercase tracking-wider text-slate-600">Atur Libur Khusus Sekolah</h3>
           
-          <!-- TOGGLE MODE INPUT -->
           <div class="flex bg-slate-200 p-0.5 rounded-lg text-[10px] font-bold">
             <button type="button" id="btnModeSingle" onclick="setModeInput('single')" class="px-2 py-0.5 rounded-md bg-white text-indigo-600 shadow-sm font-extrabold">1 Hari</button>
             <button type="button" id="btnModeRange" onclick="setModeInput('range')" class="px-2 py-0.5 rounded-md text-slate-600 hover:text-slate-900">Rentang Tanggal</button>
@@ -169,7 +217,7 @@
 
     </div>
 
-    <!-- 3. DAFTAR HARI LIBUR TERDAFTAR -->
+    <!-- 4. DAFTAR HARI LIBUR TERDAFTAR -->
     <div class="space-y-2 pt-1">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div class="flex items-center gap-2">
@@ -177,7 +225,6 @@
           <span id="totalLiburText" class="text-[10px] font-extrabold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">0 Hari</span>
         </div>
 
-        <!-- TOMBOL EDIT MODE & AKSI BANYAK -->
         <div class="flex items-center gap-1.5 flex-wrap">
           <button id="btnToggleEdit" onclick="toggleEditMode()"
             class="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold px-2.5 py-1.5 rounded-xl text-[10px] transition active:scale-95 flex items-center gap-1.5 border border-indigo-200">
@@ -282,7 +329,6 @@
       loadData();
     });
 
-    // FUNGSI UPDATE STATUS TEXT TANGGAL MULAI OPERASIONAL
     function renderStatusTglMulai(tglStr) {
       const infoBox = document.getElementById("infoTglMulai");
       const statusText = document.getElementById("textStatusMulai");
@@ -294,12 +340,90 @@
 
       const parts = tglStr.split("-");
       if (parts.length === 3) {
-        const dd = parts[2];
-        const mm = parts[1];
-        const yyyy = parts[0];
-        statusText.innerHTML = `Sistem bekerja mulai tanggal <strong class="text-emerald-950 font-extrabold underline">${dd}/${mm}/${yyyy}</strong>`;
+        statusText.innerHTML = `Sistem bekerja mulai: <strong class="text-emerald-950 font-extrabold underline">${parts[2]}/${parts[1]}/${parts[0]}</strong>`;
         infoBox.classList.remove("hidden");
       }
+    }
+
+    function updateLabelJamDisplay(jMasukTepat, jMasukBatas, jPulangBiasa, jPulangJumat) {
+      document.getElementById("lblJamTepat").textContent = jMasukTepat || "07:00";
+      document.getElementById("lblJamTepat2").textContent = jMasukTepat ? addOneMinute(jMasukTepat) : "07:01";
+      document.getElementById("lblJamBatas").textContent = jMasukBatas || "08:00";
+      document.getElementById("lblPulangBiasa").textContent = jPulangBiasa || "13:00";
+      document.getElementById("lblPulangJumat").textContent = jPulangJumat || "11:00";
+    }
+
+    function addOneMinute(timeStr) {
+      const parts = timeStr.split(":");
+      let m = parseInt(parts[1], 10) + 1;
+      let h = parseInt(parts[0], 10);
+      if (m >= 60) { m = 0; h++; }
+      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    }
+
+    function loadData() {
+      const tbody = document.getElementById("tabelLiburBody");
+      
+      fetch(WEB_APP_URL)
+        .then(res => res.json())
+        .then(data => {
+          listLibur = data.libur || [];
+          
+          if (data.tanggal_mulai) {
+            document.getElementById("inputTglMulai").value = data.tanggal_mulai;
+            renderStatusTglMulai(data.tanggal_mulai);
+          }
+
+          if (data.jam_masuk_tepat) {
+            document.getElementById("inputJamMasukTepat").value = data.jam_masuk_tepat;
+            document.getElementById("inputJamMasukBatas").value = data.jam_masuk_batas || "08:00";
+            document.getElementById("inputJamPulangBiasa").value = data.jam_pulang_biasa || "13:00";
+            document.getElementById("inputJamPulangJumat").value = data.jam_pulang_jumat || "11:00";
+            
+            updateLabelJamDisplay(data.jam_masuk_tepat, data.jam_masuk_batas, data.jam_pulang_biasa, data.jam_pulang_jumat);
+          } else {
+            updateLabelJamDisplay("07:00", "08:00", "13:00", "11:00");
+          }
+
+          renderTabelLibur();
+        })
+        .catch(err => {
+          tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-rose-500 font-bold">Gagal memuat data dari server!</td></tr>`;
+        });
+    }
+
+    function simpanJamOperasional(e) {
+      e.preventDefault();
+      const jTepat = document.getElementById("inputJamMasukTepat").value;
+      const jBatas = document.getElementById("inputJamMasukBatas").value;
+      const jPulangBiasa = document.getElementById("inputJamPulangBiasa").value;
+      const jPulangJumat = document.getElementById("inputJamPulangJumat").value;
+      const btn = document.getElementById("btnSimpanJam");
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+
+      fetch(WEB_APP_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          tipe: "simpan_jam_operasional",
+          jamMasukTepat: jTepat,
+          jamMasukBatas: jBatas,
+          jamPulangBiasa: jPulangBiasa,
+          jamPulangJumat: jPulangJumat,
+          token: TOKEN_BENAR
+        })
+      })
+      .then(res => res.json())
+      .then(res => {
+        updateLabelJamDisplay(jTepat, jBatas, jPulangBiasa, jPulangJumat);
+        showNotif(res.message || "Aturan jam operasional berhasil disimpan!", "success");
+      })
+      .catch(err => showNotif("Terjadi kesalahan koneksi!", "error"))
+      .finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-floppy-disk text-xs"></i> Simpan Aturan Jam';
+      });
     }
 
     function toggleEditMode() {
@@ -361,24 +485,6 @@
         notif.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-rose-600 mr-1"></i> ${pesan}`;
       }
       setTimeout(() => notif.classList.add("hidden"), 4000);
-    }
-
-    function loadData() {
-      const tbody = document.getElementById("tabelLiburBody");
-      
-      fetch(WEB_APP_URL)
-        .then(res => res.json())
-        .then(data => {
-          listLibur = data.libur || [];
-          if (data.tanggal_mulai) {
-            document.getElementById("inputTglMulai").value = data.tanggal_mulai;
-            renderStatusTglMulai(data.tanggal_mulai);
-          }
-          renderTabelLibur();
-        })
-        .catch(err => {
-          tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-rose-500 font-bold">Gagal memuat data dari server!</td></tr>`;
-        });
     }
 
     function groupLiburList(list) {
