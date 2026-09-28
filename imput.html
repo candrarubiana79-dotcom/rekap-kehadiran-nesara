@@ -147,22 +147,32 @@
           </div>
         </div>
 
-        <!-- KONTEN MENU 2: SISWA LUPA ABSEN -->
+        <!-- KONTEN MENU 2: SISWA LUPA ABSEN (QUICKSET 06:59 & 14:20) -->
         <div id="sectionLupaAbsen" class="hidden space-y-3 bg-amber-50/60 p-3.5 rounded-2xl border border-amber-200/80">
           <div class="flex items-center gap-2 text-xs font-bold text-amber-800">
             <i class="fa-solid fa-circle-info text-amber-600 text-sm"></i>
-            <span>Presensi susulan untuk siswa yang hadir tanpa scan QR.</span>
+            <span>Isi salah satu atau keduanya (kosongkan jika tidak diperlukan).</span>
           </div>
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Jam Masuk</label>
-              <input type="time" id="inputJamMasuk" value="07:00"
+              <div class="flex items-center justify-between mb-1">
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600">Jam Masuk</label>
+                <button type="button" onclick="setJam('inputJamMasuk', '06:59')" class="text-[10px] text-indigo-600 font-extrabold hover:underline bg-indigo-50 px-2 py-0.5 rounded-lg border border-indigo-200 flex items-center gap-1 active:scale-95 transition">
+                  <i class="fa-solid fa-bolt text-[9px]"></i> 06:59
+                </button>
+              </div>
+              <input type="time" id="inputJamMasuk" value=""
                 class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
             </div>
             <div>
-              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Jam Pulang</label>
-              <input type="time" id="inputJamPulang" value="14:00"
+              <div class="flex items-center justify-between mb-1">
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600">Jam Pulang</label>
+                <button type="button" onclick="setJam('inputJamPulang', '14:20')" class="text-[10px] text-amber-700 font-extrabold hover:underline bg-amber-100 px-2 py-0.5 rounded-lg border border-amber-300 flex items-center gap-1 active:scale-95 transition">
+                  <i class="fa-solid fa-bolt text-[9px]"></i> 14:20
+                </button>
+              </div>
+              <input type="time" id="inputJamPulang" value=""
                 class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
             </div>
           </div>
@@ -195,6 +205,11 @@
 
     let masterSiswa = [];
     let currentMode = "tidak_hadir";
+
+    // Helper untuk tombol preset jam cepat
+    function setJam(elementId, jam) {
+      document.getElementById(elementId).value = jam;
+    }
 
     function catatAktivitas() {
       if (localStorage.getItem("isLoggedIn") === "true") {
@@ -336,7 +351,6 @@
       });
     }
 
-    // FUNGSI FILTER DENGAN AUTOMATIC ALPHABETICAL SORTING (A-Z)
     function filterSiswaByKelas() {
       const kelas = document.getElementById("selectKelas").value;
       const selectSiswa = document.getElementById("selectSiswa");
@@ -347,10 +361,7 @@
         return;
       }
 
-      // 1. Filter siswa berdasarkan kelas
       const filtered = masterSiswa.filter(s => s.kelas === kelas);
-
-      // 2. URUTKAN NAMA SISWA SESUAI ALFABET (A - Z)
       filtered.sort((a, b) => a.nama.localeCompare(b.nama, 'id', { sensitivity: 'base' }));
 
       selectSiswa.innerHTML = '<option value="">-- Pilih Siswa --</option>';
@@ -421,7 +432,10 @@
           notif.className = "p-3.5 rounded-2xl text-xs font-bold text-center bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-sm";
           notif.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> ' + (res.message || "Data presensi berhasil disimpan!");
 
+          // Reset pilihan siswa & input jam
           document.getElementById("selectSiswa").value = "";
+          document.getElementById("inputJamMasuk").value = "";
+          document.getElementById("inputJamPulang").value = "";
           document.querySelectorAll('input[name="statusTidakHadir"]').forEach(r => r.checked = false);
         } else {
           notif.className = "p-3.5 rounded-2xl text-xs font-bold text-center bg-rose-50 text-rose-800 border border-rose-200 shadow-sm";
