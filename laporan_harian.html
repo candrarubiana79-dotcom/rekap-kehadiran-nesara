@@ -19,13 +19,46 @@
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
     input, select, button { font-size: 12px !important; }
     
-    /* GAYA KHUSUS CETAK / PRINT */
+    /* GAYA KHUSUS CETAK / PRINT (2 KOLOM KIRI-KANAN) */
     @media print {
       .no-print { display: none !important; }
       body { background: white !important; color: black !important; padding: 0 !important; }
-      .print-container { box-shadow: none !important; border: none !important; width: 100% !important; max-width: 100% !important; padding: 0 !important; }
-      .class-card { page-break-inside: avoid; break-inside: avoid; border: 2px solid #1e293b !important; border-radius: 8px !important; margin-bottom: 16px !important; }
+      
+      .print-container { 
+        box-shadow: none !important; 
+        border: none !important; 
+        width: 100% !important; 
+        max-width: 100% !important; 
+        padding: 0 !important; 
+      }
+      
       .print-header { display: block !important; }
+
+      /* GRID 2 KOLOM PADA SAAT DICETAK */
+      #containerLaporanBody {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 10px !important;
+        align-items: start !important;
+      }
+
+      .class-card { 
+        page-break-inside: avoid; 
+        break-inside: avoid; 
+        border: 1.5px solid #0f172a !important; 
+        border-radius: 6px !important; 
+        padding: 8px !important;
+        margin-bottom: 0 !important;
+        box-shadow: none !important;
+      }
+
+      .class-card table {
+        font-size: 9px !important;
+      }
+
+      .class-card th, .class-card td {
+        padding: 3px 4px !important;
+      }
     }
   </style>
 </head>
@@ -36,13 +69,13 @@
   <div class="fixed -bottom-20 -right-20 w-64 h-64 bg-blue-600/20 rounded-full blur-2xl pointer-events-none no-print"></div>
 
   <!-- CONTAINER UTAMA -->
-  <div class="print-container w-full max-w-4xl mx-auto my-auto bg-white/95 backdrop-blur-xl p-4 sm:p-6 rounded-3xl shadow-2xl border border-white/20 space-y-4 relative z-10">
+  <div class="print-container w-full max-w-5xl mx-auto my-auto bg-white/95 backdrop-blur-xl p-4 sm:p-6 rounded-3xl shadow-2xl border border-white/20 space-y-4 relative z-10">
     
     <!-- HEADER RESMI UNTUK PRINT (HANYA MUNCUL SAAT DICETAK) -->
-    <div class="print-header hidden text-center border-b-2 border-slate-900 pb-3 mb-4">
+    <div class="print-header hidden text-center border-b-2 border-slate-900 pb-2 mb-3">
       <h1 class="text-base font-black uppercase tracking-wider text-slate-900">SMP NEGERI 1 RANCAH</h1>
-      <h2 class="text-sm font-extrabold text-slate-800">LAPORAN HARIAN KETIDAKHADIRAN SISWA</h2>
-      <p id="printInfoTanggal" class="text-xs font-semibold text-slate-600 mt-1">Tanggal: --/--/----</p>
+      <h2 class="text-xs font-extrabold text-slate-800">LAPORAN HARIAN KETIDAKHADIRAN SISWA</h2>
+      <p id="printInfoTanggal" class="text-[10px] font-semibold text-slate-600 mt-0.5">Tanggal: --/--/----</p>
     </div>
 
     <!-- HEADER TAMPILAN WEB -->
@@ -54,7 +87,7 @@
         <div>
           <div class="flex items-center gap-1.5">
             <h2 class="text-sm sm:text-base font-extrabold text-slate-900 leading-tight">Laporan Ketidakhadiran Harian</h2>
-            <span class="text-[9px] font-extrabold bg-amber-500/10 text-amber-600 border border-amber-500/20 px-1.5 py-0.5 rounded-full">Per Kelas & Alfabet</span>
+            <span class="text-[9px] font-extrabold bg-amber-500/10 text-amber-600 border border-amber-500/20 px-1.5 py-0.5 rounded-full">Layout 2 Kolom Hemat Kertas</span>
           </div>
           <p class="text-[9px] font-bold text-indigo-600 uppercase tracking-wider">SMPN 1 RANCAH</p>
         </div>
@@ -132,7 +165,7 @@
     <!-- BARIS TOMBOL AKSI -->
     <div class="flex items-center justify-between gap-2 no-print pt-1">
       <div class="text-[11px] font-extrabold text-slate-700 flex items-center gap-1.5">
-        <i class="fa-solid fa-boxes-stacked text-indigo-600"></i> Kelompok Data Per Kelas (Urut Alfabet)
+        <i class="fa-solid fa-boxes-stacked text-indigo-600"></i> Kelompok Data Per Kelas (2 Kolom Kiri-Kanan)
       </div>
       <div class="flex items-center gap-2">
         <button onclick="salinRekapWA()" 
@@ -146,9 +179,9 @@
       </div>
     </div>
 
-    <!-- AREA UTAMA TEMPAT WADAH KOTAK-KOTAK PER KELAS -->
-    <div id="containerLaporanBody" class="space-y-4">
-      <div class="p-8 text-center text-slate-400 font-medium italic bg-white rounded-2xl border border-slate-200 shadow-sm">
+    <!-- AREA UTAMA CONTAINER KOTAK KELAS (GRID 2 KOLOM UNTUK DUA SISI) -->
+    <div id="containerLaporanBody" class="grid grid-cols-1 md:grid-cols-2 gap-3.5 items-start">
+      <div class="col-span-full p-8 text-center text-slate-400 font-medium italic bg-white rounded-2xl border border-slate-200 shadow-sm">
         <i class="fa-solid fa-spinner fa-spin text-indigo-600 mr-2"></i> Memuat data presensi...
       </div>
     </div>
@@ -157,7 +190,7 @@
 
   <!-- FOOTER -->
   <footer class="text-center text-[10px] text-slate-400 py-1.5 relative z-10 no-print">
-    Presensi Digital • SMPN 1 Rancah <span class="font-bold text-slate-300">v1.1</span>
+    Presensi Digital • SMPN 1 Rancah <span class="font-bold text-slate-300">v1.2</span>
   </footer>
 
   <script>
@@ -190,7 +223,7 @@
 
     function loadData() {
       const container = document.getElementById("containerLaporanBody");
-      container.innerHTML = `<div class="p-8 text-center text-slate-400 font-medium italic bg-white rounded-2xl border border-slate-200 shadow-sm"><i class="fa-solid fa-spinner fa-spin text-indigo-600 mr-2"></i> Mengambil data dari server...</div>`;
+      container.innerHTML = `<div class="col-span-full p-8 text-center text-slate-400 font-medium italic bg-white rounded-2xl border border-slate-200 shadow-sm"><i class="fa-solid fa-spinner fa-spin text-indigo-600 mr-2"></i> Mengambil data dari server...</div>`;
 
       fetch(WEB_APP_URL)
         .then(res => res.json())
@@ -202,7 +235,7 @@
           renderLaporan();
         })
         .catch(err => {
-          container.innerHTML = `<div class="p-6 text-center text-rose-500 font-bold bg-rose-50 rounded-2xl border border-rose-200">Gagal memuat data dari server! Periksa koneksi internet Anda.</div>`;
+          container.innerHTML = `<div class="col-span-full p-6 text-center text-rose-500 font-bold bg-rose-50 rounded-2xl border border-rose-200">Gagal memuat data dari server! Periksa koneksi internet Anda.</div>`;
         });
     }
 
@@ -230,7 +263,7 @@
       const container = document.getElementById("containerLaporanBody");
 
       if (!selectedTgl) {
-        container.innerHTML = `<div class="p-6 text-center text-slate-400 font-medium italic bg-white rounded-2xl border border-slate-200">Silakan pilih tanggal terlebih dahulu.</div>`;
+        container.innerHTML = `<div class="col-span-full p-6 text-center text-slate-400 font-medium italic bg-white rounded-2xl border border-slate-200">Silakan pilih tanggal terlebih dahulu.</div>`;
         return;
       }
 
@@ -280,7 +313,7 @@
 
       if (filteredList.length === 0) {
         container.innerHTML = `
-          <div class="p-8 text-center text-slate-400 font-medium italic bg-white rounded-2xl border border-slate-200 shadow-sm">
+          <div class="col-span-full p-8 text-center text-slate-400 font-medium italic bg-white rounded-2xl border border-slate-200 shadow-sm">
             <i class="fa-solid fa-circle-check text-emerald-500 text-2xl mb-2 block"></i> 
             Tidak ada siswa Sakit, Izin, atau Alpa pada tanggal/kelas ini.
           </div>`;
@@ -302,41 +335,41 @@
 
       let html = "";
 
-      // 2. GENERATE KOTAK KELOMPOK PER KELAS
+      // 2. GENERATE KOTAK KELOMPOK PER KELAS (DISUSUN DALAM GRID 2 KOLOM)
       sortedClasses.forEach(klsName => {
         // 3. URUTKAN SISWA BERDASARKAN ALFABET (A-Z)
         groupedByKelas[klsName].sort((a, b) => a.nama.localeCompare(b.nama, 'id', { sensitivity: 'base' }));
 
         html += `
-          <div class="class-card bg-white p-4 rounded-2xl border border-slate-200/90 shadow-sm space-y-3 print:border-2 print:border-slate-800 print:rounded-lg print:p-3">
+          <div class="class-card bg-white p-3.5 rounded-2xl border border-slate-200/90 shadow-sm space-y-2.5 print:border-2 print:border-slate-800 print:rounded-lg print:p-2.5">
             
             <!-- HEADER KOTAK KELAS -->
-            <div class="flex items-center justify-between border-b pb-2.5 border-slate-100 print:border-slate-800">
-              <div class="flex items-center gap-2">
-                <span class="w-7 h-7 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center font-black text-xs no-print">
+            <div class="flex items-center justify-between border-b pb-2 border-slate-100 print:border-slate-800">
+              <div class="flex items-center gap-1.5">
+                <span class="w-6 h-6 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center font-black text-xs no-print">
                   <i class="fa-solid fa-users"></i>
                 </span>
-                <h4 class="font-extrabold text-slate-900 text-xs sm:text-sm tracking-wide uppercase">
+                <h4 class="font-extrabold text-slate-900 text-xs tracking-wide uppercase">
                   KELAS ${klsName}
                 </h4>
               </div>
-              <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-100 print:border-slate-800 print:text-black print:bg-transparent">
-                ${groupedByKelas[klsName].length} Siswa Tidak Hadir
+              <span class="text-[9px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100 print:border-slate-800 print:text-black print:bg-transparent">
+                ${groupedByKelas[klsName].length} Siswa
               </span>
             </div>
 
-            <!-- TABEL DENGAN KOLOM CHECKLIST SAKIT, IZIN, ALPA -->
+            <!-- TABEL CHECKLIST SAKIT, IZIN, ALPA -->
             <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse text-xs print:text-[11px]">
+              <table class="w-full text-left border-collapse text-xs print:text-[10px]">
                 <thead>
-                  <tr class="bg-slate-50 text-slate-600 font-bold text-[9px] uppercase tracking-wider border-b border-slate-200 print:bg-slate-200 print:text-black print:border-slate-800">
-                    <th class="p-2 w-8 text-center border-r border-slate-200 print:border-slate-800">No</th>
-                    <th class="p-2 w-24 border-r border-slate-200 print:border-slate-800">NISN</th>
-                    <th class="p-2 border-r border-slate-200 print:border-slate-800">Nama Siswa</th>
-                    <th class="p-2 w-16 text-center border-r border-slate-200 print:border-slate-800">Sakit</th>
-                    <th class="p-2 w-16 text-center border-r border-slate-200 print:border-slate-800">Izin</th>
-                    <th class="p-2 w-16 text-center border-r border-slate-200 print:border-slate-800">Alpa</th>
-                    <th class="p-2 w-28 text-center no-print">Waktu Catat</th>
+                  <tr class="bg-slate-50 text-slate-600 font-bold text-[8px] print:text-[8px] uppercase tracking-wider border-b border-slate-200 print:bg-slate-200 print:text-black print:border-slate-800">
+                    <th class="p-1.5 w-6 text-center border-r border-slate-200 print:border-slate-800">No</th>
+                    <th class="p-1.5 w-16 border-r border-slate-200 print:border-slate-800">NISN</th>
+                    <th class="p-1.5 border-r border-slate-200 print:border-slate-800">Nama Siswa</th>
+                    <th class="p-1.5 w-10 text-center border-r border-slate-200 print:border-slate-800">Sakit</th>
+                    <th class="p-1.5 w-10 text-center border-r border-slate-200 print:border-slate-800">Izin</th>
+                    <th class="p-1.5 w-10 text-center border-r border-slate-200 print:border-slate-800">Alpa</th>
+                    <th class="p-1.5 w-20 text-center no-print">Waktu</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 print:divide-slate-800">
@@ -349,19 +382,19 @@
           const isAlpa = kUpper === "ALPA" || kUpper === "ALPHA";
 
           // Ceklis ✓ atau kosong
-          const checkSakit = isSakit ? '<span class="text-amber-600 font-black text-sm print:text-black">✓</span>' : '';
-          const checkIzin = isIzin ? '<span class="text-blue-600 font-black text-sm print:text-black">✓</span>' : '';
-          const checkAlpa = isAlpa ? '<span class="text-rose-600 font-black text-sm print:text-black">✓</span>' : '';
+          const checkSakit = isSakit ? '<span class="text-amber-600 font-black text-xs print:text-black">✓</span>' : '';
+          const checkIzin = isIzin ? '<span class="text-blue-600 font-black text-xs print:text-black">✓</span>' : '';
+          const checkAlpa = isAlpa ? '<span class="text-rose-600 font-black text-xs print:text-black">✓</span>' : '';
 
           html += `
             <tr class="hover:bg-slate-50 transition">
-              <td class="p-2 text-center text-slate-400 font-medium border-r border-slate-100 print:border-slate-800 print:text-black">${idx + 1}</td>
-              <td class="p-2 font-mono text-[10px] text-slate-500 border-r border-slate-100 print:border-slate-800 print:text-black">${siswa.kode || '-'}</td>
-              <td class="p-2 font-extrabold text-slate-800 text-xs border-r border-slate-100 print:border-slate-800 print:text-black">${siswa.nama}</td>
-              <td class="p-2 text-center border-r border-slate-100 print:border-slate-800">${checkSakit}</td>
-              <td class="p-2 text-center border-r border-slate-100 print:border-slate-800">${checkIzin}</td>
-              <td class="p-2 text-center border-r border-slate-100 print:border-slate-800">${checkAlpa}</td>
-              <td class="p-2 text-center text-slate-400 text-[9px] font-medium no-print">${siswa.timestamp || '-'}</td>
+              <td class="p-1.5 text-center text-slate-400 font-medium border-r border-slate-100 print:border-slate-800 print:text-black">${idx + 1}</td>
+              <td class="p-1.5 font-mono text-[9px] text-slate-500 border-r border-slate-100 print:border-slate-800 print:text-black">${siswa.kode || '-'}</td>
+              <td class="p-1.5 font-extrabold text-slate-800 text-[11px] print:text-[10px] border-r border-slate-100 print:border-slate-800 print:text-black">${siswa.nama}</td>
+              <td class="p-1.5 text-center border-r border-slate-100 print:border-slate-800">${checkSakit}</td>
+              <td class="p-1.5 text-center border-r border-slate-100 print:border-slate-800">${checkIzin}</td>
+              <td class="p-1.5 text-center border-r border-slate-100 print:border-slate-800">${checkAlpa}</td>
+              <td class="p-1.5 text-center text-slate-400 text-[8px] font-medium no-print">${siswa.timestamp || '-'}</td>
             </tr>
           `;
         });
