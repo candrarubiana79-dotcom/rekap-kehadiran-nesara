@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Pengaturan Kalender & Sistem - SMPN 1 RANCAH (v3.0)</title>
+  <title>Pengaturan Kalender & Sistem - SMPN 1 RANCAH (v3.1)</title>
   
   <!-- SKRIP PENGAMAN & AUTO LOGOUT -->
   <script src="auth-guard.js"></script>
@@ -38,7 +38,7 @@
         <div>
           <div class="flex items-center gap-1.5">
             <h2 class="text-sm sm:text-base font-extrabold text-slate-900 leading-tight">Pengaturan Kalender & Sistem</h2>
-            <span class="text-[9px] font-extrabold bg-indigo-500/10 text-indigo-600 border border-indigo-500/20 px-1.5 py-0.5 rounded-full">v3.0</span>
+            <span class="text-[9px] font-extrabold bg-indigo-500/10 text-indigo-600 border border-indigo-500/20 px-1.5 py-0.5 rounded-full">v3.1</span>
           </div>
           <p class="text-[9px] font-bold text-indigo-600 uppercase tracking-wider">SMPN 1 RANCAH</p>
         </div>
@@ -51,10 +51,10 @@
     <!-- NOTIFIKASI TOAST -->
     <div id="notif" class="hidden p-3 rounded-xl text-xs font-bold text-center border transition-all duration-300"></div>
 
-    <!-- GRID DUA KOLOM PENGATURAN SISTEM -->
+    <!-- GRID DUA KOLOM PENGATURAN & INFORMASI -->
     <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
       
-      <!-- 1. PENGATURAN TANGGAL MULAI OPERASIONAL -->
+      <!-- 1. FORM PENGATURAN TANGGAL MULAI OPERASIONAL -->
       <form onsubmit="simpanTanggalMulai(event)" class="md:col-span-5 bg-indigo-50/70 p-3.5 rounded-2xl border border-indigo-100 space-y-2.5 flex flex-col justify-between">
         <div class="space-y-2">
           <div class="flex items-center gap-2">
@@ -63,7 +63,7 @@
           </div>
           
           <p class="text-[10px] text-slate-600 leading-relaxed">
-            Sistem tidak menghitung siswa <strong>Alpa</strong> pada tanggal sebelum tanggal operasional ini[cite: 1, 2].
+            Sistem tidak menghitung siswa <strong>Alpa</strong> sebelum tanggal ini[cite: 1, 2].
           </p>
 
           <div id="infoTglMulai" class="hidden p-2 rounded-xl bg-emerald-100/80 border border-emerald-300 text-[10px] font-bold text-emerald-900 flex items-center gap-1.5">
@@ -85,83 +85,60 @@
         </div>
       </form>
 
-      <!-- 2. PENGATURAN RENTANG JAM OPERASIONAL LENGKAP (SESUAI BACKEND APP SCRIPT) -->
-      <form onsubmit="simpanJamOperasional(event)" class="md:col-span-7 bg-amber-50/70 p-3.5 rounded-2xl border border-amber-200/80 space-y-2.5">
-        <div class="flex items-center justify-between">
+      <!-- 2. KARTU INFORMASI JAM OPERASIONAL RESMI (READ-ONLY SESUAI APP SCRIPT) -->
+      <div class="md:col-span-7 bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 space-y-2 flex flex-col justify-between">
+        <div class="flex items-center justify-between border-b border-slate-200/80 pb-2">
           <div class="flex items-center gap-2">
-            <i class="fa-solid fa-clock text-amber-600 text-xs"></i>
-            <h3 class="text-[11px] font-extrabold uppercase tracking-wider text-amber-950">Aturan Rentang Jam Absen</h3>
+            <i class="fa-solid fa-clock text-indigo-600 text-xs"></i>
+            <h3 class="text-[11px] font-extrabold uppercase tracking-wider text-slate-900">Jadwal Operasional Scanner</h3>
           </div>
-          <span class="text-[9px] font-bold bg-amber-200/80 text-amber-900 px-2 py-0.5 rounded-md">Presisi Backend</span>
+          <span class="text-[8px] font-extrabold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full uppercase tracking-wider">Terintegrasi</span>
         </div>
 
-        <!-- 1. SESI MASUK -->
-        <div class="bg-white/80 p-2 rounded-xl border border-amber-200 space-y-1.5">
-          <div class="text-[10px] font-extrabold text-slate-700 flex items-center gap-1">
-            <i class="fa-solid fa-right-to-bracket text-emerald-600 text-[9px]"></i> Sesi Masuk (Senin - Jumat)
-          </div>
-          <div class="grid grid-cols-3 gap-1.5">
-            <div>
-              <label class="block text-[8px] font-bold uppercase text-slate-500">Jam Awal Scan</label>
-              <input type="time" id="inputJamMasukAwal" value="06:00" required
-                class="w-full px-1.5 py-1 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:ring-1 focus:ring-amber-500">
+        <!-- DETAIL ATURAN JAM ABSEN -->
+        <div class="space-y-1.5 text-[10px]">
+          
+          <!-- SESI MASUK -->
+          <div class="bg-white p-2 rounded-xl border border-slate-200/60 shadow-2xs space-y-1">
+            <div class="flex items-center justify-between font-bold text-slate-800">
+              <span class="flex items-center gap-1 text-slate-700">
+                <i class="fa-solid fa-right-to-bracket text-emerald-600 text-[9px]"></i> Sesi Masuk (Senin - Jumat)
+              </span>
+              <span class="text-[9px] font-extrabold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">06:00 - 08:00 WIB</span>
             </div>
-            <div>
-              <label class="block text-[8px] font-bold uppercase text-slate-500">Batas Tepat Waktu</label>
-              <input type="time" id="inputJamMasukTepat" value="07:00" required
-                class="w-full px-1.5 py-1 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:ring-1 focus:ring-amber-500">
-            </div>
-            <div>
-              <label class="block text-[8px] font-bold uppercase text-slate-500">Jam Akhir Scan</label>
-              <input type="time" id="inputJamMasukAkhir" value="08:00" required
-                class="w-full px-1.5 py-1 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:ring-1 focus:ring-amber-500">
+            <div class="grid grid-cols-2 gap-1 text-[9px] pt-0.5 border-t border-slate-100 text-slate-600">
+              <div>• Tepat Waktu: <strong>06:00 - 07:00</strong></div>
+              <div>• Terlambat: <strong>07:01 - 08:00</strong></div>
             </div>
           </div>
+
+          <!-- SESI PULANG SENIN-KAMIS -->
+          <div class="bg-white p-2 rounded-xl border border-slate-200/60 shadow-2xs space-y-1">
+            <div class="flex items-center justify-between font-bold text-slate-800">
+              <span class="flex items-center gap-1 text-slate-700">
+                <i class="fa-solid fa-right-from-bracket text-indigo-600 text-[9px]"></i> Pulang (Senin - Kamis)
+              </span>
+              <span class="text-[9px] font-extrabold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-200">13:00 - 16:00 WIB</span>
+            </div>
+          </div>
+
+          <!-- SESI PULANG JUMAT -->
+          <div class="bg-white p-2 rounded-xl border border-slate-200/60 shadow-2xs space-y-1">
+            <div class="flex items-center justify-between font-bold text-slate-800">
+              <span class="flex items-center gap-1 text-slate-700">
+                <i class="fa-solid fa-mosque text-amber-600 text-[9px]"></i> Pulang (Khusus Jumat)
+              </span>
+              <span class="text-[9px] font-extrabold text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">11:00 - 15:00 WIB</span>
+            </div>
+          </div>
+
         </div>
 
-        <!-- 2. SESI PULANG SENIN - KAMIS -->
-        <div class="bg-white/80 p-2 rounded-xl border border-amber-200 space-y-1.5">
-          <div class="text-[10px] font-extrabold text-slate-700 flex items-center gap-1">
-            <i class="fa-solid fa-right-from-bracket text-indigo-600 text-[9px]"></i> Sesi Pulang (Senin - Kamis)
-          </div>
-          <div class="grid grid-cols-2 gap-1.5">
-            <div>
-              <label class="block text-[8px] font-bold uppercase text-slate-500">Jam Awal Pulang</label>
-              <input type="time" id="inputJamPulangBiasaAwal" value="13:00" required
-                class="w-full px-1.5 py-1 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:ring-1 focus:ring-amber-500">
-            </div>
-            <div>
-              <label class="block text-[8px] font-bold uppercase text-slate-500">Jam Akhir Pulang</label>
-              <input type="time" id="inputJamPulangBiasaAkhir" value="16:00" required
-                class="w-full px-1.5 py-1 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:ring-1 focus:ring-amber-500">
-            </div>
-          </div>
-        </div>
-
-        <!-- 3. SESI PULANG JUMAT -->
-        <div class="bg-white/80 p-2 rounded-xl border border-amber-200 space-y-1.5">
-          <div class="text-[10px] font-extrabold text-slate-700 flex items-center gap-1">
-            <i class="fa-solid fa-mosque text-amber-600 text-[9px]"></i> Sesi Pulang (Khusus Jumat)
-          </div>
-          <div class="grid grid-cols-2 gap-1.5">
-            <div>
-              <label class="block text-[8px] font-bold uppercase text-slate-500">Jam Awal Pulang</label>
-              <input type="time" id="inputJamPulangJumatAwal" value="11:00" required
-                class="w-full px-1.5 py-1 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:ring-1 focus:ring-amber-500">
-            </div>
-            <div>
-              <label class="block text-[8px] font-bold uppercase text-slate-500">Jam Akhir Pulang</label>
-              <input type="time" id="inputJamPulangJumatAkhir" value="15:00" required
-                class="w-full px-1.5 py-1 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:ring-1 focus:ring-amber-500">
-            </div>
-          </div>
-        </div>
-
-        <button type="submit" id="btnSimpanJam"
-          class="w-full bg-amber-600 hover:bg-amber-700 active:scale-95 text-white font-bold py-2 px-3 rounded-xl transition shadow-md shadow-amber-600/20 flex items-center justify-center gap-1.5">
-          <i class="fa-solid fa-floppy-disk text-xs"></i> Simpan Semua Aturan Jam
-        </button>
-      </form>
+        <p class="text-[9px] text-slate-400 italic text-center pt-0.5">
+          <i class="fa-solid fa-shield-halved text-[8px] mr-1"></i>
+          Di luar jam operasional di atas, sistem scanner akan menolak proses scan[cite: 2].
+        </p>
+      </div>
 
     </div>
 
@@ -342,11 +319,11 @@
 
   <!-- FOOTER -->
   <footer class="text-center text-[10px] text-slate-400 py-1.5 relative z-10">
-    Presensi Digital • SMPN 1 Rancah <span class="font-bold text-slate-300">v3.0</span>
+    Presensi Digital • SMPN 1 Rancah <span class="font-bold text-slate-300">v3.1</span>
   </footer>
 
   <script>
-    const APP_VERSION = "v3.0";
+    const APP_VERSION = "v3.1";
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzq05A9BpVJFjNkHn7p2QDjbaY2ajsWjVXk5sVDkH3rStFaAC5XgEkndZSg39zOLX_2/exec";
     const TOKEN_BENAR = "GURU2026";
     
@@ -389,55 +366,11 @@
             renderStatusTglMulai(data.tanggal_mulai);
           }
 
-          if (data.jam_masuk_awal) {
-            document.getElementById("inputJamMasukAwal").value = data.jam_masuk_awal || "06:00";
-            document.getElementById("inputJamMasukTepat").value = data.jam_masuk_tepat || "07:00";
-            document.getElementById("inputJamMasukAkhir").value = data.jam_masuk_akhir || "08:00";
-            document.getElementById("inputJamPulangBiasaAwal").value = data.jam_pulang_biasa_awal || "13:00";
-            document.getElementById("inputJamPulangBiasaAkhir").value = data.jam_pulang_biasa_akhir || "16:00";
-            document.getElementById("inputJamPulangJumatAwal").value = data.jam_pulang_jumat_awal || "11:00";
-            document.getElementById("inputJamPulangJumatAkhir").value = data.jam_pulang_jumat_akhir || "15:00";
-          }
-
           renderTabelLibur();
         })
         .catch(err => {
           tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-rose-500 font-bold">Gagal memuat data dari server!</td></tr>`;
         });
-    }
-
-    function simpanJamOperasional(e) {
-      e.preventDefault();
-      const btn = document.getElementById("btnSimpanJam");
-
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
-
-      const payload = {
-        tipe: "simpan_jam_operasional",
-        jamMasukAwal: document.getElementById("inputJamMasukAwal").value,
-        jamMasukTepat: document.getElementById("inputJamMasukTepat").value,
-        jamMasukAkhir: document.getElementById("inputJamMasukAkhir").value,
-        jamPulangBiasaAwal: document.getElementById("inputJamPulangBiasaAwal").value,
-        jamPulangBiasaAkhir: document.getElementById("inputJamPulangBiasaAkhir").value,
-        jamPulangJumatAwal: document.getElementById("inputJamPulangJumatAwal").value,
-        jamPulangJumatAkhir: document.getElementById("inputJamPulangJumatAkhir").value,
-        token: TOKEN_BENAR
-      };
-
-      fetch(WEB_APP_URL, {
-        method: "POST",
-        body: JSON.stringify(payload)
-      })
-      .then(res => res.json())
-      .then(res => {
-        showNotif(res.message || "Seluruh aturan jam operasional berhasil disimpan!", "success");
-      })
-      .catch(err => showNotif("Terjadi kesalahan koneksi!", "error"))
-      .finally(() => {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-floppy-disk text-xs"></i> Simpan Semua Aturan Jam';
-      });
     }
 
     function toggleEditMode() {
