@@ -100,10 +100,10 @@
         </a>
       </div>
 
-      <!-- FORM PRESENSI (UNTUK MENU 1 & 2) -->
+      <!-- FORM PRESENSI -->
       <form id="mainForm" onsubmit="handleSubmit(event)" class="space-y-4">
         
-        <!-- DROPDOWN PILIHAN UMUM (TANGGAL, KELAS, SISWA) -->
+        <!-- DROPDOWN PILIHAN UMUM -->
         <div id="commonInputs" class="space-y-3.5">
           <div>
             <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Tanggal Presensi</label>
@@ -120,7 +120,7 @@
           </div>
 
           <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Pilih Siswa</label>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Pilih Siswa (Urut A-Z)</label>
             <select id="selectSiswa" required disabled
               class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:outline-none disabled:bg-slate-100 disabled:text-slate-400 transition">
               <option value="">-- Pilih Kelas Terlebih Dahulu --</option>
@@ -196,7 +196,6 @@
     let masterSiswa = [];
     let currentMode = "tidak_hadir";
 
-    // --- MANAJEMEN SESI & INAKTIVITAS ---
     function catatAktivitas() {
       if (localStorage.getItem("isLoggedIn") === "true") {
         localStorage.setItem("lastActivity", Date.now().toString());
@@ -217,7 +216,6 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-      // Auto set tanggal hari ini
       const now = new Date();
       const yyyy = now.getFullYear();
       const mm = String(now.getMonth() + 1).padStart(2, '0');
@@ -338,6 +336,7 @@
       });
     }
 
+    // FUNGSI FILTER DENGAN AUTOMATIC ALPHABETICAL SORTING (A-Z)
     function filterSiswaByKelas() {
       const kelas = document.getElementById("selectKelas").value;
       const selectSiswa = document.getElementById("selectSiswa");
@@ -348,7 +347,12 @@
         return;
       }
 
+      // 1. Filter siswa berdasarkan kelas
       const filtered = masterSiswa.filter(s => s.kelas === kelas);
+
+      // 2. URUTKAN NAMA SISWA SESUAI ALFABET (A - Z)
+      filtered.sort((a, b) => a.nama.localeCompare(b.nama, 'id', { sensitivity: 'base' }));
+
       selectSiswa.innerHTML = '<option value="">-- Pilih Siswa --</option>';
       
       filtered.forEach(s => {
@@ -417,7 +421,6 @@
           notif.className = "p-3.5 rounded-2xl text-xs font-bold text-center bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-sm";
           notif.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> ' + (res.message || "Data presensi berhasil disimpan!");
 
-          // Kosongkan pilihan siswa saja agar pilihan Kelas & Tanggal tetap tersimpan untuk siswa berikutnya
           document.getElementById("selectSiswa").value = "";
           document.querySelectorAll('input[name="statusTidakHadir"]').forEach(r => r.checked = false);
         } else {
