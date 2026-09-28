@@ -27,7 +27,7 @@
   <div class="fixed -bottom-20 -right-20 w-64 h-64 bg-blue-600/20 rounded-full blur-2xl pointer-events-none"></div>
 
   <!-- CONTAINER UTAMA -->
-  <div class="w-full max-w-2xl mx-auto my-auto bg-white/95 backdrop-blur-xl p-4 sm:p-6 rounded-3xl shadow-2xl border border-white/20 space-y-4 relative z-10">
+  <div class="w-full max-w-3xl mx-auto my-auto bg-white/95 backdrop-blur-xl p-4 sm:p-6 rounded-3xl shadow-2xl border border-white/20 space-y-4 relative z-10">
     
     <!-- Header -->
     <div class="flex items-center justify-between border-b pb-3 border-slate-100">
@@ -76,7 +76,7 @@
       </div>
     </form>
 
-    <!-- 2. BARIS SINKRONISASI AUTO & FORM MANUAL (SINGLE/RANGE) -->
+    <!-- 2. BARIS SINKRONISASI AUTO & FORM INPUT LIBUR -->
     <div class="bg-slate-50 p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 space-y-3">
       
       <!-- TOMBOL SINKRON NASIONAL AUTO -->
@@ -100,14 +100,14 @@
         <div class="flex items-center justify-between">
           <h3 class="text-[11px] font-bold uppercase tracking-wider text-slate-600">Atur Libur Khusus Sekolah</h3>
           
-          <!-- TOGGLE MODE INPUT (SINGLE vs RENTANG) -->
+          <!-- TOGGLE MODE INPUT (1 HARI vs RENTANG TANGGAL) -->
           <div class="flex bg-slate-200 p-0.5 rounded-lg text-[10px] font-bold">
-            <button type="button" id="btnModeSingle" onclick="setModeInput('single')" class="px-2 py-0.5 rounded-md bg-white text-indigo-600 shadow-sm">1 Hari</button>
+            <button type="button" id="btnModeSingle" onclick="setModeInput('single')" class="px-2 py-0.5 rounded-md bg-white text-indigo-600 shadow-sm font-extrabold">1 Hari</button>
             <button type="button" id="btnModeRange" onclick="setModeInput('range')" class="px-2 py-0.5 rounded-md text-slate-600 hover:text-slate-900">Rentang Tanggal</button>
           </div>
         </div>
         
-        <!-- INPUT TANGGAL TUNGGAL (MODE 1 HARI) -->
+        <!-- INPUT MODE 1 HARI -->
         <div id="wrapperSingle" class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-end">
           <div class="sm:col-span-4">
             <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Tanggal Libur</label>
@@ -127,7 +127,7 @@
           </div>
         </div>
 
-        <!-- INPUT RENTANG TANGGAL (MODE RENTANG 5 - 15) -->
+        <!-- INPUT MODE RENTANG TANGGAL -->
         <div id="wrapperRange" class="hidden space-y-2">
           <div class="grid grid-cols-2 gap-2">
             <div>
@@ -160,26 +160,44 @@
 
     </div>
 
-    <!-- 3. DAFTAR HARI LIBUR TERDAFTAR -->
-    <div class="space-y-2">
-      <div class="flex items-center justify-between">
-        <h3 class="text-[11px] font-bold uppercase tracking-wider text-slate-600">Daftar Libur Terdaftar</h3>
-        <span id="totalLiburText" class="text-[10px] font-extrabold bg-indigo-100 text-indigo-700 px-2.5 py-0.5 rounded-full">0 Hari</span>
+    <!-- 3. DAFTAR HARI LIBUR TERDAFTAR + FITUR BULK ACTIONS -->
+    <div class="space-y-2 pt-1">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <h3 class="text-[11px] font-bold uppercase tracking-wider text-slate-600">Daftar Libur Terdaftar</h3>
+          <span id="totalLiburText" class="text-[10px] font-extrabold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">0 Hari</span>
+        </div>
+
+        <!-- AKSI HAPUS BANYAK & HAPUS SEMUA -->
+        <div class="flex items-center gap-1.5">
+          <button id="btnHapusTerpilih" onclick="hapusTerpilih()" disabled
+            class="hidden bg-rose-600 hover:bg-rose-700 disabled:bg-slate-300 text-white font-bold px-2.5 py-1 rounded-lg text-[10px] transition shadow-sm active:scale-95 items-center gap-1">
+            <i class="fa-solid fa-trash-can text-[9px]"></i> Hapus Terpilih (<span id="countSelected">0</span>)
+          </button>
+          
+          <button onclick="hapusSemuaLibur()" class="bg-slate-200 hover:bg-rose-100 hover:text-rose-700 text-slate-600 font-bold px-2.5 py-1 rounded-lg text-[10px] transition active:scale-95 flex items-center gap-1">
+            <i class="fa-solid fa-dumpster text-[9px]"></i> Hapus Semua Libur
+          </button>
+        </div>
       </div>
 
-      <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm max-h-60 overflow-y-auto">
+      <!-- TABEL DAFTAR LIBUR -->
+      <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm max-h-72 overflow-y-auto">
         <table class="w-full text-left border-collapse text-xs">
           <thead class="sticky top-0 bg-slate-100 shadow-sm z-10">
             <tr class="text-slate-600 font-bold uppercase text-[9px] tracking-wider border-b border-slate-200">
+              <th class="p-2.5 w-8 text-center">
+                <input type="checkbox" id="checkAll" onchange="toggleSelectAll(this)" class="accent-indigo-600 rounded cursor-pointer">
+              </th>
               <th class="p-2.5 w-10 text-center">No</th>
-              <th class="p-2.5 w-32">Tanggal</th>
+              <th class="p-2.5 w-44">Tanggal & Bulan</th>
               <th class="p-2.5">Keterangan</th>
-              <th class="p-2.5 w-16 text-center">Aksi</th>
+              <th class="p-2.5 w-20 text-center">Aksi</th>
             </tr>
           </thead>
           <tbody id="tabelLiburBody" class="divide-y divide-slate-100">
             <tr>
-              <td colspan="4" class="p-6 text-center text-slate-400 font-medium">
+              <td colspan="5" class="p-6 text-center text-slate-400 font-medium">
                 <i class="fa-solid fa-spinner fa-spin text-indigo-600 mr-2"></i> Memuat data...
               </td>
             </tr>
@@ -188,6 +206,44 @@
       </div>
     </div>
 
+  </div>
+
+  <!-- MODAL EDIT TANGGAL LIBUR -->
+  <div id="editModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+    <div class="bg-white w-full max-w-md p-5 rounded-2xl shadow-2xl border border-slate-100 space-y-4">
+      <div class="flex items-center justify-between border-b pb-3">
+        <h3 class="text-sm font-extrabold text-slate-900"><i class="fa-solid fa-pen-to-square text-indigo-600 mr-1.5"></i> Edit Hari Libur</h3>
+        <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600 text-sm"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <form onsubmit="simpanEditGroup(event)" class="space-y-3">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Dari Tanggal</label>
+            <input type="date" id="editTglMulai" required
+              class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Sampai Tanggal</label>
+            <input type="date" id="editTglSelesai" required
+              class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Keterangan Libur</label>
+          <input type="text" id="editKeterangan" required placeholder="Contoh: Libur Semester"
+            class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" onclick="closeEditModal()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl text-xs transition">Batal</button>
+          <button type="submit" id="btnSimpanEdit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs transition shadow-md shadow-indigo-500/20 flex items-center gap-1.5">
+            <i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <!-- FOOTER -->
@@ -199,8 +255,11 @@
     const APP_VERSION = "v3.0";
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzq05A9BpVJFjNkHn7p2QDjbaY2ajsWjVXk5sVDkH3rStFaAC5XgEkndZSg39zOLX_2/exec";
     const TOKEN_BENAR = "GURU2026";
+    
     let listLibur = [];
+    let groupedLibur = [];
     let modeInputActive = "single"; // 'single' atau 'range'
+    let editingGroupDates = [];
 
     document.addEventListener("DOMContentLoaded", () => {
       loadData();
@@ -252,10 +311,332 @@
           renderTabelLibur();
         })
         .catch(err => {
-          tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-rose-500 font-bold">Gagal memuat data dari server!</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-rose-500 font-bold">Gagal memuat data dari server!</td></tr>`;
         });
     }
 
+    // ALGORITMA PENGELOMPOKAN LIBUR BERURUTAN (RANGE GROUPING)
+    function groupLiburList(list) {
+      if (!list || list.length === 0) return [];
+      
+      let sorted = [...list].sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
+      let groups = [];
+      let currentGroup = null;
+
+      sorted.forEach(item => {
+        let itemDate = new Date(item.tanggal + "T00:00:00");
+        let itemKet = (item.keterangan || "").trim();
+
+        if (!currentGroup) {
+          currentGroup = {
+            startDate: item.tanggal,
+            endDate: item.tanggal,
+            keterangan: itemKet,
+            dates: [item.tanggal]
+          };
+        } else {
+          let lastDate = new Date(currentGroup.endDate + "T00:00:00");
+          let diffDays = Math.round((itemDate - lastDate) / (1000 * 60 * 60 * 24));
+
+          if (diffDays === 1 && itemKet.toLowerCase() === currentGroup.keterangan.toLowerCase()) {
+            currentGroup.endDate = item.tanggal;
+            currentGroup.dates.push(item.tanggal);
+          } else {
+            groups.push(currentGroup);
+            currentGroup = {
+              startDate: item.tanggal,
+              endDate: item.tanggal,
+              keterangan: itemKet,
+              dates: [item.tanggal]
+            };
+          }
+        }
+      });
+
+      if (currentGroup) groups.push(currentGroup);
+      return groups;
+    }
+
+    // HELPER BADGE WARNA BERDASARKAN BULAN
+    function getMonthBadge(tglStr) {
+      if (!tglStr) return { name: "-", style: "bg-slate-100 text-slate-700 border-slate-200" };
+      const monthNum = parseInt(tglStr.split("-")[1], 10);
+      const bulanNama = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+      
+      const styles = [
+        "bg-blue-100 text-blue-800 border-blue-300",       // 1 Jan
+        "bg-purple-100 text-purple-800 border-purple-300", // 2 Feb
+        "bg-emerald-100 text-emerald-800 border-emerald-300", // 3 Mar
+        "bg-amber-100 text-amber-800 border-amber-300",     // 4 Apr
+        "bg-rose-100 text-rose-800 border-rose-300",       // 5 Mei
+        "bg-sky-100 text-sky-800 border-sky-300",         // 6 Jun
+        "bg-cyan-100 text-cyan-800 border-cyan-300",       // 7 Jul
+        "bg-red-100 text-red-800 border-red-300",         // 8 Agt
+        "bg-orange-100 text-orange-800 border-orange-300", // 9 Sep
+        "bg-teal-100 text-teal-800 border-teal-300",       // 10 Okt
+        "bg-violet-100 text-violet-800 border-violet-300", // 11 Nov
+        "bg-fuchsia-100 text-fuchsia-800 border-fuchsia-300" // 12 Des
+      ];
+
+      const idx = Math.max(0, Math.min(11, monthNum - 1));
+      return {
+        name: bulanNama[idx] || "-",
+        style: styles[idx]
+      };
+    }
+
+    function formatRangeTanggalIndo(startDateStr, endDateStr) {
+      const bulan = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agt", "Sep", "Okt", "Nov", "Des"];
+      const pA = startDateStr.split("-");
+      const pB = endDateStr.split("-");
+
+      if (startDateStr === endDateStr) {
+        return `${parseInt(pA[2], 10)} ${bulan[parseInt(pA[1], 10) - 1]} ${pA[0]}`;
+      }
+
+      if (pA[0] === pB[0] && pA[1] === pB[1]) {
+        return `${parseInt(pA[2], 10)} - ${parseInt(pB[2], 10)} ${bulan[parseInt(pA[1], 10) - 1]} ${pA[0]}`;
+      } else if (pA[0] === pB[0]) {
+        return `${parseInt(pA[2], 10)} ${bulan[parseInt(pA[1], 10) - 1]} - ${parseInt(pB[2], 10)} ${bulan[parseInt(pB[1], 10) - 1]} ${pA[0]}`;
+      } else {
+        return `${parseInt(pA[2], 10)} ${bulan[parseInt(pA[1], 10) - 1]} ${pA[0]} - ${parseInt(pB[2], 10)} ${bulan[parseInt(pB[1], 10) - 1]} ${pB[0]}`;
+      }
+    }
+
+    function renderTabelLibur() {
+      const tbody = document.getElementById("tabelLiburBody");
+      const totalText = document.getElementById("totalLiburText");
+
+      groupedLibur = groupLiburList(listLibur);
+      totalText.textContent = `${listLibur.length} Hari (${groupedLibur.length} Periode)`;
+
+      if (groupedLibur.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="p-5 text-center text-slate-400 font-medium italic">Belum ada hari libur terdaftar.</td></tr>`;
+        document.getElementById("checkAll").checked = false;
+        updateBulkDeleteState();
+        return;
+      }
+
+      let html = "";
+      groupedLibur.forEach((group, index) => {
+        const tglText = formatRangeTanggalIndo(group.startDate, group.endDate);
+        const monthBadge = getMonthBadge(group.startDate);
+        const durasiHari = group.dates.length;
+
+        html += `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="p-2.5 text-center">
+              <input type="checkbox" class="checkGroup accent-indigo-600 rounded cursor-pointer" 
+                data-dates='${JSON.stringify(group.dates)}' onchange="updateBulkDeleteState()">
+            </td>
+            <td class="p-2.5 text-center text-slate-400 font-medium text-[11px]">${index + 1}</td>
+            <td class="p-2.5">
+              <div class="font-extrabold text-slate-800 text-[11px] flex items-center gap-1.5 flex-wrap">
+                <span>${tglText}</span>
+                <span class="text-[9px] font-bold px-1.5 py-0.2 rounded border ${monthBadge.style}">${monthBadge.name}</span>
+              </div>
+              <div class="text-[9px] font-semibold text-slate-400 mt-0.5">
+                <i class="fa-solid fa-clock text-[8px] mr-0.5"></i> ${durasiHari} Hari (${group.startDate}${durasiHari > 1 ? ' s.d ' + group.endDate : ''})
+              </div>
+            </td>
+            <td class="p-2.5 font-bold text-slate-700 text-[11px]">${group.keterangan}</td>
+            <td class="p-2.5 text-center">
+              <div class="flex items-center justify-center gap-1">
+                <button onclick="editGroup(${index})" class="text-indigo-600 bg-indigo-50 hover:bg-indigo-100 p-1.5 rounded-lg transition active:scale-95" title="Edit / Ubah">
+                  <i class="fa-solid fa-pen-to-square text-xs"></i>
+                </button>
+                <button onclick="hapusGroupDates(${index})" class="text-rose-600 bg-rose-50 hover:bg-rose-100 p-1.5 rounded-lg transition active:scale-95" title="Hapus">
+                  <i class="fa-solid fa-trash-can text-xs"></i>
+                </button>
+              </div>
+            </td>
+          </tr>`;
+      });
+      tbody.innerHTML = html;
+      document.getElementById("checkAll").checked = false;
+      updateBulkDeleteState();
+    }
+
+    // MANAGEMENT CEKLIS BANYAK
+    function toggleSelectAll(master) {
+      const checkboxes = document.querySelectorAll('.checkGroup');
+      checkboxes.forEach(cb => cb.checked = master.checked);
+      updateBulkDeleteState();
+    }
+
+    function updateBulkDeleteState() {
+      const checkedBoxes = document.querySelectorAll('.checkGroup:checked');
+      const btnHapus = document.getElementById("btnHapusTerpilih");
+      const countSpan = document.getElementById("countSelected");
+
+      let totalDatesSelected = 0;
+      checkedBoxes.forEach(cb => {
+        let datesArr = JSON.parse(cb.getAttribute('data-dates') || '[]');
+        totalDatesSelected += datesArr.length;
+      });
+
+      countSpan.textContent = totalDatesSelected;
+
+      if (totalDatesSelected > 0) {
+        btnHapus.classList.remove("hidden");
+        btnHapus.classList.add("flex");
+        btnHapus.disabled = false;
+      } else {
+        btnHapus.classList.add("hidden");
+        btnHapus.classList.remove("flex");
+        btnHapus.disabled = true;
+      }
+    }
+
+    async function hapusTerpilih() {
+      const checkedBoxes = document.querySelectorAll('.checkGroup:checked');
+      let targetDates = [];
+      
+      checkedBoxes.forEach(cb => {
+        let datesArr = JSON.parse(cb.getAttribute('data-dates') || '[]');
+        targetDates = targetDates.concat(datesArr);
+      });
+
+      if (targetDates.length === 0) return;
+      if (!confirm(`Yakin ingin menghapus ${targetDates.length} tanggal libur yang dicentang?`)) return;
+
+      const btn = document.getElementById("btnHapusTerpilih");
+      btn.disabled = true;
+
+      let count = 0;
+      for (let tgl of targetDates) {
+        count++;
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> (${count}/${targetDates.length})`;
+        try {
+          await fetch(WEB_APP_URL, {
+            method: "POST",
+            body: JSON.stringify({ tipe: "hapus_libur", tanggal: tgl, token: TOKEN_BENAR })
+          });
+        } catch(e){}
+      }
+
+      showNotif(`Berhasil menghapus ${targetDates.length} hari libur!`, "success");
+      loadData();
+    }
+
+    async function hapusSemuaLibur() {
+      if (listLibur.length === 0) {
+        alert("Tidak ada data hari libur untuk dihapus.");
+        return;
+      }
+
+      if (!confirm(`PERINGATAN: Yakin ingin menghapus SELURUH (${listLibur.length} Hari) libur terdaftar?`)) return;
+
+      showNotif("Menghapus seluruh hari libur...", "success");
+
+      for (let item of listLibur) {
+        try {
+          await fetch(WEB_APP_URL, {
+            method: "POST",
+            body: JSON.stringify({ tipe: "hapus_libur", tanggal: item.tanggal, token: TOKEN_BENAR })
+          });
+        } catch(e){}
+      }
+
+      showNotif("Seluruh hari libur telah berhasil dihapus!", "success");
+      loadData();
+    }
+
+    // MODAL EDIT HANDLER
+    function editGroup(groupIndex) {
+      const grp = groupedLibur[groupIndex];
+      if (!grp) return;
+
+      editingGroupDates = [...grp.dates];
+      document.getElementById("editTglMulai").value = grp.startDate;
+      document.getElementById("editTglSelesai").value = grp.endDate;
+      document.getElementById("editKeterangan").value = grp.keterangan;
+
+      document.getElementById("editModal").classList.remove("hidden");
+    }
+
+    function closeEditModal() {
+      document.getElementById("editModal").classList.add("hidden");
+      editingGroupDates = [];
+    }
+
+    async function simpanEditGroup(e) {
+      e.preventDefault();
+
+      const newMulai = document.getElementById("editTglMulai").value;
+      const newSelesai = document.getElementById("editTglSelesai").value;
+      const newKet = document.getElementById("editKeterangan").value.trim();
+      const btn = document.getElementById("btnSimpanEdit");
+
+      if (!newMulai || !newSelesai || !newKet) {
+        alert("Lengkapi semua isian!");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+
+      // 1. Hapus tanggal lama di group ini
+      for (let oldTgl of editingGroupDates) {
+        try {
+          await fetch(WEB_APP_URL, {
+            method: "POST",
+            body: JSON.stringify({ tipe: "hapus_libur", tanggal: oldTgl, token: TOKEN_BENAR })
+          });
+        } catch(e){}
+      }
+
+      // 2. Tambahkan rentang tanggal baru
+      let listNewDates = [];
+      let curr = new Date(newMulai + "T00:00:00");
+      let end = new Date(newSelesai + "T00:00:00");
+
+      while (curr <= end) {
+        let yyyy = curr.getFullYear();
+        let mm = String(curr.getMonth() + 1).padStart(2, '0');
+        let dd = String(curr.getDate()).padStart(2, '0');
+        listNewDates.push(`${yyyy}-${mm}-${dd}`);
+        curr.setDate(curr.getDate() + 1);
+      }
+
+      for (let nTgl of listNewDates) {
+        try {
+          await fetch(WEB_APP_URL, {
+            method: "POST",
+            body: JSON.stringify({ tipe: "tambah_libur", tanggal: nTgl, keterangan: newKet, token: TOKEN_BENAR })
+          });
+        } catch(e){}
+      }
+
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan';
+      
+      closeEditModal();
+      showNotif("Hari libur berhasil diperbarui!", "success");
+      loadData();
+    }
+
+    async function hapusGroupDates(groupIndex) {
+      const grp = groupedLibur[groupIndex];
+      if (!grp) return;
+
+      const tglDesc = formatRangeTanggalIndo(grp.startDate, grp.endDate);
+      if (!confirm(`Yakin menghapus libur ${grp.keterangan} (${tglDesc})?`)) return;
+
+      for (let tgl of grp.dates) {
+        try {
+          await fetch(WEB_APP_URL, {
+            method: "POST",
+            body: JSON.stringify({ tipe: "hapus_libur", tanggal: tgl, token: TOKEN_BENAR })
+          });
+        } catch(e){}
+      }
+
+      showNotif("Libur berhasil dihapus!", "success");
+      loadData();
+    }
+
+    // SINKRONISASI & TANGGAL MULAI
     function sinkronLiburNasional() {
       if (!confirm("Tarik data hari libur nasional & cuti bersama secara otomatis dari server kalender?")) return;
 
@@ -302,49 +683,6 @@
       });
     }
 
-    function formatTanggalIndo(tglStr) {
-      if (!tglStr) return "";
-      const parts = tglStr.split("-");
-      if (parts.length !== 3) return tglStr;
-      
-      const bulan = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agt", "Sep", "Okt", "Nov", "Des"];
-      return `${parseInt(parts[2], 10)} ${bulan[parseInt(parts[1], 10) - 1] || ''} ${parts[0]}`;
-    }
-
-    function renderTabelLibur() {
-      const tbody = document.getElementById("tabelLiburBody");
-      const totalText = document.getElementById("totalLiburText");
-
-      totalText.textContent = `${listLibur.length} Hari`;
-
-      if (listLibur.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="p-5 text-center text-slate-400 font-medium italic">Belum ada hari libur terdaftar.</td></tr>`;
-        return;
-      }
-
-      listLibur.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
-
-      let html = "";
-      listLibur.forEach((item, index) => {
-        html += `
-          <tr class="hover:bg-slate-50 transition">
-            <td class="p-2.5 text-center text-slate-400 font-medium text-[11px]">${index + 1}</td>
-            <td class="p-2.5">
-              <div class="font-bold text-slate-800 text-[11px]">${formatTanggalIndo(item.tanggal)}</div>
-              <div class="text-[9px] font-mono text-slate-400">${item.tanggal}</div>
-            </td>
-            <td class="p-2.5 font-semibold text-slate-700 text-[11px]">${item.keterangan}</td>
-            <td class="p-2.5 text-center">
-              <button onclick="hapusHariLibur('${item.tanggal}')" class="text-rose-600 bg-rose-50 hover:bg-rose-100 p-1.5 rounded-lg transition active:scale-95" title="Hapus">
-                <i class="fa-solid fa-trash-can text-xs"></i>
-              </button>
-            </td>
-          </tr>`;
-      });
-      tbody.innerHTML = html;
-    }
-
-    // FUNGSI SIMPAN LIBUR (PROSES SINGLE MAUPUN RENTANG MULTI-HARI)
     async function tambahHariLibur(e) {
       e.preventDefault();
 
@@ -380,7 +718,6 @@
         }
 
       } else {
-        // MODE RENTANG TANGGAL (MULTIPLE DATES)
         const tglAwalStr = document.getElementById("inputTglMulaiRange").value;
         const tglAkhirStr = document.getElementById("inputTglSelesaiRange").value;
         const ket = document.getElementById("inputKetRange").value.trim();
@@ -388,15 +725,14 @@
 
         if (!tglAwalStr || !tglAkhirStr || !ket) { alert("Lengkapi tanggal awal, tanggal akhir, dan keterangan!"); return; }
 
-        const tglAwal = new Date(tglAwalStr);
-        const tglAkhir = new Date(tglAkhirStr);
+        const tglAwal = new Date(tglAwalStr + "T00:00:00");
+        const tglAkhir = new Date(tglAkhirStr + "T00:00:00");
 
         if (tglAwal > tglAkhir) {
           alert("Tanggal awal tidak boleh lebih besar dari tanggal selesai!");
           return;
         }
 
-        // Generate daftar tanggal dari tglAwal s.d tglAkhir
         let listDates = [];
         let curr = new Date(tglAwal);
         while (curr <= tglAkhir) {
@@ -410,7 +746,6 @@
         btn.disabled = true;
         btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> (0/${listDates.length})`;
 
-        let suksesCount = 0;
         for (let i = 0; i < listDates.length; i++) {
           btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> (${i + 1}/${listDates.length})`;
           try {
@@ -418,36 +753,18 @@
               method: "POST",
               body: JSON.stringify({ tipe: "tambah_libur", tanggal: listDates[i], keterangan: ket, token: TOKEN_BENAR })
             });
-            suksesCount++;
-          } catch(err) {
-            console.log("Gagal simpan tgl: " + listDates[i]);
-          }
+          } catch(err){}
         }
 
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-layer-group text-xs"></i> Simpan Rentang';
 
-        showNotif(`Berhasil menambahkan ${suksesCount} hari libur!`, "success");
+        showNotif(`Berhasil menambahkan ${listDates.length} hari libur!`, "success");
         document.getElementById("inputTglMulaiRange").value = "";
         document.getElementById("inputTglSelesaiRange").value = "";
         document.getElementById("inputKetRange").value = "";
         loadData();
       }
-    }
-
-    function hapusHariLibur(tanggal) {
-      if (!confirm(`Yakin ingin menghapus hari libur tanggal ${tanggal}?`)) return;
-
-      fetch(WEB_APP_URL, {
-        method: "POST",
-        body: JSON.stringify({ tipe: "hapus_libur", tanggal: tanggal, token: TOKEN_BENAR })
-      })
-      .then(res => res.json())
-      .then(res => {
-        showNotif("Hari libur berhasil dihapus!", "success");
-        loadData();
-      })
-      .catch(err => showNotif("Gagal menghapus data!", "error"));
     }
   </script>
 </body>
