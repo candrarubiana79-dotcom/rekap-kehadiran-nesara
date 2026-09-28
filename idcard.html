@@ -100,7 +100,7 @@
   <!-- CONTAINER UTAMA CETAK ID CARD -->
   <div class="main-container w-full max-w-5xl bg-white/95 backdrop-blur-xl p-5 sm:p-6 md:p-8 rounded-3xl shadow-2xl border border-white/20 space-y-6 relative z-10">
     
-    <!-- Header -->
+    <!-- Header Page -->
     <div class="flex items-center justify-between border-b pb-5 border-slate-100 no-print">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center text-lg font-bold">
@@ -278,18 +278,21 @@
           <div id="card-${index}" class="id-card bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-xl border border-indigo-500/80 p-2.5 shadow-xl flex flex-col justify-between relative overflow-hidden text-white">
             <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-indigo-500/10 rounded-full blur-xl pointer-events-none"></div>
 
-            <!-- Header Kartu -->
+            <!-- Header Kartu dengan Logo Sekolah -->
             <div class="border-b border-indigo-400/30 pb-1 flex items-center justify-between z-10">
-              <div>
-                <h2 class="text-[9px] font-black tracking-widest text-indigo-300 uppercase leading-tight">SMPN 1 RANCAH</h2>
-                <p class="text-[6.5px] text-slate-300 font-bold tracking-wider uppercase leading-tight">Kartu Presensi Digital</p>
+              <div class="flex items-center gap-1.5">
+                <img src="asset/logo-smpn1rancah.png" alt="Logo" class="w-6 h-6 object-contain shrink-0" onerror="this.style.display='none'">
+                <div>
+                  <h2 class="text-[9px] font-black tracking-widest text-indigo-300 uppercase leading-tight">SMPN 1 RANCAH</h2>
+                  <p class="text-[6.5px] text-slate-300 font-bold tracking-wider uppercase leading-tight">Kartu Presensi Digital</p>
+                </div>
               </div>
               <span class="bg-indigo-600 text-white font-black text-[7.5px] px-2 py-0.5 rounded-full uppercase tracking-wider">
                 ${siswa.kelas}
               </span>
             </div>
 
-            <!-- Body Kartu: Wadah QR Code diperbesar & super tajam -->
+            <!-- Body Kartu -->
             <div class="flex items-center gap-2.5 my-auto z-10 pl-1">
               <div class="bg-white p-1 rounded-xl shadow-md border border-indigo-300 flex-shrink-0 w-24 h-24 flex items-center justify-center qr-wrapper">
                 <div id="qrcode-${index}" class="w-full h-full"></div>
@@ -317,7 +320,7 @@
 
         container.appendChild(wrapper);
 
-        // QR Code di-generate dengan resolusi tinggi (256x256 px) agar sangat tajam & tidak pecah
+        // QR Code di-generate dengan resolusi tinggi (256x256 px)
         new QRCode(document.getElementById(`qrcode-${index}`), {
           text: String(siswa.nisn),
           width: 256,
