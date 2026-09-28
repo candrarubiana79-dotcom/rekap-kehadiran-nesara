@@ -19,7 +19,7 @@
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
     input, select, button { font-size: 12px !important; }
     
-    /* GAYA KHUSUS CETAK / PRINT (SUPER COMPACT & HEMAT KERTAS) */
+    /* GAYA KHUSUS CETAK / PRINT (PER TINGKAT 2 KOLOM KIRI-KANAN) */
     @media print {
       .no-print { display: none !important; }
       body { background: white !important; color: black !important; padding: 0 !important; font-size: 8px !important; }
@@ -34,8 +34,24 @@
       
       .print-header { display: block !important; margin-bottom: 6px !important; }
 
-      /* GRID 2 KOLOM PADA SAAT DICETAK */
-      #containerLaporanBody {
+      .level-block {
+        page-break-inside: auto;
+        margin-bottom: 8px !important;
+      }
+
+      .level-title {
+        page-break-after: avoid;
+        break-after: avoid;
+        font-size: 9px !important;
+        font-weight: 800 !important;
+        border-bottom: 1px solid #0f172a !important;
+        padding-bottom: 2px !important;
+        margin-bottom: 4px !important;
+        text-transform: uppercase;
+      }
+
+      /* GRID 2 KOLOM (KIRI-KANAN) DALAM TIAP TINGKAT SAAT CETAK */
+      .level-grid {
         display: grid !important;
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
         gap: 6px !important;
@@ -52,7 +68,6 @@
         box-shadow: none !important;
       }
 
-      /* TEKS TABEL EXTRA PERKECIL SAAT CETAK */
       .class-card table {
         font-size: 8px !important;
       }
@@ -73,7 +88,7 @@
   <!-- CONTAINER UTAMA -->
   <div class="print-container w-full max-w-5xl mx-auto my-auto bg-white/95 backdrop-blur-xl p-4 sm:p-6 rounded-3xl shadow-2xl border border-white/20 space-y-4 relative z-10">
     
-    <!-- HEADER RESMI UNTUK PRINT (TAMPILAN RINGKAS SAAT DICETAK) -->
+    <!-- HEADER RESMI UNTUK PRINT -->
     <div class="print-header hidden text-center border-b border-slate-900 pb-1.5 mb-2">
       <h1 class="text-sm font-black uppercase tracking-wider text-slate-900">SMP NEGERI 1 RANCAH</h1>
       <h2 class="text-[11px] font-extrabold text-slate-800">LAPORAN HARIAN KETIDAKHADIRAN SISWA</h2>
@@ -89,7 +104,7 @@
         <div>
           <div class="flex items-center gap-1.5">
             <h2 class="text-sm sm:text-base font-extrabold text-slate-900 leading-tight">Laporan Ketidakhadiran Harian</h2>
-            <span class="text-[9px] font-extrabold bg-amber-500/10 text-amber-600 border border-amber-500/20 px-1.5 py-0.5 rounded-full">Compact Print v1.3</span>
+            <span class="text-[9px] font-extrabold bg-amber-500/10 text-amber-600 border border-amber-500/20 px-1.5 py-0.5 rounded-full">Per Tingkat v1.4</span>
           </div>
           <p class="text-[9px] font-bold text-indigo-600 uppercase tracking-wider">SMPN 1 RANCAH</p>
         </div>
@@ -167,7 +182,7 @@
     <!-- BARIS TOMBOL AKSI -->
     <div class="flex items-center justify-between gap-2 no-print pt-1">
       <div class="text-[11px] font-extrabold text-slate-700 flex items-center gap-1.5">
-        <i class="fa-solid fa-boxes-stacked text-indigo-600"></i> Kelompok Data Per Kelas (Super Compact)
+        <i class="fa-solid fa-layer-group text-indigo-600"></i> Kelompok Per Tingkat Kelas (Kiri - Kanan)
       </div>
       <div class="flex items-center gap-2">
         <button onclick="salinRekapWA()" 
@@ -181,9 +196,9 @@
       </div>
     </div>
 
-    <!-- AREA UTAMA CONTAINER KOTAK KELAS -->
-    <div id="containerLaporanBody" class="grid grid-cols-1 md:grid-cols-2 gap-3.5 items-start">
-      <div class="col-span-full p-8 text-center text-slate-400 font-medium italic bg-white rounded-2xl border border-slate-200 shadow-sm">
+    <!-- AREA UTAMA CONTAINER DOKUMEN (DIKELOMPOKKAN PER TINGKAT) -->
+    <div id="containerLaporanBody" class="space-y-5">
+      <div class="p-8 text-center text-slate-400 font-medium italic bg-white rounded-2xl border border-slate-200 shadow-sm">
         <i class="fa-solid fa-spinner fa-spin text-indigo-600 mr-2"></i> Memuat data presensi...
       </div>
     </div>
@@ -192,7 +207,7 @@
 
   <!-- FOOTER -->
   <footer class="text-center text-[10px] text-slate-400 py-1.5 relative z-10 no-print">
-    Presensi Digital • SMPN 1 Rancah <span class="font-bold text-slate-300">v1.3</span>
+    Presensi Digital • SMPN 1 Rancah <span class="font-bold text-slate-300">v1.4</span>
   </footer>
 
   <script>
@@ -203,7 +218,6 @@
     let filteredList = [];
 
     document.addEventListener("DOMContentLoaded", () => {
-      // Set default tanggal hari ini
       const today = new Date().toISOString().split("T")[0];
       document.getElementById("filterTanggal").value = today;
       
@@ -225,7 +239,7 @@
 
     function loadData() {
       const container = document.getElementById("containerLaporanBody");
-      container.innerHTML = `<div class="col-span-full p-8 text-center text-slate-400 font-medium italic bg-white rounded-2xl border border-slate-200 shadow-sm"><i class="fa-solid fa-spinner fa-spin text-indigo-600 mr-2"></i> Mengambil data dari server...</div>`;
+      container.innerHTML = `<div class="p-8 text-center text-slate-400 font-medium italic bg-white rounded-2xl border border-slate-200 shadow-sm"><i class="fa-solid fa-spinner fa-spin text-indigo-600 mr-2"></i> Mengambil data dari server...</div>`;
 
       fetch(WEB_APP_URL)
         .then(res => res.json())
@@ -237,7 +251,7 @@
           renderLaporan();
         })
         .catch(err => {
-          container.innerHTML = `<div class="col-span-full p-6 text-center text-rose-500 font-bold bg-rose-50 rounded-2xl border border-rose-200">Gagal memuat data dari server! Periksa koneksi internet Anda.</div>`;
+          container.innerHTML = `<div class="p-6 text-center text-rose-500 font-bold bg-rose-50 rounded-2xl border border-rose-200">Gagal memuat data dari server! Periksa koneksi internet Anda.</div>`;
         });
     }
 
@@ -259,13 +273,28 @@
       selectKelas.innerHTML = optHtml;
     }
 
+    // FUNGSI UNTUK EKSTRAKSI TINGKAT KELAS (MISAL: 7A -> TINGKAT 7)
+    function getTingkat(klsName) {
+      const clean = (klsName || "").trim();
+      
+      // Ambil angka depan (contoh 7A -> 7, 8-B -> 8)
+      const numMatch = clean.match(/^(\d+)/);
+      if (numMatch) return "TINGKAT " + numMatch[1];
+
+      // Ambil Romawi (contoh VII -> VII)
+      const romanMatch = clean.match(/^(VII|VIII|IX|X|XI|XII)/i);
+      if (romanMatch) return "TINGKAT " + romanMatch[1].toUpperCase();
+
+      return "LAIN-LAIN";
+    }
+
     function renderLaporan() {
       const selectedTgl = document.getElementById("filterTanggal").value;
       const selectedKelas = document.getElementById("filterKelas").value;
       const container = document.getElementById("containerLaporanBody");
 
       if (!selectedTgl) {
-        container.innerHTML = `<div class="col-span-full p-6 text-center text-slate-400 font-medium italic bg-white rounded-2xl border border-slate-200">Silakan pilih tanggal terlebih dahulu.</div>`;
+        container.innerHTML = `<div class="p-6 text-center text-slate-400 font-medium italic bg-white rounded-2xl border border-slate-200">Silakan pilih tanggal terlebih dahulu.</div>`;
         return;
       }
 
@@ -315,95 +344,139 @@
 
       if (filteredList.length === 0) {
         container.innerHTML = `
-          <div class="col-span-full p-8 text-center text-slate-400 font-medium italic bg-white rounded-2xl border border-slate-200 shadow-sm">
+          <div class="p-8 text-center text-slate-400 font-medium italic bg-white rounded-2xl border border-slate-200 shadow-sm">
             <i class="fa-solid fa-circle-check text-emerald-500 text-2xl mb-2 block"></i> 
             Tidak ada siswa Sakit, Izin, atau Alpa pada tanggal/kelas ini.
           </div>`;
         return;
       }
 
-      // 1. KELOMPOKKAN DATA BERDASARKAN KELAS
-      const groupedByKelas = {};
+      // 1. KELOMPOKKAN BERDASARKAN TINGKAT DULU, LALU PER KELAS
+      const groupedByTingkat = {};
+
       filteredList.forEach(item => {
         const klsKey = (item.kelas || "Tanpa Kelas").trim();
-        if (!groupedByKelas[klsKey]) {
-          groupedByKelas[klsKey] = [];
+        const tingkatKey = getTingkat(klsKey);
+
+        if (!groupedByTingkat[tingkatKey]) {
+          groupedByTingkat[tingkatKey] = {};
         }
-        groupedByKelas[klsKey].push(item);
+        if (!groupedByTingkat[tingkatKey][klsKey]) {
+          groupedByTingkat[tingkatKey][klsKey] = [];
+        }
+        groupedByTingkat[tingkatKey][klsKey].push(item);
       });
 
-      // Urutkan nama kelas
-      const sortedClasses = Object.keys(groupedByKelas).sort();
+      // Urutkan Tingkat (7, 8, 9, dst)
+      const sortedTingkat = Object.keys(groupedByTingkat).sort((a, b) => {
+        const numA = parseInt(a.replace(/\D/g, ''), 10) || 999;
+        const numB = parseInt(b.replace(/\D/g, ''), 10) || 999;
+        return numA - numB || a.localeCompare(b);
+      });
 
       let html = "";
 
-      // 2. GENERATE KOTAK KELOMPOK PER KELAS
-      sortedClasses.forEach(klsName => {
-        // 3. URUTKAN SISWA BERDASARKAN ALFABET (A-Z)
-        groupedByKelas[klsName].sort((a, b) => a.nama.localeCompare(b.nama, 'id', { sensitivity: 'base' }));
+      // 2. LOOP SETIAP TINGKAT
+      sortedTingkat.forEach(tingkatName => {
+        const classesInTingkat = Object.keys(groupedByTingkat[tingkatName]).sort();
+        
+        let totalSiswaTingkat = 0;
+        classesInTingkat.forEach(c => totalSiswaTingkat += groupedByTingkat[tingkatName][c].length);
 
         html += `
-          <div class="class-card bg-white p-3.5 rounded-2xl border border-slate-200/90 shadow-sm space-y-2 print:border print:border-slate-800 print:rounded print:p-2">
+          <div class="level-block space-y-2">
             
-            <!-- HEADER KOTAK KELAS -->
-            <div class="flex items-center justify-between border-b pb-1.5 border-slate-100 print:border-slate-800">
-              <div class="flex items-center gap-1.5">
-                <span class="w-5 h-5 bg-indigo-50 text-indigo-600 rounded flex items-center justify-center font-black text-[10px] no-print">
-                  <i class="fa-solid fa-users"></i>
-                </span>
-                <h4 class="font-extrabold text-slate-900 text-xs print:text-[10px] tracking-wide uppercase">
-                  KELAS ${klsName}
-                </h4>
+            <!-- HEADER BLOK TINGKAT -->
+            <div class="level-title flex items-center justify-between bg-indigo-50/80 p-2 sm:p-2.5 rounded-xl border border-indigo-100 print:bg-transparent print:p-0 print:border-none">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-4 bg-indigo-600 rounded-full print:bg-black"></span>
+                <h3 class="font-black text-indigo-950 text-xs sm:text-sm uppercase tracking-wider print:text-[10px] print:text-black">
+                  ${tingkatName}
+                </h3>
               </div>
-              <span class="text-[9px] print:text-[8px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100 print:border-slate-800 print:text-black print:bg-transparent">
-                ${groupedByKelas[klsName].length} Siswa
+              <span class="text-[10px] print:text-[8px] font-extrabold text-indigo-700 bg-white print:bg-transparent px-2.5 py-0.5 rounded-md border border-indigo-200/60 print:border-none">
+                Total: ${totalSiswaTingkat} Siswa
               </span>
             </div>
 
-            <!-- TABEL CHECKLIST SAKIT, IZIN, ALPA -->
-            <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse text-xs print:text-[8px]">
-                <thead>
-                  <tr class="bg-slate-50 text-slate-600 font-bold text-[8px] print:text-[7px] uppercase tracking-wider border-b border-slate-200 print:bg-slate-200 print:text-black print:border-slate-800">
-                    <th class="p-1 w-5 text-center border-r border-slate-200 print:border-slate-800">No</th>
-                    <th class="p-1 w-14 border-r border-slate-200 print:border-slate-800">NISN</th>
-                    <th class="p-1 border-r border-slate-200 print:border-slate-800">Nama Siswa</th>
-                    <th class="p-1 w-8 text-center border-r border-slate-200 print:border-slate-800">Sakit</th>
-                    <th class="p-1 w-8 text-center border-r border-slate-200 print:border-slate-800">Izin</th>
-                    <th class="p-1 w-8 text-center border-r border-slate-200 print:border-slate-800">Alpa</th>
-                    <th class="p-1 w-16 text-center no-print">Waktu</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100 print:divide-slate-800">
+            <!-- GRID 2 KOLOM (KIRI & KANAN) UNTUK KELAS-KELAS DI TINGKAT INI -->
+            <div class="level-grid grid grid-cols-1 md:grid-cols-2 gap-3 items-start">
         `;
 
-        groupedByKelas[klsName].forEach((siswa, idx) => {
-          const kUpper = (siswa.keterangan || "").toUpperCase();
-          const isSakit = kUpper === "SAKIT";
-          const isIzin = kUpper === "IZIN" || kUpper === "IJIN";
-          const isAlpa = kUpper === "ALPA" || kUpper === "ALPHA";
-
-          // Ceklis ✓ atau kosong
-          const checkSakit = isSakit ? '<span class="text-amber-600 font-black text-xs print:text-black print:text-[9px]">✓</span>' : '';
-          const checkIzin = isIzin ? '<span class="text-blue-600 font-black text-xs print:text-black print:text-[9px]">✓</span>' : '';
-          const checkAlpa = isAlpa ? '<span class="text-rose-600 font-black text-xs print:text-black print:text-[9px]">✓</span>' : '';
+        // 3. LOOP SETIAP KELAS DALAM TINGKAT TERSEBUT
+        classesInTingkat.forEach(klsName => {
+          const siswaList = groupedByTingkat[tingkatName][klsName];
+          
+          // URUTKAN SISWA BERDASARKAN ALFABET (A-Z)
+          siswaList.sort((a, b) => a.nama.localeCompare(b.nama, 'id', { sensitivity: 'base' }));
 
           html += `
-            <tr class="hover:bg-slate-50 transition">
-              <td class="p-1 text-center text-slate-400 font-medium border-r border-slate-100 print:border-slate-800 print:text-black">${idx + 1}</td>
-              <td class="p-1 font-mono text-[9px] print:text-[7.5px] text-slate-500 border-r border-slate-100 print:border-slate-800 print:text-black">${siswa.kode || '-'}</td>
-              <td class="p-1 font-extrabold text-slate-800 text-[11px] print:text-[8px] border-r border-slate-100 print:border-slate-800 print:text-black">${siswa.nama}</td>
-              <td class="p-1 text-center border-r border-slate-100 print:border-slate-800">${checkSakit}</td>
-              <td class="p-1 text-center border-r border-slate-100 print:border-slate-800">${checkIzin}</td>
-              <td class="p-1 text-center border-r border-slate-100 print:border-slate-800">${checkAlpa}</td>
-              <td class="p-1 text-center text-slate-400 text-[8px] font-medium no-print">${siswa.timestamp || '-'}</td>
-            </tr>
+            <div class="class-card bg-white p-3.5 rounded-2xl border border-slate-200/90 shadow-sm space-y-2 print:border print:border-slate-800 print:rounded print:p-2">
+              
+              <!-- HEADER KELAS -->
+              <div class="flex items-center justify-between border-b pb-1.5 border-slate-100 print:border-slate-800">
+                <div class="flex items-center gap-1.5">
+                  <span class="w-5 h-5 bg-indigo-50 text-indigo-600 rounded flex items-center justify-center font-black text-[10px] no-print">
+                    <i class="fa-solid fa-users"></i>
+                  </span>
+                  <h4 class="font-extrabold text-slate-900 text-xs print:text-[10px] tracking-wide uppercase">
+                    KELAS ${klsName}
+                  </h4>
+                </div>
+                <span class="text-[9px] print:text-[8px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100 print:border-slate-800 print:text-black print:bg-transparent">
+                  ${siswaList.length} Siswa
+                </span>
+              </div>
+
+              <!-- TABEL CHECKLIST SAKIT, IZIN, ALPA -->
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs print:text-[8px]">
+                  <thead>
+                    <tr class="bg-slate-50 text-slate-600 font-bold text-[8px] print:text-[7px] uppercase tracking-wider border-b border-slate-200 print:bg-slate-200 print:text-black print:border-slate-800">
+                      <th class="p-1 w-5 text-center border-r border-slate-200 print:border-slate-800">No</th>
+                      <th class="p-1 w-14 border-r border-slate-200 print:border-slate-800">NISN</th>
+                      <th class="p-1 border-r border-slate-200 print:border-slate-800">Nama Siswa</th>
+                      <th class="p-1 w-8 text-center border-r border-slate-200 print:border-slate-800">Sakit</th>
+                      <th class="p-1 w-8 text-center border-r border-slate-200 print:border-slate-800">Izin</th>
+                      <th class="p-1 w-8 text-center border-r border-slate-200 print:border-slate-800">Alpa</th>
+                      <th class="p-1 w-16 text-center no-print">Waktu</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-100 print:divide-slate-800">
+          `;
+
+          siswaList.forEach((siswa, idx) => {
+            const kUpper = (siswa.keterangan || "").toUpperCase();
+            const isSakit = kUpper === "SAKIT";
+            const isIzin = kUpper === "IZIN" || kUpper === "IJIN";
+            const isAlpa = kUpper === "ALPA" || kUpper === "ALPHA";
+
+            const checkSakit = isSakit ? '<span class="text-amber-600 font-black text-xs print:text-black print:text-[9px]">✓</span>' : '';
+            const checkIzin = isIzin ? '<span class="text-blue-600 font-black text-xs print:text-black print:text-[9px]">✓</span>' : '';
+            const checkAlpa = isAlpa ? '<span class="text-rose-600 font-black text-xs print:text-black print:text-[9px]">✓</span>' : '';
+
+            html += `
+              <tr class="hover:bg-slate-50 transition">
+                <td class="p-1 text-center text-slate-400 font-medium border-r border-slate-100 print:border-slate-800 print:text-black">${idx + 1}</td>
+                <td class="p-1 font-mono text-[9px] print:text-[7.5px] text-slate-500 border-r border-slate-100 print:border-slate-800 print:text-black">${siswa.kode || '-'}</td>
+                <td class="p-1 font-extrabold text-slate-800 text-[11px] print:text-[8px] border-r border-slate-100 print:border-slate-800 print:text-black">${siswa.nama}</td>
+                <td class="p-1 text-center border-r border-slate-100 print:border-slate-800">${checkSakit}</td>
+                <td class="p-1 text-center border-r border-slate-100 print:border-slate-800">${checkIzin}</td>
+                <td class="p-1 text-center border-r border-slate-100 print:border-slate-800">${checkAlpa}</td>
+                <td class="p-1 text-center text-slate-400 text-[8px] font-medium no-print">${siswa.timestamp || '-'}</td>
+              </tr>
+            `;
+          });
+
+          html += `
+                  </tbody>
+                </table>
+              </div>
+            </div>
           `;
         });
 
         html += `
-                </tbody>
-              </table>
             </div>
           </div>
         `;
@@ -441,7 +514,7 @@
       textWA += `• Alpa  : ${cAlpa} Siswa\n`;
       textWA += `*Total Tidak Hadir: ${cTotal} Siswa*\n\n`;
 
-      textWA += `📝 *DAFTAR SISWA PER KELAS:* \n`;
+      textWA += `📝 *DAFTAR SISWA PER TINGKAT:* \n`;
 
       if (filteredList.length === 0) {
         textWA += `_(Nihil / Semua Siswa Hadir)_\n`;
@@ -449,17 +522,24 @@
         const grouped = {};
         filteredList.forEach(item => {
           const kls = (item.kelas || "Tanpa Kelas").trim();
-          if (!grouped[kls]) grouped[kls] = [];
-          grouped[kls].push(item);
+          const tk = getTingkat(kls);
+          if (!grouped[tk]) grouped[tk] = {};
+          if (!grouped[tk][kls]) grouped[tk][kls] = [];
+          grouped[tk][kls].push(item);
         });
 
-        const sortedKls = Object.keys(grouped).sort();
-        sortedKls.forEach(klsName => {
-          textWA += `\n*🏫 KELAS ${klsName}:*\n`;
-          grouped[klsName].sort((a, b) => a.nama.localeCompare(b.nama, 'id', { sensitivity: 'base' }));
+        const sortedTk = Object.keys(grouped).sort();
+        sortedTk.forEach(tkName => {
+          textWA += `\n*📌 ${tkName}*\n`;
+          const sortedKls = Object.keys(grouped[tkName]).sort();
           
-          grouped[klsName].forEach((siswa, i) => {
-            textWA += `${i + 1}. *${siswa.nama}* - _${siswa.keterangan}_\n`;
+          sortedKls.forEach(klsName => {
+            textWA += `*🏫 Kelas ${klsName}:*\n`;
+            grouped[tkName][klsName].sort((a, b) => a.nama.localeCompare(b.nama, 'id', { sensitivity: 'base' }));
+            
+            grouped[tkName][klsName].forEach((siswa, i) => {
+              textWA += `  ${i + 1}. *${siswa.nama}* - _${siswa.keterangan}_\n`;
+            });
           });
         });
       }
