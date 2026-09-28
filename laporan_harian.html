@@ -1,1 +1,378 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Laporan Harian Ketidakhadiran - SMPN 1 RANCAH</title>
+  
+  <!-- SKRIP PENGAMAN & AUTO LOGOUT -->
+  <script src="auth-guard.js"></script>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    input, select, button { font-size: 12px !important; }
+    @media print {
+      .no-print { display: none !important; }
+      body { background: white !important; color: black !important; padding: 0 !important; }
+      .print-container { shadow: none !important; border: none !important; width: 100% !important; max-width: 100% !important; }
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-800 min-h-screen flex flex-col justify-between p-2.5 sm:p-4 md:p-6 relative overflow-x-hidden selection:bg-indigo-500 selection:text-white">
+
+  <!-- Background Decorative Light Orbs -->
+  <div class="fixed -top-20 -left-20 w-64 h-64 bg-indigo-600/20 rounded-full blur-2xl pointer-events-none no-print"></div>
+  <div class="fixed -bottom-20 -right-20 w-64 h-64 bg-blue-600/20 rounded-full blur-2xl pointer-events-none no-print"></div>
+
+  <!-- CONTAINER UTAMA -->
+  <div class="print-container w-full max-w-4xl mx-auto my-auto bg-white/95 backdrop-blur-xl p-4 sm:p-6 rounded-3xl shadow-2xl border border-white/20 space-y-4 relative z-10">
+    
+    <!-- HEADER -->
+    <div class="flex items-center justify-between border-b pb-3 border-slate-100">
+      <div class="flex items-center gap-2.5">
+        <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-lg font-bold shadow-sm">
+          <i class="fa-solid fa-clipboard-user"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <h2 class="text-sm sm:text-base font-extrabold text-slate-900 leading-tight">Laporan Ketidakhadiran Harian</h2>
+            <span class="text-[9px] font-extrabold bg-amber-500/10 text-amber-600 border border-amber-500/20 px-1.5 py-0.5 rounded-full">Sakit / Izin / Alpa</span>
+          </div>
+          <p class="text-[9px] font-bold text-indigo-600 uppercase tracking-wider">SMPN 1 RANCAH</p>
+        </div>
+      </div>
+      <a href="tools.html" class="no-print text-[11px] font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 active:scale-95">
+        <i class="fa-solid fa-arrow-left text-[10px]"></i> Kembali
+      </a>
+    </div>
+
+    <!-- NOTIFIKASI TOAST -->
+    <div id="notif" class="hidden p-3 rounded-xl text-xs font-bold text-center border transition-all duration-300 no-print"></div>
+
+    <!-- PANEL FILTER TANGGAL & KELAS -->
+    <div class="bg-slate-50 p-3 sm:p-4 rounded-2xl border border-slate-200/80 space-y-3 no-print">
+      <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-end">
+        
+        <!-- Filter Tanggal -->
+        <div class="sm:col-span-5">
+          <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+            <i class="fa-solid fa-calendar-day mr-1 text-indigo-600"></i> Pilih Tanggal
+          </label>
+          <input type="date" id="filterTanggal" onchange="renderLaporan()"
+            class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none shadow-sm">
+        </div>
+
+        <!-- Filter Kelas -->
+        <div class="sm:col-span-5">
+          <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+            <i class="fa-solid fa-users-rectangle mr-1 text-indigo-600"></i> Pilih Kelas
+          </label>
+          <select id="filterKelas" onchange="renderLaporan()"
+            class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none shadow-sm">
+            <option value="SEMUA">-- Semua Kelas --</option>
+          </select>
+        </div>
+
+        <!-- Tombol Refresh -->
+        <div class="sm:col-span-2">
+          <button onclick="loadData()" id="btnRefresh"
+            class="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold py-2 px-3 rounded-xl transition shadow-md shadow-indigo-500/20 flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-rotate text-xs"></i> Muat
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- RINGKASAN STATISTIK KARTU -->
+    <div class="grid grid-cols-4 gap-2 sm:gap-3">
+      <!-- Sakit -->
+      <div class="bg-amber-50/80 border border-amber-200/80 p-2.5 sm:p-3 rounded-2xl text-center space-y-0.5">
+        <div class="text-[9px] sm:text-[10px] font-extrabold uppercase text-amber-800 tracking-wider">Sakit</div>
+        <div id="cntSakit" class="text-base sm:text-xl font-black text-amber-700">0</div>
+        <div class="text-[8px] font-semibold text-amber-600">Siswa</div>
+      </div>
+
+      <!-- Izin -->
+      <div class="bg-blue-50/80 border border-blue-200/80 p-2.5 sm:p-3 rounded-2xl text-center space-y-0.5">
+        <div class="text-[9px] sm:text-[10px] font-extrabold uppercase text-blue-800 tracking-wider">Izin</div>
+        <div id="cntIzin" class="text-base sm:text-xl font-black text-blue-700">0</div>
+        <div class="text-[8px] font-semibold text-blue-600">Siswa</div>
+      </div>
+
+      <!-- Alpa -->
+      <div class="bg-rose-50/80 border border-rose-200/80 p-2.5 sm:p-3 rounded-2xl text-center space-y-0.5">
+        <div class="text-[9px] sm:text-[10px] font-extrabold uppercase text-rose-800 tracking-wider">Alpa</div>
+        <div id="cntAlpa" class="text-base sm:text-xl font-black text-rose-700">0</div>
+        <div class="text-[8px] font-semibold text-rose-600">Siswa</div>
+      </div>
+
+      <!-- Total -->
+      <div class="bg-slate-100 border border-slate-200 p-2.5 sm:p-3 rounded-2xl text-center space-y-0.5">
+        <div class="text-[9px] sm:text-[10px] font-extrabold uppercase text-slate-700 tracking-wider">Total</div>
+        <div id="cntTotal" class="text-base sm:text-xl font-black text-slate-800">0</div>
+        <div class="text-[8px] font-semibold text-slate-500">Tidak Hadir</div>
+      </div>
+    </div>
+
+    <!-- TOMBOL AKSI: COPY WA & PRINT -->
+    <div class="flex items-center justify-between gap-2 no-print">
+      <div class="text-[11px] font-extrabold text-slate-700 flex items-center gap-1.5">
+        <i class="fa-solid fa-list-check text-indigo-600"></i> Daftar Siswa Tidak Hadir
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="salinRekapWA()" 
+          class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-xl text-[10px] transition active:scale-95 flex items-center gap-1.5 shadow-sm shadow-emerald-600/20">
+          <i class="fa-brands fa-whatsapp text-xs"></i> Salin Rekap WA
+        </button>
+        <button onclick="window.print()" 
+          class="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 font-bold px-3 py-1.5 rounded-xl text-[10px] transition active:scale-95 flex items-center gap-1.5">
+          <i class="fa-solid fa-print text-xs"></i> Cetak
+        </button>
+      </div>
+    </div>
+
+    <!-- TABEL DAFTAR KETIDAKHADIRAN -->
+    <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm max-h-96 overflow-y-auto">
+      <table class="w-full text-left border-collapse text-xs">
+        <thead class="sticky top-0 bg-slate-100 shadow-sm z-10">
+          <tr class="text-slate-600 font-bold uppercase text-[9px] tracking-wider border-b border-slate-200">
+            <th class="p-2.5 w-10 text-center">No</th>
+            <th class="p-2.5 w-24">NISN</th>
+            <th class="p-2.5">Nama Siswa</th>
+            <th class="p-2.5 w-24">Kelas</th>
+            <th class="p-2.5 w-28 text-center">Status</th>
+            <th class="p-2.5 w-36 text-center">Waktu Catat</th>
+          </tr>
+        </thead>
+        <tbody id="tabelLaporanBody" class="divide-y divide-slate-100">
+          <tr>
+            <td colspan="6" class="p-6 text-center text-slate-400 font-medium">
+              <i class="fa-solid fa-spinner fa-spin text-indigo-600 mr-2"></i> Memuat data presensi...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="text-center text-[10px] text-slate-400 py-1.5 relative z-10 no-print">
+    Presensi Digital • SMPN 1 Rancah <span class="font-bold text-slate-300">v1.0</span>
+  </footer>
+
+  <script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzq05A9BpVJFjNkHn7p2QDjbaY2ajsWjVXk5sVDkH3rStFaAC5XgEkndZSg39zOLX_2/exec";
+    
+    let rawLogs = [];
+    let rawMaster = [];
+    let filteredList = [];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      // Set tanggal default ke hari ini
+      const today = new Date().toISOString().split("T")[0];
+      document.getElementById("filterTanggal").value = today;
+      
+      loadData();
+    });
+
+    function showNotif(pesan, status = "success") {
+      const notif = document.getElementById("notif");
+      notif.classList.remove("hidden");
+      if (status === "success") {
+        notif.className = "p-2.5 rounded-xl text-xs font-bold text-center bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-sm";
+        notif.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i> ${pesan}`;
+      } else {
+        notif.className = "p-2.5 rounded-xl text-xs font-bold text-center bg-rose-50 text-rose-800 border border-rose-200 shadow-sm";
+        notif.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-rose-600 mr-1"></i> ${pesan}`;
+      }
+      setTimeout(() => notif.classList.add("hidden"), 3000);
+    }
+
+    function loadData() {
+      const tbody = document.getElementById("tabelLaporanBody");
+      tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400 font-medium"><i class="fa-solid fa-spinner fa-spin text-indigo-600 mr-2"></i> Mengambil data dari server...</td></tr>`;
+
+      fetch(WEB_APP_URL)
+        .then(res => res.json())
+        .then(data => {
+          rawLogs = data.logs || [];
+          rawMaster = data.master || [];
+
+          populateKelasDropdown();
+          renderLaporan();
+        })
+        .catch(err => {
+          tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-rose-500 font-bold">Gagal memuat data dari server! Konek internet terganggu.</td></tr>`;
+        });
+    }
+
+    function populateKelasDropdown() {
+      const selectKelas = document.getElementById("filterKelas");
+      const setKelas = new Set();
+
+      // Ambil daftar kelas unik dari master data
+      rawMaster.forEach(m => {
+        if (m.kelas && m.kelas !== "-") setKelas.add(m.kelas.trim());
+      });
+
+      // Urutkan kelas
+      const sortedKelas = Array.from(setKelas).sort();
+
+      let optHtml = `<option value="SEMUA">-- Semua Kelas --</option>`;
+      sortedKelas.forEach(kls => {
+        optHtml += `<option value="${kls}">${kls}</option>`;
+      });
+
+      selectKelas.innerHTML = optHtml;
+    }
+
+    function renderLaporan() {
+      const selectedTgl = document.getElementById("filterTanggal").value;
+      const selectedKelas = document.getElementById("filterKelas").value;
+      const tbody = document.getElementById("tabelLaporanBody");
+
+      if (!selectedTgl) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-5 text-center text-slate-400 font-medium italic">Silakan pilih tanggal terlebih dahulu.</td></tr>`;
+        return;
+      }
+
+      // Filter log hanya status ketidakhadiran (Sakit, Izin, Alpa) pada tanggal & kelas terpilih
+      filteredList = rawLogs.filter(item => {
+        const tglMatch = item.tanggal === selectedTgl;
+        const ketUpper = (item.keterangan || "").toUpperCase();
+        
+        // Status yang dihitung sebagai ketidakhadiran
+        const isKetidakhadiran = (
+          ketUpper === "SAKIT" || 
+          ketUpper === "IZIN" || 
+          ketUpper === "IJIN" || 
+          ketUpper === "ALPA" || 
+          ketUpper === "ALPHA"
+        );
+
+        let kelasMatch = true;
+        if (selectedKelas !== "SEMUA") {
+          kelasMatch = (item.kelas || "").trim().toUpperCase() === selectedKelas.toUpperCase();
+        }
+
+        return tglMatch && isKetidakhadiran && kelasMatch;
+      });
+
+      // Hitung Statistik
+      let countSakit = 0;
+      let countIzin = 0;
+      let countAlpa = 0;
+
+      filteredList.forEach(item => {
+        const k = (item.keterangan || "").toUpperCase();
+        if (k === "SAKIT") countSakit++;
+        else if (k === "IZIN" || k === "IJIN") countIzin++;
+        else if (k === "ALPA" || k === "ALPHA") countAlpa++;
+      });
+
+      document.getElementById("cntSakit").textContent = countSakit;
+      document.getElementById("cntIzin").textContent = countIzin;
+      document.getElementById("cntAlpa").textContent = countAlpa;
+      document.getElementById("cntTotal").textContent = filteredList.length;
+
+      // Render Tabel
+      if (filteredList.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="p-6 text-center text-slate-400 font-medium italic">
+              <i class="fa-solid fa-circle-check text-emerald-500 mr-1.5"></i> 
+              Tidak ada siswa Sakit, Izin, atau Alpa pada tanggal/kelas ini.
+            </td>
+          </tr>`;
+        return;
+      }
+
+      let html = "";
+      filteredList.forEach((item, idx) => {
+        const kUpper = (item.keterangan || "").toUpperCase();
+        let badgeStyle = "bg-slate-100 text-slate-700 border-slate-200";
+
+        if (kUpper === "SAKIT") {
+          badgeStyle = "bg-amber-100 text-amber-800 border-amber-300 font-extrabold";
+        } else if (kUpper === "IZIN" || kUpper === "IJIN") {
+          badgeStyle = "bg-blue-100 text-blue-800 border-blue-300 font-extrabold";
+        } else if (kUpper === "ALPA" || kUpper === "ALPHA") {
+          badgeStyle = "bg-rose-100 text-rose-800 border-rose-300 font-extrabold";
+        }
+
+        html += `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="p-2.5 text-center text-slate-400 font-medium">${idx + 1}</td>
+            <td class="p-2.5 font-mono text-[11px] font-semibold text-slate-600">${item.kode || '-'}</td>
+            <td class="p-2.5 font-extrabold text-slate-800 text-[11px]">${item.nama}</td>
+            <td class="p-2.5 font-bold text-slate-600 text-[11px]">${item.kelas}</td>
+            <td class="p-2.5 text-center">
+              <span class="text-[9px] px-2 py-0.5 rounded-full border ${badgeStyle}">${item.keterangan}</span>
+            </td>
+            <td class="p-2.5 text-center text-slate-400 text-[10px] font-medium">${item.timestamp || '-'}</td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+    }
+
+    function salinRekapWA() {
+      const selectedTgl = document.getElementById("filterTanggal").value;
+      const selectedKelas = document.getElementById("filterKelas").value;
+
+      if (!selectedTgl) {
+        alert("Pilih tanggal terlebih dahulu!");
+        return;
+      }
+
+      // Format Tanggal Indonesia
+      const parts = selectedTgl.split("-");
+      const tglIndo = `${parts[2]}/${parts[1]}/${parts[0]}`;
+
+      const cSakit = document.getElementById("cntSakit").textContent;
+      const cIzin = document.getElementById("cntIzin").textContent;
+      const cAlpa = document.getElementById("cntAlpa").textContent;
+      const cTotal = document.getElementById("cntTotal").textContent;
+
+      let textWA = `*REKAP KETIDAKHADIRAN SISWA*\n`;
+      textWA += `*SMPN 1 RANCAH*\n`;
+      textWA += `--------------------------------------\n`;
+      textWA += `📅 *Tanggal:* ${tglIndo}\n`;
+      textWA += `🏫 *Kelas:* ${selectedKelas}\n\n`;
+
+      textWA += `📊 *RINGKASAN:* \n`;
+      textWA += `• Sakit : ${cSakit} Siswa\n`;
+      textWA += `• Izin  : ${cIzin} Siswa\n`;
+      textWA += `• Alpa  : ${cAlpa} Siswa\n`;
+      textWA += `*Total Tidak Hadir: ${cTotal} Siswa*\n\n`;
+
+      textWA += `📝 *DAFTAR SISWA:* \n`;
+
+      if (filteredList.length === 0) {
+        textWA += `_(Nihil / Semua Siswa Hadir)_\n`;
+      } else {
+        filteredList.forEach((item, i) => {
+          textWA += `${i + 1}. *${item.nama}* (${item.kelas}) - _${item.keterangan}_\n`;
+        });
+      }
+
+      textWA += `\n--------------------------------------\n`;
+      textWA += `_Diisi oleh Sistem Presensi Digital SMPN 1 Rancah_`;
+
+      navigator.clipboard.writeText(textWA)
+        .then(() => showNotif("Format Rekap WA berhasil disalin ke Clipboard!", "success"))
+        .catch(() => alert("Gagal menyalin teks!"));
+    }
+  </script>
+</body>
+</html>
