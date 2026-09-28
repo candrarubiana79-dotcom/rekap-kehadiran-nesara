@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistem Presensi - SMPN 1 RANCAH</title>
+  <title>Portal Guru & Piket - SMPN 1 RANCAH (v3.0)</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -16,162 +16,179 @@
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
   </style>
 </head>
-<body class="bg-slate-900 text-slate-800 min-h-screen flex items-center justify-center p-3 sm:p-4 md:p-6 relative overflow-x-hidden selection:bg-indigo-500 selection:text-white">
+<body class="bg-slate-900 text-slate-800 min-h-screen flex flex-col items-center justify-between p-3 sm:p-4 md:p-6 relative overflow-x-hidden selection:bg-indigo-500 selection:text-white">
 
   <!-- Background Decorative Light Orbs -->
   <div class="fixed -top-32 -left-32 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none"></div>
   <div class="fixed -bottom-32 -right-32 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl pointer-events-none"></div>
 
-  <!-- 1. LOGIN CONTAINER -->
-  <div id="loginSection" class="w-full max-w-md bg-white/95 backdrop-blur-xl p-6 sm:p-8 rounded-3xl shadow-2xl border border-white/20 relative z-10 transition-all">
-    <div class="text-center mb-8">
-      <div class="w-16 h-16 bg-gradient-to-tr from-indigo-600 to-blue-500 text-white rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl shadow-lg shadow-indigo-500/30">
-        <i class="fa-solid fa-shield-halved"></i>
-      </div>
-      <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Portal Guru & Piket</h1>
-      <p class="text-xs font-bold text-indigo-600 tracking-wider uppercase mt-1">SMPN 1 RANCAH</p>
-    </div>
+  <!-- CONTAINER UTAMA -->
+  <div class="w-full max-w-xl mx-auto my-auto relative z-10 space-y-4">
 
-    <form onsubmit="handleLogin(event)" class="space-y-5">
-      <div>
-        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Token / Password Akses</label>
-        <div class="relative">
-          <i class="fa-solid fa-key absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-          <input type="password" id="inputToken" placeholder="Masukkan token guru..." required
-            class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:outline-none transition">
+    <!-- 1. LOGIN SECTION -->
+    <div id="loginSection" class="bg-white/95 backdrop-blur-xl p-6 sm:p-8 rounded-3xl shadow-2xl border border-white/20 transition-all">
+      <div class="text-center mb-6">
+        <div class="w-16 h-16 bg-gradient-to-tr from-indigo-600 to-blue-500 text-white rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl shadow-lg shadow-indigo-500/30">
+          <i class="fa-solid fa-shield-halved"></i>
         </div>
+        <div class="flex items-center justify-center gap-2">
+          <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Portal Guru & Piket</h1>
+          <span class="text-[10px] font-extrabold bg-indigo-500/10 text-indigo-600 border border-indigo-500/20 px-2 py-0.5 rounded-full">v3.0</span>
+        </div>
+        <p class="text-xs font-bold text-indigo-600 tracking-wider uppercase mt-1">SMPN 1 RANCAH</p>
       </div>
-      <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold py-3.5 rounded-2xl text-sm transition shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2">
-        <i class="fa-solid fa-right-to-bracket"></i> Masuk Sistem
-      </button>
-    </form>
-  </div>
 
-  <!-- 2. MAIN CONTAINER -->
-  <div id="formSection" class="hidden w-full max-w-2xl bg-white/95 backdrop-blur-xl p-5 sm:p-6 md:p-8 rounded-3xl shadow-2xl border border-white/20 space-y-6 relative z-10 transition-all duration-300">
-    
-    <!-- Header -->
-    <div class="flex items-center justify-between border-b pb-5 border-slate-100">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center text-lg font-bold">
-          <i class="fa-solid fa-school"></i>
-        </div>
+      <form onsubmit="handleLogin(event)" class="space-y-4">
         <div>
-          <h2 id="sectionTitle" class="text-lg font-extrabold text-slate-900 leading-tight">Input Presensi Manual</h2>
-          <p class="text-xs font-bold text-indigo-600 uppercase tracking-wider">SMPN 1 RANCAH</p>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Token / Password Akses</label>
+          <div class="relative">
+            <i class="fa-solid fa-key absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input type="password" id="inputToken" placeholder="Masukkan token guru..." required
+              class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:outline-none transition">
+          </div>
         </div>
-      </div>
-      <button onclick="logout()" class="text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 px-3 py-2 rounded-xl transition flex items-center gap-1.5">
-        <i class="fa-solid fa-right-from-bracket"></i> Keluar
-      </button>
+        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold py-3.5 rounded-2xl text-sm transition shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-right-to-bracket"></i> Masuk Sistem
+        </button>
+      </form>
     </div>
 
-    <!-- INDIKATOR STATUS MEMUAT DATA MASTER -->
-    <div id="statusDataMaster" class="p-3.5 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 bg-amber-50 text-amber-800 border border-amber-200">
-      <i class="fa-solid fa-spinner fa-spin text-amber-600 text-sm"></i>
-      <span>Sedang memuat data master siswa...</span>
-    </div>
-
-    <!-- TAB MENU PILIHAN (3 TAB RESPONSIVE) -->
-    <div class="grid grid-cols-3 gap-1.5 bg-slate-100/80 p-1.5 rounded-2xl text-[11px] font-bold">
-      <button id="tabTidakHadir" type="button" onclick="switchMenu('tidak_hadir')"
-        class="py-2.5 px-2 rounded-xl transition-all text-center flex items-center justify-center gap-1.5 bg-white text-indigo-600 shadow-sm font-extrabold">
-        <i class="fa-solid fa-user-xmark"></i>
-        <span>1. Tidak Hadir</span>
-      </button>
-      <button id="tabLupaAbsen" type="button" onclick="switchMenu('lupa_absen')"
-        class="py-2.5 px-2 rounded-xl transition-all text-center flex items-center justify-center gap-1.5 text-slate-500 hover:text-slate-800 font-semibold">
-        <i class="fa-solid fa-clock-rotate-left"></i>
-        <span>2. Lupa Absen</span>
-      </button>
-      <a href="tools.html"
-        class="py-2.5 px-2 rounded-xl transition-all text-center flex items-center justify-center gap-1.5 text-slate-500 hover:text-indigo-600 font-semibold">
-        <i class="fa-solid fa-screwdriver-wrench"></i>
-        <span>3. Tools</span>
-      </a>
-    </div>
-
-    <!-- FORM PRESENSI (UNTUK MENU 1 & 2) -->
-    <form id="mainForm" onsubmit="handleSubmit(event)" class="space-y-5">
+    <!-- 2. MAIN FORM SECTION -->
+    <div id="formSection" class="hidden bg-white/95 backdrop-blur-xl p-5 sm:p-6 md:p-8 rounded-3xl shadow-2xl border border-white/20 space-y-5 transition-all duration-300">
       
-      <!-- DROPDOWN PILIHAN UMUM (TANGGAL, KELAS, SISWA) -->
-      <div id="commonInputs" class="space-y-4">
-        <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Tanggal Presensi</label>
-          <input type="date" id="inputTanggal" required
-            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:outline-none transition">
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Pilih Kelas</label>
-          <select id="selectKelas" onchange="filterSiswaByKelas()" required disabled
-            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:outline-none disabled:bg-slate-100 disabled:text-slate-400 transition">
-            <option value="">-- Sedang Memuat Data... --</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Pilih Siswa</label>
-          <select id="selectSiswa" required disabled
-            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:outline-none disabled:bg-slate-100 disabled:text-slate-400 transition">
-            <option value="">-- Pilih Kelas Terlebih Dahulu --</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- KONTEN MENU 1: SISWA TIDAK HADIR -->
-      <div id="sectionTidakHadir" class="space-y-3">
-        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Keterangan Tidak Hadir</label>
-        <div class="grid grid-cols-3 gap-3">
-          <label class="flex flex-col items-center justify-center p-3 border border-slate-200 rounded-2xl cursor-pointer hover:bg-slate-50 transition">
-            <input type="radio" name="statusTidakHadir" value="Izin" class="accent-indigo-600 mb-1">
-            <span class="text-xs font-extrabold text-indigo-700">Izin</span>
-          </label>
-          <label class="flex flex-col items-center justify-center p-3 border border-slate-200 rounded-2xl cursor-pointer hover:bg-slate-50 transition">
-            <input type="radio" name="statusTidakHadir" value="Sakit" class="accent-amber-600 mb-1">
-            <span class="text-xs font-extrabold text-amber-700">Sakit</span>
-          </label>
-          <label class="flex flex-col items-center justify-center p-3 border border-slate-200 rounded-2xl cursor-pointer hover:bg-slate-50 transition">
-            <input type="radio" name="statusTidakHadir" value="Alpa" class="accent-rose-600 mb-1">
-            <span class="text-xs font-extrabold text-rose-700">Alpa</span>
-          </label>
-        </div>
-      </div>
-
-      <!-- KONTEN MENU 2: SISWA LUPA ABSEN -->
-      <div id="sectionLupaAbsen" class="hidden space-y-4 bg-amber-50/60 p-4 rounded-2xl border border-amber-200/80">
-        <div class="flex items-center gap-2 text-xs font-bold text-amber-800">
-          <i class="fa-solid fa-circle-info text-amber-600 text-base"></i>
-          <span>Fitur susulan untuk siswa yang hadir tetapi belum scan QR.</span>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Jam Masuk</label>
-            <input type="time" id="inputJamMasuk" value="07:00"
-              class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+      <!-- Header -->
+      <div class="flex items-center justify-between border-b pb-4 border-slate-100">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center text-lg font-bold">
+            <i class="fa-solid fa-school"></i>
           </div>
           <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Jam Pulang</label>
-            <input type="time" id="inputJamPulang" value="14:00"
-              class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            <div class="flex items-center gap-2">
+              <h2 id="sectionTitle" class="text-base sm:text-lg font-extrabold text-slate-900 leading-tight">Input Presensi Manual</h2>
+              <span class="text-[10px] font-extrabold bg-indigo-500/10 text-indigo-600 border border-indigo-500/20 px-2 py-0.5 rounded-full">v3.0</span>
+            </div>
+            <p class="text-[11px] font-bold text-indigo-600 uppercase tracking-wider">SMPN 1 RANCAH</p>
           </div>
         </div>
+        <button onclick="logout()" class="text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 px-3 py-2 rounded-xl transition flex items-center gap-1.5 active:scale-95">
+          <i class="fa-solid fa-right-from-bracket"></i> Keluar
+        </button>
       </div>
 
-      <!-- Notifikasi Toast -->
-      <div id="notif" class="hidden p-3.5 rounded-2xl text-xs font-bold text-center border"></div>
+      <!-- INDIKATOR STATUS MEMUAT DATA MASTER -->
+      <div id="statusDataMaster" class="p-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 bg-amber-50 text-amber-800 border border-amber-200">
+        <i class="fa-solid fa-spinner fa-spin text-amber-600 text-sm"></i>
+        <span>Sedang memuat data master siswa...</span>
+      </div>
 
-      <!-- Tombol Simpan -->
-      <button type="submit" id="btnSubmit" disabled
-        class="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-2xl text-sm transition shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2">
-        <i class="fa-solid fa-paper-plane"></i> Simpan Presensi
-      </button>
-    </form>
+      <!-- TAB MENU PILIHAN -->
+      <div class="grid grid-cols-3 gap-1.5 bg-slate-100/80 p-1.5 rounded-2xl text-[11px] font-bold">
+        <button id="tabTidakHadir" type="button" onclick="switchMenu('tidak_hadir')"
+          class="py-2.5 px-2 rounded-xl transition-all text-center flex items-center justify-center gap-1.5 bg-white text-indigo-600 shadow-sm font-extrabold">
+          <i class="fa-solid fa-user-xmark"></i>
+          <span>1. Tidak Hadir</span>
+        </button>
+        <button id="tabLupaAbsen" type="button" onclick="switchMenu('lupa_absen')"
+          class="py-2.5 px-2 rounded-xl transition-all text-center flex items-center justify-center gap-1.5 text-slate-500 hover:text-slate-800 font-semibold">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+          <span>2. Lupa Absen</span>
+        </button>
+        <a href="tools.html"
+          class="py-2.5 px-2 rounded-xl transition-all text-center flex items-center justify-center gap-1.5 text-slate-500 hover:text-indigo-600 font-semibold">
+          <i class="fa-solid fa-screwdriver-wrench"></i>
+          <span>3. Tools</span>
+        </a>
+      </div>
+
+      <!-- FORM PRESENSI (UNTUK MENU 1 & 2) -->
+      <form id="mainForm" onsubmit="handleSubmit(event)" class="space-y-4">
+        
+        <!-- DROPDOWN PILIHAN UMUM (TANGGAL, KELAS, SISWA) -->
+        <div id="commonInputs" class="space-y-3.5">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Tanggal Presensi</label>
+            <input type="date" id="inputTanggal" required
+              class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:outline-none transition">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Pilih Kelas</label>
+            <select id="selectKelas" onchange="filterSiswaByKelas()" required disabled
+              class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:outline-none disabled:bg-slate-100 disabled:text-slate-400 transition">
+              <option value="">-- Sedang Memuat Data... --</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Pilih Siswa</label>
+            <select id="selectSiswa" required disabled
+              class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:outline-none disabled:bg-slate-100 disabled:text-slate-400 transition">
+              <option value="">-- Pilih Kelas Terlebih Dahulu --</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- KONTEN MENU 1: SISWA TIDAK HADIR -->
+        <div id="sectionTidakHadir" class="space-y-2 pt-1">
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Keterangan Tidak Hadir</label>
+          <div class="grid grid-cols-3 gap-2.5">
+            <label class="flex flex-col items-center justify-center p-3 border border-slate-200 rounded-2xl cursor-pointer hover:bg-indigo-50/50 has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 transition">
+              <input type="radio" name="statusTidakHadir" value="Izin" class="accent-indigo-600 mb-1">
+              <span class="text-xs font-extrabold text-indigo-700">Izin</span>
+            </label>
+            <label class="flex flex-col items-center justify-center p-3 border border-slate-200 rounded-2xl cursor-pointer hover:bg-amber-50/50 has-[:checked]:bg-amber-50 has-[:checked]:border-amber-500 transition">
+              <input type="radio" name="statusTidakHadir" value="Sakit" class="accent-amber-600 mb-1">
+              <span class="text-xs font-extrabold text-amber-700">Sakit</span>
+            </label>
+            <label class="flex flex-col items-center justify-center p-3 border border-slate-200 rounded-2xl cursor-pointer hover:bg-rose-50/50 has-[:checked]:bg-rose-50 has-[:checked]:border-rose-500 transition">
+              <input type="radio" name="statusTidakHadir" value="Alpa" class="accent-rose-600 mb-1">
+              <span class="text-xs font-extrabold text-rose-700">Alpa</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- KONTEN MENU 2: SISWA LUPA ABSEN -->
+        <div id="sectionLupaAbsen" class="hidden space-y-3 bg-amber-50/60 p-3.5 rounded-2xl border border-amber-200/80">
+          <div class="flex items-center gap-2 text-xs font-bold text-amber-800">
+            <i class="fa-solid fa-circle-info text-amber-600 text-sm"></i>
+            <span>Presensi susulan untuk siswa yang hadir tanpa scan QR.</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Jam Masuk</label>
+              <input type="time" id="inputJamMasuk" value="07:00"
+                class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Jam Pulang</label>
+              <input type="time" id="inputJamPulang" value="14:00"
+                class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            </div>
+          </div>
+        </div>
+
+        <!-- NOTIFIKASI TOAST -->
+        <div id="notif" class="hidden p-3.5 rounded-2xl text-xs font-bold text-center border transition-all duration-300"></div>
+
+        <!-- TOMBOL SIMPAN -->
+        <button type="submit" id="btnSubmit" disabled
+          class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 disabled:bg-slate-300 disabled:cursor-not-allowed disabled:active:scale-100 text-white font-bold py-3.5 rounded-2xl text-sm transition shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-paper-plane"></i> Simpan Presensi
+        </button>
+      </form>
+
+    </div>
 
   </div>
+
+  <!-- FOOTER -->
+  <footer class="text-center text-[11px] text-slate-400 py-2 relative z-10">
+    Presensi Digital • SMPN 1 Rancah <span class="font-bold text-slate-300">v3.0</span>
+  </footer>
 
   <script>
+    const APP_VERSION = "v3.0";
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzq05A9BpVJFjNkHn7p2QDjbaY2ajsWjVXk5sVDkH3rStFaAC5XgEkndZSg39zOLX_2/exec";
     const TOKEN_BENAR = "GURU2026";
     const WAKTU_INAKTIF = 2 * 60 * 60 * 1000; // 2 Jam (ms)
@@ -200,6 +217,7 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
+      // Auto set tanggal hari ini
       const now = new Date();
       const yyyy = now.getFullYear();
       const mm = String(now.getMonth() + 1).padStart(2, '0');
@@ -280,7 +298,7 @@
       const selectKelas = document.getElementById("selectKelas");
       const btnSubmit = document.getElementById("btnSubmit");
 
-      statusBox.className = "p-3.5 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 bg-amber-50 text-amber-800 border border-amber-200";
+      statusBox.className = "p-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 bg-amber-50 text-amber-800 border border-amber-200";
       statusBox.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-amber-600 text-sm"></i> <span>Sedang memuat data master siswa...</span>';
       
       selectKelas.disabled = true;
@@ -293,14 +311,14 @@
           masterSiswa = data.master || [];
           populateKelas();
 
-          statusBox.className = "p-3.5 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 bg-emerald-50 text-emerald-800 border border-emerald-200";
-          statusBox.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i> <span>Data pengisian sudah siap!</span>';
+          statusBox.className = "p-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 bg-emerald-50 text-emerald-800 border border-emerald-200";
+          statusBox.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i> <span>Data pengisian sudah siap! (' + masterSiswa.length + ' Siswa)</span>';
           
           selectKelas.disabled = false;
           btnSubmit.disabled = false;
         })
         .catch(err => {
-          statusBox.className = "p-3.5 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 bg-rose-50 text-rose-800 border border-rose-200";
+          statusBox.className = "p-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 bg-rose-50 text-rose-800 border border-rose-200";
           statusBox.innerHTML = '<i class="fa-solid fa-circle-xmark text-rose-600 text-sm"></i> <span>Gagal memuat data! Periksa koneksi internet Anda.</span>';
         });
     }
@@ -396,25 +414,26 @@
       .then(res => {
         notif.classList.remove("hidden");
         if (res.status === "success") {
-          notif.className = "p-3.5 rounded-2xl text-xs font-bold text-center bg-emerald-50 text-emerald-800 border border-emerald-200";
-          notif.textContent = res.message || "Data presensi berhasil disimpan!";
+          notif.className = "p-3.5 rounded-2xl text-xs font-bold text-center bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-sm";
+          notif.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> ' + (res.message || "Data presensi berhasil disimpan!");
 
+          // Kosongkan pilihan siswa saja agar pilihan Kelas & Tanggal tetap tersimpan untuk siswa berikutnya
           document.getElementById("selectSiswa").value = "";
           document.querySelectorAll('input[name="statusTidakHadir"]').forEach(r => r.checked = false);
         } else {
-          notif.className = "p-3.5 rounded-2xl text-xs font-bold text-center bg-rose-50 text-rose-800 border border-rose-200";
-          notif.textContent = res.message || "Gagal menyimpan data!";
+          notif.className = "p-3.5 rounded-2xl text-xs font-bold text-center bg-rose-50 text-rose-800 border border-rose-200 shadow-sm";
+          notif.innerHTML = '<i class="fa-solid fa-circle-xmark text-rose-600 mr-1.5"></i> ' + (res.message || "Gagal menyimpan data!");
         }
       })
       .catch(err => {
         notif.classList.remove("hidden");
-        notif.className = "p-3.5 rounded-2xl text-xs font-bold text-center bg-rose-50 text-rose-800 border border-rose-200";
-        notif.textContent = "Gagal terhubung ke server! Periksa koneksi internet Anda.";
+        notif.className = "p-3.5 rounded-2xl text-xs font-bold text-center bg-rose-50 text-rose-800 border border-rose-200 shadow-sm";
+        notif.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-rose-600 mr-1.5"></i> Gagal terhubung ke server! Periksa koneksi internet Anda.';
       })
       .finally(() => {
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Simpan Presensi';
-        setTimeout(() => notif.classList.add("hidden"), 4000);
+        setTimeout(() => notif.classList.add("hidden"), 3500);
       });
     }
   </script>
