@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cetak Kartu Pelajar Bolak-Balik - SMPN 1 Rancah (v3.2)</title>
+  <title>Cetak Kartu Pelajar (Depan / Belakang / Duplex) - SMPN 1 Rancah (v3.3)</title>
   
   <!-- SKRIP PENGAMAN & AUTO LOGOUT -->
   <script src="auth-guard.js"></script>
@@ -39,12 +39,14 @@
     .grid-form { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
     .form-group { display: flex; flex-direction: column; }
     .form-group.full-width { grid-column: span 2; }
-    .form-group label { font-size: 10.5px; font-weight: 700; color: #64748b; margin-bottom: 3px; text-transform: uppercase; }
+    .form-group label { font-size: 10.5px; font-weight: 700; color: #64748b; margin-bottom: 3px; text-transform: uppercase; display: flex; justify-content: space-between; }
+    .form-group label span { color: #0284c7; font-weight: 800; }
     .form-group select, .form-group textarea, .form-group input { padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 11px; font-weight: 600; outline: none; }
-    .form-group textarea { height: 70px; resize: vertical; }
+    .form-group input[type="range"] { accent-color: #0284c7; cursor: pointer; margin-top: 2px; }
+    .form-group textarea { height: 60px; resize: vertical; }
 
     .action-buttons { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
-    .btn { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: 800; font-size: 11px; flex: 1; height: 34px; text-align: center; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+    .btn { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: 800; font-size: 11px; flex: 1; height: 34px; text-align: center; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 4px; }
     .btn-download { background: #0284c7; color: #fff; }
     .btn-download:hover { background: #0369a1; }
     .btn-cetak { background: #16a34a; color: #fff; }
@@ -52,7 +54,6 @@
     .btn-reset { background: #64748b; color: #fff; }
     .btn-reset:hover { background: #475569; }
     .badge-v { background: #0284c7; color: #ffffff; font-size: 10px; padding: 2px 8px; border-radius: 12px; font-weight: 800; }
-    .hidden { display: none !important; }
 
     /* AREA PREVIEW KANAN */
     .preview-section { flex: 1; background: #1e293b; border-radius: 16px; padding: 20px; border: 1px solid #334155; min-height: calc(100vh - 40px); display: flex; flex-direction: column; align-items: center; }
@@ -74,7 +75,7 @@
       width: 85.6mm; height: 53.9mm;
       background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
       border: 1px solid #0080d6; border-radius: 3.2mm; position: relative;
-      overflow: hidden; box-shrink: 0; page-break-inside: avoid; box-sizing: border-box;
+      overflow: hidden; flex-shrink: 0; page-break-inside: avoid; box-sizing: border-box;
     }
     .header-depan {
       background: linear-gradient(90deg, #0091ea 0%, #0060a8 100%);
@@ -96,8 +97,15 @@
     .data-separator { width: 1.5mm; color: #dc2626; font-weight: bold; }
     .data-value { flex: 1; color: #0f172a; font-weight: 600; text-transform: uppercase; }
 
-    .ttd-section { position: absolute; right: 3mm; bottom: 1.2mm; z-index: 3; color: #0f172a; font-size: 5.8px; }
-    .nama-kepsek { font-size: 6.8px; font-weight: 800; text-decoration: underline; }
+    /* TTD & STEMPEL CAP */
+    .ttd-section { position: absolute; right: 3mm; bottom: 1.2mm; z-index: 3; color: #0f172a; }
+    .ttd-box { position: relative; text-align: left; font-size: 5.8px; line-height: 1.15; }
+    .ttd-space { height: 5.5mm; }
+    .img-stempel { position: absolute; height: auto; opacity: 0.88; z-index: 2; mix-blend-mode: multiply; pointer-events: none; transition: all 0.05s ease; }
+    .img-ttd { position: absolute; height: auto; z-index: 1; pointer-events: none; transition: all 0.05s ease; }
+    .nama-kepsek { font-size: 6.8px; font-weight: 800; text-decoration: underline; position: relative; z-index: 3; }
+    .nip-kepsek { font-size: 5.8px; position: relative; z-index: 3; }
+
     .bg-wave-back { position: absolute; bottom: 0; right: 0; width: 100%; height: 48%; background: #facc15; clip-path: polygon(0 75%, 100% 15%, 100% 100%, 0% 100%); z-index: 1; }
     .bg-wave-front { position: absolute; bottom: 0; right: 0; width: 100%; height: 38%; background: #0091ea; clip-path: polygon(0 85%, 100% 30%, 100% 100%, 0% 100%); z-index: 1; }
 
@@ -131,7 +139,7 @@
       .preview-section { background: none !important; border: none !important; padding: 0 !important; }
       .page-sheet {
         box-shadow: none !important; border-radius: 0 !important; padding: 0 !important; margin: 0 !important;
-        page-break-after: always !always; break-after: page; display: grid !important;
+        page-break-after: always !important; break-after: page; display: grid !important;
         grid-template-columns: repeat(2, 85.6mm) !important; gap: 4mm 6mm !important; justify-content: start !important;
       }
       .page-title-tag { display: none !important; }
@@ -149,13 +157,14 @@
       </div>
 
       <h2>
-        <span>Cetak Kartu Bolak-Balik</span>
-        <span class="badge-v">v3.2</span>
+        <span>Cetak Kartu Pelajar</span>
+        <span class="badge-v">v3.3</span>
       </h2>
       
       <div id="statusIndikator" class="status-box loading">Memuat data siswa...</div>
 
-      <div class="section-title">1. Legalitas & TTD Kepsek</div>
+      <!-- TAHAP 1: LEGALITAS & UPLOAD -->
+      <div class="section-title">1. Legalitas & File Gambar</div>
       <div class="grid-form">
         <div class="form-group full-width">
           <label>Nama Kepala Sekolah:</label>
@@ -169,9 +178,48 @@
           <label>Tempat & Tgl TTD:</label>
           <input type="text" id="inputTglTtd" value="Rancah, Juli 2026" oninput="updateMetadata()">
         </div>
+        <div class="form-group">
+          <label>Upload Cap (PNG/JPG):</label>
+          <input type="file" id="inputStempel" accept="image/*" onchange="uploadGambarLokal(event, 'stempelData')">
+        </div>
+        <div class="form-group">
+          <label>Upload TTD (PNG/JPG):</label>
+          <input type="file" id="inputTTD" accept="image/*" onchange="uploadGambarLokal(event, 'ttdData')">
+        </div>
       </div>
 
-      <div class="section-title">2. Tata Tertib Belakang</div>
+      <!-- TAHAP 2: EDIT POSISI LIVE CAP & TTD -->
+      <div class="section-title">2. Edit Posisi Live (Cap & TTD)</div>
+      <div class="grid-form">
+        <div class="form-group">
+          <label>Cap - Posisi X: <span id="valStempelX">-11mm</span></label>
+          <input type="range" id="stempelX" min="-30" max="20" step="0.5" value="-11" oninput="updatePosisiLive()">
+        </div>
+        <div class="form-group">
+          <label>Cap - Posisi Y: <span id="valStempelY">1mm</span></label>
+          <input type="range" id="stempelY" min="-10" max="15" step="0.5" value="1" oninput="updatePosisiLive()">
+        </div>
+        <div class="form-group full-width">
+          <label>Cap - Ukuran Lebar: <span id="valStempelSize">14mm</span></label>
+          <input type="range" id="stempelSize" min="8" max="25" step="0.5" value="14" oninput="updatePosisiLive()">
+        </div>
+
+        <div class="form-group">
+          <label>TTD - Posisi X: <span id="valTtdX">0.5mm</span></label>
+          <input type="range" id="ttdX" min="-20" max="30" step="0.5" value="0.5" oninput="updatePosisiLive()">
+        </div>
+        <div class="form-group">
+          <label>TTD - Posisi Y: <span id="valTtdY">2.5mm</span></label>
+          <input type="range" id="ttdY" min="-10" max="15" step="0.5" value="2.5" oninput="updatePosisiLive()">
+        </div>
+        <div class="form-group full-width">
+          <label>TTD - Ukuran Lebar: <span id="valTtdSize">16mm</span></label>
+          <input type="range" id="ttdSize" min="8" max="30" step="0.5" value="16" oninput="updatePosisiLive()">
+        </div>
+      </div>
+
+      <!-- TAHAP 3: TATA TERTIB -->
+      <div class="section-title">3. Tata Tertib Belakang</div>
       <div class="grid-form">
         <div class="form-group full-width">
           <label>Teks Tata Tertib:</label>
@@ -186,25 +234,38 @@
         </div>
       </div>
 
-      <div class="section-title">3. Pengaturan Cetak Duplex</div>
+      <!-- TAHAP 4: PENGATURAN CETAK -->
+      <div class="section-title">4. Pengaturan Cetak</div>
       <div class="grid-form">
         <div class="form-group full-width">
           <label>Pilih Kelas:</label>
           <select id="selectKelas" onchange="renderDuplex()"><option value="">-- Pilih Kelas --</option></select>
         </div>
 
-        <div class="form-group full-width">
-          <label>Ukuran Kertas Cetak:</label>
+        <div class="form-group">
+          <label>Ukuran Kertas:</label>
           <select id="selectUkuranKertas">
             <option value="A4">A4 (8 Kartu / Lembar)</option>
             <option value="F4" selected>F4 / Folio (10 Kartu / Lembar)</option>
           </select>
         </div>
 
+        <div class="form-group">
+          <label>Sisi Halaman Cetak:</label>
+          <select id="selectSisiCetak" onchange="renderDuplex()">
+            <option value="semua" selected>1. Sisi Depan & Belakang (Duplex)</option>
+            <option value="depan">2. Sisi Depan Saja</option>
+            <option value="belakang">3. Sisi Belakang Saja (Mirrored)</option>
+          </select>
+        </div>
+
         <div class="form-group full-width">
           <div class="action-buttons">
             <button type="button" onclick="cetakDuplex()" class="btn btn-cetak">
-              🖨️ Cetak Bolak-Balik (Duplex)
+              🖨️ Jalankan Cetak
+            </button>
+            <button type="button" onclick="resetPosisiDefault()" class="btn btn-reset">
+              Reset Posisi
             </button>
           </div>
         </div>
@@ -215,10 +276,10 @@
     <div class="preview-section">
       <div class="preview-header">
         <div style="display: flex; align-items: center; gap: 8px;">
-          <span>Preview Layout Cetak Duplex</span>
-          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v3.2</span>
+          <span>Preview Layout Cetak Kartu</span>
+          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v3.3</span>
         </div>
-        <span style="font-size: 11px; opacity: 0.7; font-weight: normal;">Presisi Mirrored Grid (A4 & F4)</span>
+        <span style="font-size: 11px; opacity: 0.7; font-weight: normal;">Presisi Standar KTP (85.6mm x 53.9mm)</span>
       </div>
       <div id="wadahCetak"></div>
     </div>
@@ -230,9 +291,86 @@
     let dataSiswaGlobal = [];
     let daftarKelasGlobal = [];
 
+    const defaultPosisi = {
+      stempelX: '-11', stempelY: '1', stempelSize: '14',
+      ttdX: '0.5', ttdY: '2.5', ttdSize: '16'
+    };
+
     window.onload = function() {
+      if (localStorage.getItem('namaKepsek')) document.getElementById('inputNamaKepsek').value = localStorage.getItem('namaKepsek');
+      if (localStorage.getItem('nipKepsek')) document.getElementById('inputNipKepsek').value = localStorage.getItem('nipKepsek');
+      if (localStorage.getItem('tglTtdData')) document.getElementById('inputTglTtd').value = localStorage.getItem('tglTtdData');
+
+      initSliders();
       fetchDataSiswa();
     };
+
+    function initSliders() {
+      document.getElementById('stempelX').value = localStorage.getItem('stempelX') || defaultPosisi.stempelX;
+      document.getElementById('stempelY').value = localStorage.getItem('stempelY') || defaultPosisi.stempelY;
+      document.getElementById('stempelSize').value = localStorage.getItem('stempelSize') || defaultPosisi.stempelSize;
+
+      document.getElementById('ttdX').value = localStorage.getItem('ttdX') || defaultPosisi.ttdX;
+      document.getElementById('ttdY').value = localStorage.getItem('ttdY') || defaultPosisi.ttdY;
+      document.getElementById('ttdSize').value = localStorage.getItem('ttdSize') || defaultPosisi.ttdSize;
+
+      updateLabelPosisi();
+    }
+
+    function updateLabelPosisi() {
+      document.getElementById('valStempelX').innerText = document.getElementById('stempelX').value + 'mm';
+      document.getElementById('valStempelY').innerText = document.getElementById('stempelY').value + 'mm';
+      document.getElementById('valStempelSize').innerText = document.getElementById('stempelSize').value + 'mm';
+
+      document.getElementById('valTtdX').innerText = document.getElementById('ttdX').value + 'mm';
+      document.getElementById('valTtdY').innerText = document.getElementById('ttdY').value + 'mm';
+      document.getElementById('valTtdSize').innerText = document.getElementById('ttdSize').value + 'mm';
+    }
+
+    function updatePosisiLive() {
+      updateLabelPosisi();
+
+      const sX = document.getElementById('stempelX').value;
+      const sY = document.getElementById('stempelY').value;
+      const sSize = document.getElementById('stempelSize').value;
+
+      const tX = document.getElementById('ttdX').value;
+      const tY = document.getElementById('ttdY').value;
+      const tSize = document.getElementById('ttdSize').value;
+
+      localStorage.setItem('stempelX', sX);
+      localStorage.setItem('stempelY', sY);
+      localStorage.setItem('stempelSize', sSize);
+
+      localStorage.setItem('ttdX', tX);
+      localStorage.setItem('ttdY', tY);
+      localStorage.setItem('ttdSize', tSize);
+
+      document.querySelectorAll('.img-stempel').forEach(img => {
+        img.style.left = sX + 'mm';
+        img.style.top = sY + 'mm';
+        img.style.width = sSize + 'mm';
+      });
+
+      document.querySelectorAll('.img-ttd').forEach(img => {
+        img.style.left = tX + 'mm';
+        img.style.top = tY + 'mm';
+        img.style.width = tSize + 'mm';
+      });
+    }
+
+    function resetPosisiDefault() {
+      localStorage.setItem('stempelX', defaultPosisi.stempelX);
+      localStorage.setItem('stempelY', defaultPosisi.stempelY);
+      localStorage.setItem('stempelSize', defaultPosisi.stempelSize);
+
+      localStorage.setItem('ttdX', defaultPosisi.ttdX);
+      localStorage.setItem('ttdY', defaultPosisi.ttdY);
+      localStorage.setItem('ttdSize', defaultPosisi.ttdSize);
+
+      initSliders();
+      updatePosisiLive();
+    }
 
     function fetchDataSiswa() {
       const statusBox = document.getElementById('statusIndikator');
@@ -267,13 +405,44 @@
     }
 
     function updateMetadata() {
+      const nama = document.getElementById('inputNamaKepsek').value;
+      const nip = document.getElementById('inputNipKepsek').value;
+      const tgl = document.getElementById('inputTglTtd').value;
+
+      localStorage.setItem('namaKepsek', nama);
+      localStorage.setItem('nipKepsek', nip);
+      localStorage.setItem('tglTtdData', tgl);
+
       renderDuplex();
+    }
+
+    function uploadGambarLokal(event, storageKey) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        localStorage.setItem(storageKey, e.target.result);
+        renderDuplex();
+      };
+      reader.readAsDataURL(file);
     }
 
     function buatHtmlDepan(s) {
       const namaKepsek = document.getElementById('inputNamaKepsek').value || '-';
       const nipKepsek = document.getElementById('inputNipKepsek').value || '-';
       const tglTtd = document.getElementById('inputTglTtd').value || '-';
+
+      const stempelBase64 = localStorage.getItem('stempelData') || '';
+      const ttdBase64 = localStorage.getItem('ttdData') || '';
+
+      const sX = localStorage.getItem('stempelX') || defaultPosisi.stempelX;
+      const sY = localStorage.getItem('stempelY') || defaultPosisi.stempelY;
+      const sSize = localStorage.getItem('stempelSize') || defaultPosisi.stempelSize;
+
+      const tX = localStorage.getItem('ttdX') || defaultPosisi.ttdX;
+      const tY = localStorage.getItem('ttdY') || defaultPosisi.ttdY;
+      const tSize = localStorage.getItem('ttdSize') || defaultPosisi.ttdSize;
 
       const nisn = (s[0] || '').trim();
       const nama = (s[1] || '').trim();
@@ -306,11 +475,15 @@
             </div>
           </div>
           <div class="ttd-section">
-            <div>${tglTtd}</div>
-            <div>Kepala Sekolah</div>
-            <div style="height:4mm;"></div>
-            <div class="nama-kepsek">${namaKepsek}</div>
-            <div>NIP. ${nipKepsek}</div>
+            <div class="ttd-box">
+              ${stempelBase64 ? `<img src="${stempelBase64}" class="img-stempel" style="left:${sX}mm; top:${sY}mm; width:${sSize}mm;">` : ''}
+              ${ttdBase64 ? `<img src="${ttdBase64}" class="img-ttd" style="left:${tX}mm; top:${tY}mm; width:${tSize}mm;">` : ''}
+              <div>${tglTtd}</div>
+              <div>Kepala Sekolah</div>
+              <div class="ttd-space"></div>
+              <div class="nama-kepsek">${namaKepsek}</div>
+              <div class="nip-kepsek">NIP. ${nipKepsek}</div>
+            </div>
           </div>
           <div class="bg-wave-back"></div>
           <div class="bg-wave-front"></div>
@@ -349,48 +522,57 @@
 
     function renderDuplex() {
       const kelasPilihan = document.getElementById('selectKelas').value;
+      const sisiPilihan = document.getElementById('selectSisiCetak').value;
+      const ukuranKertas = document.getElementById('selectUkuranKertas').value;
       const wadah = document.getElementById('wadahCetak');
+      
       if (!kelasPilihan) { wadah.innerHTML = ''; return; }
 
       const siswaKelas = dataSiswaGlobal.filter(s => (s[2]||'').trim() === kelasPilihan);
-      const batchSize = 10; // Default F4 (10 Kartu per lembar)
+      const batchSize = (ukuranKertas === "F4") ? 10 : 8; // F4 = 10, A4 = 8 Kartu per Lembar
       let htmlAll = '';
 
-      // BATCHING PER LEMBAR KERTAS
       for (let i = 0; i < siswaKelas.length; i += batchSize) {
         const chunk = siswaKelas.slice(i, i + batchSize);
+        const nomorLembar = Math.floor(i / batchSize) + 1;
 
-        // 1. LEMBAR DEPAN (Urutan Normal 1, 2, 3, 4...)
-        htmlAll += `<div class="page-sheet"><div class="page-title-tag">📄 LEMBAR ${Math.floor(i/batchSize)+1} - SISI DEPAN</div>`;
-        chunk.forEach(s => { htmlAll += buatHtmlDepan(s); });
-        htmlAll += `</div>`;
-
-        // 2. LEMBAR BELAKANG (MIRRORED KIRI-KANAN PER BARIS)
-        htmlAll += `<div class="page-sheet"><div class="page-title-tag">📄 LEMBAR ${Math.floor(i/batchSize)+1} - SISI BELAKANG (MIRRORED)</div>`;
-        
-        // Tukar posisi [Kiri, Kanan] -> [Kanan, Kiri] untuk setiap baris
-        for (let j = 0; j < chunk.length; j += 2) {
-          if (j + 1 < chunk.length) {
-            htmlAll += buatHtmlBelakang(chunk[j + 1]); // Tampilkan Kanan dulu di posisi Kiri
-            htmlAll += buatHtmlBelakang(chunk[j]);     // Tampilkan Kiri di posisi Kanan
-          } else {
-            htmlAll += buatHtmlBelakang(chunk[j]);     // Jika ganjil
-          }
+        // 1. TAMPILKAN DEPAN (JIKA PILIHAN 'SEMUA' ATAU 'DEPAN')
+        if (sisiPilihan === "semua" || sisiPilihan === "depan") {
+          htmlAll += `<div class="page-sheet"><div class="page-title-tag">📄 LEMBAR ${nomorLembar} - SISI DEPAN</div>`;
+          chunk.forEach(s => { htmlAll += buatHtmlDepan(s); });
+          htmlAll += `</div>`;
         }
-        htmlAll += `</div>`;
+
+        // 2. TAMPILKAN BELAKANG MIRRORED (JIKA PILIHAN 'SEMUA' ATAU 'BELAKANG')
+        if (sisiPilihan === "semua" || sisiPilihan === "belakang") {
+          htmlAll += `<div class="page-sheet"><div class="page-title-tag">📄 LEMBAR ${nomorLembar} - SISI BELAKANG (MIRRORED)</div>`;
+          
+          // Tukar posisi [Kiri, Kanan] -> [Kanan, Kiri] untuk setiap baris (Horizontal Mirroring)
+          for (let j = 0; j < chunk.length; j += 2) {
+            if (j + 1 < chunk.length) {
+              htmlAll += buatHtmlBelakang(chunk[j + 1]); // Sisi Kanan menjadi Kiri
+              htmlAll += buatHtmlBelakang(chunk[j]);     // Sisi Kiri menjadi Kanan
+            } else {
+              htmlAll += buatHtmlBelakang(chunk[j]);     // Jika ganjil
+            }
+          }
+          htmlAll += `</div>`;
+        }
       }
 
       wadah.innerHTML = htmlAll;
 
-      // Generate QR Code di Sisi Belakang
-      siswaKelas.forEach(s => {
-        const nisn = (s[0] || '').trim();
-        const elBox = document.getElementById(`qr-duplex-${nisn}`);
-        if (elBox) {
-          elBox.innerHTML = '';
-          new QRCode(elBox, { text: nisn, width: 90, height: 90 });
-        }
-      });
+      // Generate QR Code di Sisi Belakang jika ditampilkan
+      if (sisiPilihan === "semua" || sisiPilihan === "belakang") {
+        siswaKelas.forEach(s => {
+          const nisn = (s[0] || '').trim();
+          const elBox = document.getElementById(`qr-duplex-${nisn}`);
+          if (elBox) {
+            elBox.innerHTML = '';
+            new QRCode(elBox, { text: nisn, width: 90, height: 90 });
+          }
+        });
+      }
     }
 
     function cetakDuplex() {
