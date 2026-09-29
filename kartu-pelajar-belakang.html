@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kartu Pelajar Bagian Belakang - SMPN 1 Rancah</title>
+  <title>Kartu Pelajar Bagian Belakang - SMPN 1 Rancah (v.3.0)</title>
   
   <!-- SKRIP PENGAMAN & AUTO LOGOUT -->
   <script src="auth-guard.js"></script>
@@ -27,7 +27,7 @@
       border: 1px solid #e2e8f0; max-height: calc(100vh - 40px); overflow-y: auto;
       position: sticky; top: 20px;
     }
-    .panel-control h2 { font-size: 18px; margin-bottom: 12px; color: #0f172a; font-weight: 800; }
+    .panel-control h2 { font-size: 18px; margin-bottom: 12px; color: #0f172a; font-weight: 800; display: flex; items-center; justify-content: space-between; }
     
     .status-box { padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; margin-bottom: 14px; }
     .status-box.loading { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
@@ -51,11 +51,12 @@
     .btn-cetak:hover { background: #15803d; }
     .btn-reset { background: #64748b; color: #fff; }
     .btn-reset:hover { background: #475569; }
+    .badge-v { background: #0284c7; color: #ffffff; font-size: 10px; padding: 2px 8px; border-radius: 12px; font-weight: 800; }
     .hidden { display: none !important; }
 
     /* AREA PREVIEW KANAN */
     .preview-section { flex: 1; background: #1e293b; border-radius: 16px; padding: 20px; border: 1px solid #334155; min-height: calc(100vh - 40px); display: flex; flex-direction: column; align-items: center; }
-    .preview-header { width: 100%; color: #f8fafc; font-size: 14px; font-weight: 800; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; }
+    .preview-header { width: 100%; color: #f8fafc; font-size: 14px; font-weight: 800; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
 
     .grid-cetak-container { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; width: 100%; }
     .grid-cetak-container.preview-single { padding-top: 40px; padding-bottom: 80px; }
@@ -103,7 +104,7 @@
     .rules-list li { margin-bottom: 0.3mm; font-weight: 600; }
     .rules-list li::marker { color: #0284c7; font-weight: 800; }
 
-    /* SECTION QR CODE DIPERBESAR */
+    /* SECTION QR CODE */
     .qr-section {
       width: 26mm; display: flex; flex-direction: column; align-items: center; justify-content: center;
       background: #ffffff; padding: 1mm 0.8mm;
@@ -129,7 +130,7 @@
       border-radius: 0.8mm;
     }
 
-    /* MEDIA PRINT A4 PRESISI */
+    /* MEDIA PRINT A4 & F4 PRESISI */
     @media print {
       body { background: #ffffff !important; padding: 0 !important; margin: 0 !important; }
       .panel-control, .preview-header { display: none !important; }
@@ -137,7 +138,7 @@
       .preview-section { background: none !important; border: none !important; padding: 0 !important; }
       .grid-cetak-container {
         display: grid !important; grid-template-columns: repeat(2, 85.6mm) !important;
-        gap: 5mm !important; padding: 10mm !important; justify-content: start !important;
+        gap: 4mm 6mm !important; padding: 0 !important; justify-content: start !important;
       }
       .grid-cetak-container.preview-single .kartu-container { transform: none !important; margin: 0 !important; }
       .kartu-container { box-shadow: none !important; border-color: #000 !important; page-break-inside: avoid !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
@@ -159,7 +160,10 @@
         </a>
       </div>
 
-      <h2>Kontrol Sisi Belakang Kartu</h2>
+      <h2>
+        <span>Kontrol Kartu Belakang</span>
+        <span class="badge-v">v.3.0</span>
+      </h2>
       
       <div id="statusIndikator" class="status-box loading">Memuat data siswa...</div>
 
@@ -184,7 +188,7 @@
           <label>Mode Tampilan:</label>
           <select id="selectMode" onchange="switchModeCetak()">
             <option value="single">Per Siswa (Preview Single)</option>
-            <option value="kelas">Per Kelas (Cetak A4 / Massal)</option>
+            <option value="kelas">Per Kelas (Cetak A4 / F4 Massal)</option>
           </select>
         </div>
 
@@ -198,11 +202,20 @@
           <select id="selectSiswa" onchange="renderKartuSingle()"><option value="">-- Pilih Kelas Terlebih Dahulu --</option></select>
         </div>
 
+        <!-- PILIHAN UKURAN KERTAS -->
+        <div class="form-group full-width">
+          <label>Ukuran Kertas Cetak:</label>
+          <select id="selectUkuranKertas">
+            <option value="A4">A4 (210 x 297 mm)</option>
+            <option value="F4" selected>F4 / Folio (215 x 330 mm)</option>
+          </select>
+        </div>
+
         <div class="form-group full-width">
           <div class="action-buttons">
             <button type="button" id="btnDownloadSingle" onclick="downloadPNGSingle()" class="btn btn-download">Download PNG</button>
             <button type="button" id="btnDownloadKelas" onclick="downloadPNGKelas()" class="btn btn-download hidden">Download PNG Kelas</button>
-            <button type="button" onclick="window.print()" class="btn btn-cetak">Cetak / A4</button>
+            <button type="button" onclick="cetakSesuaiKertas()" class="btn btn-cetak">Cetak / Print</button>
           </div>
         </div>
       </div>
@@ -211,8 +224,11 @@
     <!-- AREA PREVIEW KANAN -->
     <div class="preview-section">
       <div class="preview-header">
-        <span>Preview Belakang Kartu</span>
-        <span style="font-size: 11px; opacity: 0.7; font-weight: normal;">Presisi Ukuran KTP (85.6mm x 53.9mm)</span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span>Preview Belakang Kartu Pelajar</span>
+          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v.3.0</span>
+        </div>
+        <span style="font-size: 11px; opacity: 0.7; font-weight: normal;">Presisi Standar KTP (85.6mm x 53.9mm)</span>
       </div>
       <div id="wadahCetak" class="grid-cetak-container preview-single"></div>
     </div>
@@ -360,7 +376,7 @@
           elBox.innerHTML = '';
           new QRCode(elBox, {
             text: nisn,
-            width: 100, // Piksel diperbesar agar cetakan sangat tajam
+            width: 100, // HD High Resolution QR
             height: 100,
             correctLevel: QRCode.CorrectLevel.M
           });
@@ -397,6 +413,25 @@
       const mode = document.getElementById('selectMode').value;
       if (mode === 'single') renderKartuSingle();
       else renderKartuPerKelas();
+    }
+
+    function cetakSesuaiKertas() {
+      const ukuran = document.getElementById("selectUkuranKertas").value;
+      let styleTag = document.getElementById("dynamicPageStyle");
+      
+      if (!styleTag) {
+        styleTag = document.createElement("style");
+        styleTag.id = "dynamicPageStyle";
+        document.head.appendChild(styleTag);
+      }
+
+      if (ukuran === "F4") {
+        styleTag.innerHTML = `@page { size: 215mm 330mm; margin: 8mm; }`;
+      } else {
+        styleTag.innerHTML = `@page { size: 210mm 297mm; margin: 8mm; }`;
+      }
+
+      window.print();
     }
 
     function downloadPNGSingle() {
