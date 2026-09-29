@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cetak Kartu Pelajar (Depan / Belakang / Duplex) - SMPN 1 Rancah (v3.4)</title>
+  <title>Cetak Kartu Pelajar (Depan / Belakang / Duplex) - SMPN 1 Rancah (v3.5)</title>
   
   <!-- SKRIP PENGAMAN & AUTO LOGOUT -->
   <script src="auth-guard.js"></script>
@@ -62,7 +62,7 @@
     .page-sheet {
       background: white; padding: 8mm; margin-bottom: 20px; border-radius: 8px;
       box-shadow: 0 10px 20px rgba(0,0,0,0.3); display: grid;
-      grid-template-columns: repeat(2, 85.6mm); gap: 4mm 6mm; justify-content: center;
+      grid-template-columns: repeat(2, 85.6mm); gap: 4mm 6mm; justify-content: start;
     }
 
     .page-title-tag {
@@ -139,7 +139,7 @@
       .app-layout { display: block !important; }
       .preview-section { background: none !important; border: none !important; padding: 0 !important; }
       .page-sheet {
-        box-shadow: none !important; border-radius: 0 !important; padding: 0 !important; margin: 0 !important;
+        box-shadow: none !important; border-radius: 0 !important;
         page-break-after: always !important; break-after: page; display: grid !important;
         grid-template-columns: repeat(2, 85.6mm) !important; gap: 4mm 6mm !important; justify-content: start !important;
       }
@@ -159,7 +159,7 @@
 
       <h2>
         <span>Cetak Kartu Pelajar</span>
-        <span class="badge-v">v3.4</span>
+        <span class="badge-v">v3.5</span>
       </h2>
       
       <div id="statusIndikator" class="status-box loading">Memuat data siswa...</div>
@@ -235,8 +235,8 @@
         </div>
       </div>
 
-      <!-- TAHAP 4: PENGATURAN CETAK -->
-      <div class="section-title">4. Pengaturan Cetak</div>
+      <!-- TAHAP 4: PENGATURAN CETAK & KALIBRASI -->
+      <div class="section-title">4. Pengaturan Cetak & Kalibrasi</div>
       <div class="grid-form">
         <div class="form-group full-width">
           <label>Pilih Kelas:</label>
@@ -260,6 +260,15 @@
           </select>
         </div>
 
+        <!-- KALIBRASI KOMPENSASI PERGESERAN BELAKANG -->
+        <div class="form-group full-width">
+          <label>Kompensasi Geser Belakang: <span id="valGeserBelakang">1 mm</span></label>
+          <input type="range" id="inputGeserBelakang" min="-5" max="5" step="0.5" value="1" oninput="updateGeserBelakang()">
+          <p style="font-size: 8.5px; color: #64748b; margin-top: 2px;">
+            *Ubah (+mm) jika cetakan belakang kurang ke kanan/terlalu ke kiri.
+          </p>
+        </div>
+
         <div class="form-group full-width">
           <div class="action-buttons">
             <button type="button" onclick="cetakDuplex()" class="btn btn-cetak">
@@ -278,7 +287,7 @@
       <div class="preview-header">
         <div style="display: flex; align-items: center; gap: 8px;">
           <span>Preview Layout Cetak Kartu</span>
-          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v3.4</span>
+          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v3.5</span>
         </div>
         <span style="font-size: 11px; opacity: 0.7; font-weight: normal;">Presisi Standar KTP (85.6mm x 53.9mm)</span>
       </div>
@@ -297,12 +306,16 @@
       ttdX: '0.5', ttdY: '2.5', ttdSize: '16'
     };
 
+    let geserBelakangX = parseFloat(localStorage.getItem('geserBelakangX'));
+    if (isNaN(geserBelakangX)) geserBelakangX = 1; // Default offset 1mm ke kanan
+
     window.onload = function() {
       if (localStorage.getItem('namaKepsek')) document.getElementById('inputNamaKepsek').value = localStorage.getItem('namaKepsek');
       if (localStorage.getItem('nipKepsek')) document.getElementById('inputNipKepsek').value = localStorage.getItem('nipKepsek');
       if (localStorage.getItem('tglTtdData')) document.getElementById('inputTglTtd').value = localStorage.getItem('tglTtdData');
 
       initSliders();
+      initGeserBelakang();
       fetchDataSiswa();
     };
 
@@ -316,6 +329,21 @@
       document.getElementById('ttdSize').value = localStorage.getItem('ttdSize') || defaultPosisi.ttdSize;
 
       updateLabelPosisi();
+    }
+
+    function initGeserBelakang() {
+      const input = document.getElementById('inputGeserBelakang');
+      if (input) {
+        input.value = geserBelakangX;
+        document.getElementById('valGeserBelakang').innerText = geserBelakangX + " mm";
+      }
+    }
+
+    function updateGeserBelakang() {
+      geserBelakangX = parseFloat(document.getElementById('inputGeserBelakang').value);
+      document.getElementById('valGeserBelakang').innerText = geserBelakangX + " mm";
+      localStorage.setItem('geserBelakangX', geserBelakangX);
+      renderDuplex();
     }
 
     function updateLabelPosisi() {
@@ -369,8 +397,13 @@
       localStorage.setItem('ttdY', defaultPosisi.ttdY);
       localStorage.setItem('ttdSize', defaultPosisi.ttdSize);
 
+      geserBelakangX = 1;
+      localStorage.setItem('geserBelakangX', 1);
+
       initSliders();
+      initGeserBelakang();
       updatePosisiLive();
+      renderDuplex();
     }
 
     function fetchDataSiswa() {
@@ -451,7 +484,7 @@
       const tglLahir = (s[5] || '').trim();
       const ttl = (tempatLahir && tglLahir) ? `${tempatLahir}, ${tglLahir}` : (tempatLahir || tglLahir || '-');
 
-      // PEMBENTUKAN STRING ALAMAT LENGKAP
+      // PEMBENTUKAN ALAMAT LENGKAP AUTOMATIS
       const dsn = (s[7] || '').trim();
       const rt = (s[8] || '').trim();
       const rw = (s[9] || '').trim();
@@ -561,14 +594,17 @@
         const chunk = siswaKelas.slice(i, i + batchSize);
         const nomorLembar = Math.floor(i / batchSize) + 1;
 
+        // SISI DEPAN (NORMAL MARGIN)
         if (sisiPilihan === "semua" || sisiPilihan === "depan") {
-          htmlAll += `<div class="page-sheet"><div class="page-title-tag">📄 LEMBAR ${nomorLembar} - SISI DEPAN</div>`;
+          htmlAll += `<div class="page-sheet" style="padding: 8mm;"><div class="page-title-tag">📄 LEMBAR ${nomorLembar} - SISI DEPAN</div>`;
           chunk.forEach(s => { htmlAll += buatHtmlDepan(s); });
           htmlAll += `</div>`;
         }
 
+        // SISI BELAKANG (DENGAN KOMPENSASI GeserBelakangX MARGIN-LEFT)
         if (sisiPilihan === "semua" || sisiPilihan === "belakang") {
-          htmlAll += `<div class="page-sheet"><div class="page-title-tag">📄 LEMBAR ${nomorLembar} - SISI BELAKANG (MIRRORED)</div>`;
+          const calcPaddingLeft = 8 + geserBelakangX;
+          htmlAll += `<div class="page-sheet" style="padding: 8mm 8mm 8mm ${calcPaddingLeft}mm;"><div class="page-title-tag">📄 LEMBAR ${nomorLembar} - SISI BELAKANG (MIRRORED - OFFSET ${geserBelakangX}mm)</div>`;
           
           for (let j = 0; j < chunk.length; j += 2) {
             if (j + 1 < chunk.length) {
@@ -606,9 +642,9 @@
       }
 
       if (ukuran === "F4") {
-        styleTag.innerHTML = `@page { size: 215mm 330mm; margin: 8mm; }`;
+        styleTag.innerHTML = `@page { size: 215mm 330mm; margin: 0; }`;
       } else {
-        styleTag.innerHTML = `@page { size: 210mm 297mm; margin: 8mm; }`;
+        styleTag.innerHTML = `@page { size: 210mm 297mm; margin: 0; }`;
       }
 
       window.print();
