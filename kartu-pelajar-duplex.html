@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cetak Kartu Pelajar (Depan / Belakang / Duplex) - SMPN 1 Rancah (v3.3)</title>
+  <title>Cetak Kartu Pelajar (Depan / Belakang / Duplex) - SMPN 1 Rancah (v3.4)</title>
   
   <!-- SKRIP PENGAMAN & AUTO LOGOUT -->
   <script src="auth-guard.js"></script>
@@ -92,10 +92,11 @@
     .content-depan { display: flex; padding: 0 2.8mm; position: relative; z-index: 2; gap: 2mm; align-items: flex-start; }
     .foto-box { width: 17.5mm; height: 23mm; border: 0.5mm solid #facc15; border-radius: 1.2mm; background: #f1f5f9; object-fit: cover; flex-shrink: 0; }
     .data-box { flex-grow: 1; background: rgba(255, 255, 255, 0.96); border: 0.35mm solid #dc2626; border-radius: 1.5mm; padding: 1.2mm 1.8mm; }
-    .data-row { display: flex; margin-bottom: 0.3mm; font-size: 5pt; }
-    .data-label { width: 22mm; color: #334155; font-weight: 700; }
-    .data-separator { width: 1.5mm; color: #dc2626; font-weight: bold; }
-    .data-value { flex: 1; color: #0f172a; font-weight: 600; text-transform: uppercase; }
+    .data-row { display: flex; margin-bottom: 0.3mm; font-size: 5pt; line-height: 1.2; }
+    .data-row:last-child { margin-bottom: 0; }
+    .data-label { width: 22mm; color: #334155; font-weight: 700; flex-shrink: 0; }
+    .data-separator { width: 1.5mm; color: #dc2626; font-weight: bold; flex-shrink: 0; }
+    .data-value { flex: 1; color: #0f172a; font-weight: 600; text-transform: uppercase; word-break: break-word; }
 
     /* TTD & STEMPEL CAP */
     .ttd-section { position: absolute; right: 3mm; bottom: 1.2mm; z-index: 3; color: #0f172a; }
@@ -158,7 +159,7 @@
 
       <h2>
         <span>Cetak Kartu Pelajar</span>
-        <span class="badge-v">v3.3</span>
+        <span class="badge-v">v3.4</span>
       </h2>
       
       <div id="statusIndikator" class="status-box loading">Memuat data siswa...</div>
@@ -244,7 +245,7 @@
 
         <div class="form-group">
           <label>Ukuran Kertas:</label>
-          <select id="selectUkuranKertas">
+          <select id="selectUkuranKertas" onchange="renderDuplex()">
             <option value="A4">A4 (8 Kartu / Lembar)</option>
             <option value="F4" selected>F4 / Folio (10 Kartu / Lembar)</option>
           </select>
@@ -277,7 +278,7 @@
       <div class="preview-header">
         <div style="display: flex; align-items: center; gap: 8px;">
           <span>Preview Layout Cetak Kartu</span>
-          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v3.3</span>
+          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v3.4</span>
         </div>
         <span style="font-size: 11px; opacity: 0.7; font-weight: normal;">Presisi Standar KTP (85.6mm x 53.9mm)</span>
       </div>
@@ -449,7 +450,31 @@
       const tempatLahir = (s[4] || '').trim();
       const tglLahir = (s[5] || '').trim();
       const ttl = (tempatLahir && tglLahir) ? `${tempatLahir}, ${tglLahir}` : (tempatLahir || tglLahir || '-');
-      const jk = (s[6] || '').trim();
+
+      // PEMBENTUKAN STRING ALAMAT LENGKAP
+      const dsn = (s[7] || '').trim();
+      const rt = (s[8] || '').trim();
+      const rw = (s[9] || '').trim();
+      const desa = (s[10] || '').trim();
+      const kec = (s[11] || '').trim();
+
+      let bagianAlamat = [];
+      if (dsn) {
+        if (/^d(sn|usun)\.?\s+/i.test(dsn)) bagianAlamat.push(dsn);
+        else bagianAlamat.push(`Dsn. ${dsn}`);
+      }
+      if (rt || rw) {
+        bagianAlamat.push(`RT ${rt || '0'}/RW ${rw || '0'}`);
+      }
+      if (desa) {
+        if (/^d(esa|s)\.?\s+/i.test(desa)) bagianAlamat.push(desa);
+        else bagianAlamat.push(`Ds. ${desa}`);
+      }
+      if (kec) {
+        if (/^kec(amatan)?\.?\s+/i.test(kec)) bagianAlamat.push(kec);
+        else bagianAlamat.push(`Kec. ${kec}`);
+      }
+      const alamat = bagianAlamat.join(' ') || '-';
 
       const fotoRaw = (s[12] || '').trim();
       const fotoUrl = (fotoRaw.startsWith('http')) ? fotoRaw : `assets/foto_${nisn}.jpg`;
@@ -470,8 +495,8 @@
             <div class="data-box">
               <div class="data-row"><div class="data-label">Nama</div><div class="data-separator">:</div><div class="data-value" style="font-weight:800;">${nama}</div></div>
               <div class="data-row"><div class="data-label">NISN</div><div class="data-separator">:</div><div class="data-value">${nisn}</div></div>
-              <div class="data-row"><div class="data-label">TTL</div><div class="data-separator">:</div><div class="data-value">${ttl}</div></div>
-              <div class="data-row"><div class="data-label">JK</div><div class="data-separator">:</div><div class="data-value">${jk || '-'}</div></div>
+              <div class="data-row"><div class="data-label">Tempat Tanggal Lahir</div><div class="data-separator">:</div><div class="data-value">${ttl}</div></div>
+              <div class="data-row"><div class="data-label">Alamat</div><div class="data-separator">:</div><div class="data-value">${alamat}</div></div>
             </div>
           </div>
           <div class="ttd-section">
@@ -529,31 +554,28 @@
       if (!kelasPilihan) { wadah.innerHTML = ''; return; }
 
       const siswaKelas = dataSiswaGlobal.filter(s => (s[2]||'').trim() === kelasPilihan);
-      const batchSize = (ukuranKertas === "F4") ? 10 : 8; // F4 = 10, A4 = 8 Kartu per Lembar
+      const batchSize = (ukuranKertas === "F4") ? 10 : 8;
       let htmlAll = '';
 
       for (let i = 0; i < siswaKelas.length; i += batchSize) {
         const chunk = siswaKelas.slice(i, i + batchSize);
         const nomorLembar = Math.floor(i / batchSize) + 1;
 
-        // 1. TAMPILKAN DEPAN (JIKA PILIHAN 'SEMUA' ATAU 'DEPAN')
         if (sisiPilihan === "semua" || sisiPilihan === "depan") {
           htmlAll += `<div class="page-sheet"><div class="page-title-tag">📄 LEMBAR ${nomorLembar} - SISI DEPAN</div>`;
           chunk.forEach(s => { htmlAll += buatHtmlDepan(s); });
           htmlAll += `</div>`;
         }
 
-        // 2. TAMPILKAN BELAKANG MIRRORED (JIKA PILIHAN 'SEMUA' ATAU 'BELAKANG')
         if (sisiPilihan === "semua" || sisiPilihan === "belakang") {
           htmlAll += `<div class="page-sheet"><div class="page-title-tag">📄 LEMBAR ${nomorLembar} - SISI BELAKANG (MIRRORED)</div>`;
           
-          // Tukar posisi [Kiri, Kanan] -> [Kanan, Kiri] untuk setiap baris (Horizontal Mirroring)
           for (let j = 0; j < chunk.length; j += 2) {
             if (j + 1 < chunk.length) {
-              htmlAll += buatHtmlBelakang(chunk[j + 1]); // Sisi Kanan menjadi Kiri
-              htmlAll += buatHtmlBelakang(chunk[j]);     // Sisi Kiri menjadi Kanan
+              htmlAll += buatHtmlBelakang(chunk[j + 1]);
+              htmlAll += buatHtmlBelakang(chunk[j]);
             } else {
-              htmlAll += buatHtmlBelakang(chunk[j]);     // Jika ganjil
+              htmlAll += buatHtmlBelakang(chunk[j]);
             }
           }
           htmlAll += `</div>`;
@@ -562,7 +584,6 @@
 
       wadah.innerHTML = htmlAll;
 
-      // Generate QR Code di Sisi Belakang jika ditampilkan
       if (sisiPilihan === "semua" || sisiPilihan === "belakang") {
         siswaKelas.forEach(s => {
           const nisn = (s[0] || '').trim();
