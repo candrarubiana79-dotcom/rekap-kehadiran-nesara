@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rekap Presensi Siswa v2.1 - SMPN 1 RANCAH</title>
+  <title>Rekap Presensi Siswa v2.2 - SMPN 1 RANCAH</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -28,14 +28,14 @@
       display: inline-block;
     }
 
-    /* BARIS MENSYALA / HIGHLIGHT SAAT DIKLIK */
+    /* BARIS MENYALA / HIGHLIGHT SAAT DIKLIK */
     .row-highlight {
       background-color: #fef08a !important; /* Yellow-200 */
       transition: background-color 0.15s ease-in-out;
     }
     
     .row-highlight td {
-      background-color: #fef08a !important; /* Warna sel menyala */
+      background-color: #fef08a !important;
       color: #0f172a !important;
       font-weight: 800 !important;
       border-top: 2px solid #eab308 !important;
@@ -93,7 +93,7 @@
                 Sistem Presensi Digital
               </span>
               <span class="px-2 py-0.5 bg-amber-400 text-slate-900 font-black text-[10px] sm:text-[11px] rounded-full shadow-sm">
-                v2.1
+                v2.2
               </span>
             </div>
             <h1 class="text-lg sm:text-2xl md:text-3xl font-extrabold tracking-tight leading-tight">REKAPITULASI PRESENSI SISWA</h1>
@@ -182,12 +182,17 @@
       <div class="text-center py-1 sm:py-2 border-b border-slate-100">
         <h2 id="judulRekap" class="text-base sm:text-lg md:text-xl font-extrabold text-slate-800">REKAPITULASI PRESENSI SISWA</h2>
         <p id="subJudulRekap" class="text-xs sm:text-sm font-medium text-slate-500 mt-0.5"></p>
-        <p class="text-[10px] text-amber-700 font-bold mt-1 bg-amber-50 inline-block px-3 py-1 rounded-full border border-amber-200">
-          💡 Tips: Sentuh/klik nama siswa untuk menyalakan sorotan baris agar mudah dibaca!
-        </p>
+        <div class="flex flex-wrap items-center justify-center gap-2 mt-1.5 text-[10px]">
+          <span class="bg-amber-50 text-amber-800 font-bold px-2.5 py-1 rounded-full border border-amber-200">
+            💡 Sentuh nama siswa untuk sorotan baris
+          </span>
+          <span class="bg-amber-400 text-slate-900 font-extrabold px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1">
+            <i class="fa-solid fa-star text-[9px]"></i> Kolom Kuning = Tanggal Hari Ini
+          </span>
+        </div>
       </div>
 
-      <!-- TABLE AREA (RESPONSIF DENGAN STICKY NAMA) -->
+      <!-- TABLE AREA (RESPONSIF DENGAN STICKY NAMA & HIGHLIGHT HARI INI) -->
       <div id="containerTabel" class="overflow-x-auto border border-slate-200 shadow-sm bg-white rounded-xl relative">
         <table id="tabelUtama" class="w-full text-center border-collapse text-xs sm:text-sm">
           <!-- Digenerate via JS -->
@@ -198,7 +203,7 @@
 
     <!-- FOOTER -->
     <footer class="text-center text-xs text-slate-400 py-2">
-      &copy; 2026 Presensi Digital v2.1 • <span class="font-semibold text-slate-600">SMPN 1 RANCAH</span>
+      &copy; 2026 Presensi Digital v2.2 • <span class="font-semibold text-slate-600">SMPN 1 RANCAH</span>
     </footer>
 
   </div>
@@ -534,16 +539,30 @@
         </tr>
         <tr class="bg-slate-100 font-bold text-[11px] sm:text-xs border-b border-slate-200">`;
 
-      // HEADER ROW 2: ANGKA TANGGAL (1-31)
+      // HEADER ROW 2: ANGKA TANGGAL (1-31) + MENYALAKAN KOLOM HARI INI
       for (let d = 1; d <= totalDays; d++) {
         const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
         const dayOfWeek = new Date(year, month - 1, d).getDay();
         const infoLibur = rawLibur.find(l => l.tanggal === dateStr);
+        const isToday = (dateStr === todayStr);
 
-        let bgHeader = (dayOfWeek === 0 || dayOfWeek === 6) ? "bg-rose-200 text-rose-800" : (infoLibur ? "bg-purple-200 text-purple-800" : "text-slate-600");
+        let bgHeader = "";
         let titleHeader = infoLibur ? infoLibur.keterangan : (dayOfWeek === 0 || dayOfWeek === 6 ? "Libur Akhir Pekan" : "");
+
+        if (isToday) {
+          bgHeader = "bg-amber-400 text-slate-900 font-black border-x-2 border-x-amber-600 shadow-inner z-10";
+          titleHeader = "HARI INI (" + dateStr + ")";
+        } else if (dayOfWeek === 0 || dayOfWeek === 6) {
+          bgHeader = "bg-rose-200 text-rose-800";
+        } else if (infoLibur) {
+          bgHeader = "bg-purple-200 text-purple-800";
+        } else {
+          bgHeader = "text-slate-600";
+        }
         
-        html += `<th class="p-1 border border-slate-200 min-w-[28px] ${bgHeader}" title="${titleHeader}">${d}</th>`;
+        html += `<th class="p-1 border border-slate-200 min-w-[28px] ${bgHeader}" title="${titleHeader}">
+                  ${d}${isToday ? '<span class="block text-[8px] font-extrabold text-slate-900 leading-none">▲</span>' : ''}
+                 </th>`;
       }
 
       // HEADER ROW 2: H, I, S, A
@@ -575,6 +594,10 @@
           const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
           const dayOfWeek = new Date(year, month - 1, d).getDay();
           const infoLibur = rawLibur.find(l => l.tanggal === dateStr);
+          const isToday = (dateStr === todayStr);
+
+          // EFFAK TAMPILAN HIGHLIGHT KHUSUS UNTUK TANGGAL HARI INI
+          const highlightTodayClass = isToday ? "border-x-2 border-x-amber-500 shadow-sm" : "";
 
           // 1. Cek Hari Sabtu/Minggu ATAU Hari Libur Terdaftar
           if (dayOfWeek === 0 || dayOfWeek === 6 || infoLibur) {
@@ -593,7 +616,7 @@
                 bgLibur = "bg-rose-100 text-rose-700 border-rose-200";
               }
 
-              html += `<td rowspan="${totalStudents}" class="p-1 border ${bgLibur} text-[10px] font-extrabold text-center align-middle tracking-wider">
+              html += `<td rowspan="${totalStudents}" class="p-1 border ${bgLibur} text-[10px] font-extrabold text-center align-middle tracking-wider ${highlightTodayClass}">
                         <span class="libur-text-vertical">${textLibur}</span>
                       </td>`;
             }
@@ -602,13 +625,13 @@
 
           // 2. Cek Tanggal Sebelum Sistem Resmi Dimulai
           if (tanggalMulaiSistem && dateStr < tanggalMulaiSistem) {
-            html += `<td class="p-1 border border-slate-200 text-slate-400 font-medium text-xs" title="Sistem Belum Dimulai">-</td>`;
+            html += `<td class="p-1 border border-slate-200 text-slate-400 font-medium text-xs ${highlightTodayClass}" title="Sistem Belum Dimulai">-</td>`;
             continue;
           }
 
           // 3. Cek Tanggal Masa Depan (Belum Terjadi)
           if (dateStr > todayStr) {
-            html += `<td class="p-1 border border-slate-200 text-slate-300 font-medium text-xs" title="Tanggal Belum Berjalan">-</td>`;
+            html += `<td class="p-1 border border-slate-200 text-slate-300 font-medium text-xs ${highlightTodayClass}" title="Tanggal Belum Berjalan">-</td>`;
             continue;
           }
 
@@ -623,19 +646,27 @@
           const logManual = studentLogs.find(l => ["Izin", "Sakit", "Alpa"].includes(l.keterangan));
 
           let code = "A";
-          let bgCell = "bg-rose-100 text-rose-800 font-bold";
+          let bgCell = isToday ? "bg-amber-200 text-slate-900 font-black" : "bg-rose-100 text-rose-800 font-bold";
 
           if (logManual) {
-            if (logManual.keterangan === "Izin") { code = "I"; countI++; bgCell = "bg-blue-100 text-blue-800 font-bold"; }
-            else if (logManual.keterangan === "Sakit") { code = "S"; countS++; bgCell = "bg-amber-100 text-amber-800 font-bold"; }
-            else { code = "A"; countA++; bgCell = "bg-rose-100 text-rose-800 font-bold"; }
+            if (logManual.keterangan === "Izin") { 
+              code = "I"; countI++; 
+              bgCell = isToday ? "bg-amber-200 text-blue-900 font-black" : "bg-blue-100 text-blue-800 font-bold"; 
+            } else if (logManual.keterangan === "Sakit") { 
+              code = "S"; countS++; 
+              bgCell = isToday ? "bg-amber-200 text-amber-950 font-black" : "bg-amber-100 text-amber-800 font-bold"; 
+            } else { 
+              code = "A"; countA++; 
+              bgCell = isToday ? "bg-amber-200 text-rose-900 font-black" : "bg-rose-100 text-rose-800 font-bold"; 
+            }
           } else if (logMasuk) {
-            code = "H"; countH++; bgCell = "bg-emerald-100 text-emerald-800 font-bold";
+            code = "H"; countH++; 
+            bgCell = isToday ? "bg-amber-300 text-emerald-950 font-black" : "bg-emerald-100 text-emerald-800 font-bold";
           } else {
             countA++;
           }
 
-          html += `<td class="p-1 border border-slate-200 ${bgCell}">${code}</td>`;
+          html += `<td class="p-1 border border-slate-200 ${bgCell} ${highlightTodayClass}">${code}</td>`;
         }
 
         html += `<td class="p-2 border border-slate-200 font-black bg-emerald-50 text-emerald-700">${countH}</td>
