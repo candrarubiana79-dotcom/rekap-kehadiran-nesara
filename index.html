@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rekap Presensi Siswa v2.4 - SMPN 1 RANCAH</title>
+  <title>Rekap Presensi Siswa v2.5 - SMPN 1 RANCAH</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -93,7 +93,7 @@
                 Sistem Presensi Digital
               </span>
               <span class="px-2 py-0.5 bg-amber-400 text-slate-900 font-black text-[10px] sm:text-[11px] rounded-full shadow-sm">
-                v2.4
+                v2.5
               </span>
             </div>
             <h1 class="text-lg sm:text-2xl md:text-3xl font-extrabold tracking-tight leading-tight">REKAPITULASI PRESENSI SISWA</h1>
@@ -206,7 +206,7 @@
 
     <!-- FOOTER -->
     <footer class="text-center text-xs text-slate-400 py-2">
-      &copy; 2026 Presensi Digital v2.4 • <span class="font-semibold text-slate-600">SMPN 1 RANCAH</span>
+      &copy; 2026 Presensi Digital v2.5 • <span class="font-semibold text-slate-600">SMPN 1 RANCAH</span>
     </footer>
 
   </div>
@@ -595,7 +595,7 @@
       }
     }
 
-    // --- REKAP HARIAN RENDER ---
+    // --- REKAP HARIAN RENDER (TANPA NISN & KELAS) ---
     function renderRekapHarian(kelasSelected) {
       const tgl = document.getElementById("filterTanggal").value;
       const todayStr = getTodayString();
@@ -636,18 +636,16 @@
         <thead>
           <tr class="bg-slate-200 text-slate-700 font-bold uppercase text-[11px] sm:text-xs tracking-wider border-b border-slate-300">
             <th class="p-2.5 sm:p-3 border border-slate-300 sticky-col-no bg-slate-200">No</th>
-            <th class="p-2.5 sm:p-3 border border-slate-300">NISN</th>
-            <th class="p-2.5 sm:p-3 border border-slate-300 text-left min-w-[150px] sm:min-w-[180px] sticky-col-nama bg-slate-200">Nama Siswa</th>
-            <th class="p-2.5 sm:p-3 border border-slate-300">Kelas</th>
+            <th class="p-2.5 sm:p-3 border border-slate-300 text-left min-w-[160px] sm:min-w-[200px] sticky-col-nama bg-slate-200">Nama Siswa</th>
             <th class="p-2.5 sm:p-3 border border-slate-300">Jam Masuk</th>
             <th class="p-2.5 sm:p-3 border border-slate-300">Jam Pulang</th>
-            <th class="p-2.5 sm:p-3 border border-slate-300">Status</th>
+            <th class="p-2.5 sm:p-3 border border-slate-300">Keterangan</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-200">`;
 
       if (filteredMaster.length === 0) {
-        html += `<tr><td colspan="7" class="p-6 text-slate-400 italic">Tidak ada data siswa terdaftar pada Kelas ${kelasSelected}.</td></tr></tbody>`;
+        html += `<tr><td colspan="5" class="p-6 text-slate-400 italic">Tidak ada data siswa terdaftar pada Kelas ${kelasSelected}.</td></tr></tbody>`;
         tabel.innerHTML = html;
         return;
       }
@@ -703,9 +701,7 @@
         html += `
           <tr class="${bgRow} cursor-pointer hover:bg-yellow-100/70 transition duration-150" onclick="sorotBarisSiswa(this)">
             <td class="p-2.5 sm:p-3 border border-slate-200 text-slate-500 font-medium sticky-col-no ${bgRow}">${index + 1}</td>
-            <td class="p-2.5 sm:p-3 border border-slate-200 font-mono text-slate-600">${siswa.nisn || '-'}</td>
             <td class="p-2.5 sm:p-3 border border-slate-200 text-left font-bold text-slate-800 sticky-col-nama ${bgRow}">${siswa.nama}</td>
-            <td class="p-2.5 sm:p-3 border border-slate-200 font-semibold text-slate-600">${siswa.kelas || '-'}</td>
             <td class="p-2.5 sm:p-3 border border-slate-200 font-medium text-slate-700">${jamMasuk}</td>
             <td class="p-2.5 sm:p-3 border border-slate-200 font-medium text-slate-700">${jamPulang}</td>
             <td class="p-2.5 sm:p-3 border border-slate-200">${statusBadge}</td>
