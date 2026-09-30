@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rekap Presensi Siswa v2.2 - SMPN 1 RANCAH</title>
+  <title>Rekap Presensi Siswa v2.3 - SMPN 1 RANCAH</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -93,7 +93,7 @@
                 Sistem Presensi Digital
               </span>
               <span class="px-2 py-0.5 bg-amber-400 text-slate-900 font-black text-[10px] sm:text-[11px] rounded-full shadow-sm">
-                v2.2
+                v2.3
               </span>
             </div>
             <h1 class="text-lg sm:text-2xl md:text-3xl font-extrabold tracking-tight leading-tight">REKAPITULASI PRESENSI SISWA</h1>
@@ -203,7 +203,7 @@
 
     <!-- FOOTER -->
     <footer class="text-center text-xs text-slate-400 py-2">
-      &copy; 2026 Presensi Digital v2.2 • <span class="font-semibold text-slate-600">SMPN 1 RANCAH</span>
+      &copy; 2026 Presensi Digital v2.3 • <span class="font-semibold text-slate-600">SMPN 1 RANCAH</span>
     </footer>
 
   </div>
@@ -596,7 +596,7 @@
           const infoLibur = rawLibur.find(l => l.tanggal === dateStr);
           const isToday = (dateStr === todayStr);
 
-          // EFFAK TAMPILAN HIGHLIGHT KHUSUS UNTUK TANGGAL HARI INI
+          // EFEK TAMPILAN HIGHLIGHT KHUSUS UNTUK TANGGAL HARI INI
           const highlightTodayClass = isToday ? "border-x-2 border-x-amber-500 shadow-sm" : "";
 
           // 1. Cek Hari Sabtu/Minggu ATAU Hari Libur Terdaftar
@@ -679,7 +679,7 @@
       tabel.innerHTML = html;
     }
 
-    // --- EXPORT TO EXCEL ---
+    // --- EXPORT TO EXCEL (WITH PASSWORD PROTECTION) ---
     function downloadExcel() {
       const kelas = document.getElementById("filterKelas").value;
       if (!kelas) {
@@ -687,6 +687,19 @@
         return;
       }
 
+      // POP-UP VERIFIKASI PASSWORD KHUSUS
+      const password = prompt("Masukkan Password Khusus Guru untuk mengunduh rekap Excel:");
+      
+      if (password === null) {
+        return; // Pengguna menekan tombol Batal / Cancel
+      }
+
+      if (password.trim() !== "GURU2026") {
+        alert("❌ Password Salah! Anda tidak memiliki otoritas untuk mengunduh file Excel ini.");
+        return;
+      }
+
+      // JIKA PASSWORD BENAR (GURU2026), JALANKAN PROSES UNDUH EXCEL
       const table = document.getElementById("tabelUtama");
       const filename = currentMode === "harian" 
         ? `Rekap_Harian_Kelas_${kelas}_${document.getElementById("filterTanggal").value}.xlsx`
