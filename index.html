@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rekap Presensi Siswa v2.3 - SMPN 1 RANCAH</title>
+  <title>Rekap Presensi Siswa v2.4 - SMPN 1 RANCAH</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -93,7 +93,7 @@
                 Sistem Presensi Digital
               </span>
               <span class="px-2 py-0.5 bg-amber-400 text-slate-900 font-black text-[10px] sm:text-[11px] rounded-full shadow-sm">
-                v2.3
+                v2.4
               </span>
             </div>
             <h1 class="text-lg sm:text-2xl md:text-3xl font-extrabold tracking-tight leading-tight">REKAPITULASI PRESENSI SISWA</h1>
@@ -192,6 +192,9 @@
         </div>
       </div>
 
+      <!-- WADAH CARD RINGKASAN STATISTIK -->
+      <div id="boxStatistik"></div>
+
       <!-- TABLE AREA (RESPONSIF DENGAN STICKY NAMA & HIGHLIGHT HARI INI) -->
       <div id="containerTabel" class="overflow-x-auto border border-slate-200 shadow-sm bg-white rounded-xl relative">
         <table id="tabelUtama" class="w-full text-center border-collapse text-xs sm:text-sm">
@@ -203,7 +206,7 @@
 
     <!-- FOOTER -->
     <footer class="text-center text-xs text-slate-400 py-2">
-      &copy; 2026 Presensi Digital v2.3 • <span class="font-semibold text-slate-600">SMPN 1 RANCAH</span>
+      &copy; 2026 Presensi Digital v2.4 • <span class="font-semibold text-slate-600">SMPN 1 RANCAH</span>
     </footer>
 
   </div>
@@ -349,8 +352,221 @@
       select.value = currentVal;
     }
 
+    // --- HITUNG STATISTIK HARIAN ---
+    function hitungStatistikHarian(kelasSelected) {
+      const tgl = document.getElementById("filterTanggal").value;
+      const todayStr = getTodayString();
+      const infoLibur = rawLibur.find(l => l.tanggal === tgl);
+
+      let sourceList = rawMaster.length > 0 ? rawMaster : rawLogs;
+      let targetList = sourceList;
+
+      if (rawMaster.length === 0) {
+        let uniqueMap = new Map();
+        targetList.forEach(item => {
+          let key = item.kode || item.nama;
+          if (!uniqueMap.has(key)) {
+            uniqueMap.set(key, { nisn: item.kode || "-", nama: item.nama, kelas: item.kelas });
+          }
+        });
+        targetList = Array.from(uniqueMap.values());
+      }
+
+      if (kelasSelected) {
+        targetList = targetList.filter(m => m.kelas === kelasSelected);
+      }
+
+      let totalSiswa = targetList.length;
+      let countHadir = 0;
+      let countIzin = 0;
+      let countSakit = 0;
+      let countAlpa = 0;
+
+      const isWeekendOrHoliday = infoLibur;
+      const isFuture = (tgl > todayStr);
+      const isBeforeStart = (tanggalMulaiSistem && tgl < tanggalMulaiSistem);
+
+      if (!isWeekendOrHoliday && !isFuture && !isBeforeStart) {
+        targetList.forEach(siswa => {
+          const studentLogs = rawLogs.filter(l => {
+            const sameDate = String(l.tanggal).trim() === String(tgl).trim();
+            const matchKode = l.kode && siswa.nisn && String(l.kode).trim() === String(siswa.nisn).trim();
+            const matchNama = String(l.nama).toLowerCase().trim() === String(siswa.nama).toLowerCase().trim();
+            return sameDate && (matchKode || matchNama);
+          });
+
+          const logMasuk = studentLogs.find(l => l.keterangan === "Masuk" || l.keterangan === "Terlambat Masuk");
+          const logManual = studentLogs.find(l => ["Izin", "Sakit", "Alpa"].includes(l.keterangan));
+
+          if (logManual) {
+            if (logManual.keterangan === "Izin") countIzin++;
+            else if (logManual.keterangan === "Sakit") countSakit++;
+            else countAlpa++;
+          } else if (logMasuk) {
+            countHadir++;
+          } else {
+            countAlpa++;
+          }
+        });
+      }
+
+      let countTidakHadir = countIzin + countSakit + countAlpa;
+
+      return {
+        totalSiswa,
+        countHadir,
+        countIzin,
+        countSakit,
+        countAlpa,
+        countTidakHadir,
+        isWeekendOrHoliday,
+        isFuture,
+        isBeforeStart
+      };
+    }
+
+    // --- RENDER RINGKASAN STATISTIK ---
+    function renderStatistikSummary() {
+      const box = document.getElementById("boxStatistik");
+      if (!box) return;
+
+      if (currentMode !== "harian") {
+        box.innerHTML = "";
+        box.classList.add("hidden");
+        return;
+      }
+
+      box.classList.remove("hidden");
+      const kelas = document.getElementById("filterKelas").value;
+      const stats = hitungStatistikHarian(kelas);
+
+      if (stats.isWeekendOrHoliday) {
+        box.innerHTML = `
+          <div class="bg-purple-50 border border-purple-200 text-purple-800 p-3 sm:p-4 rounded-xl text-center font-bold text-xs sm:text-sm">
+            🎉 Hari Libur (${stats.isWeekendOrHoliday.keterangan || 'Libur'}). Tidak ada presensi.
+          </div>`;
+        return;
+      }
+      if (stats.isFuture) {
+        box.innerHTML = `
+          <div class="bg-slate-50 border border-slate-200 text-slate-600 p-3 sm:p-4 rounded-xl text-center font-bold text-xs sm:text-sm">
+            ⏳ Tanggal belum berjalan. Belum ada rekap presensi.
+          </div>`;
+        return;
+      }
+      if (stats.isBeforeStart) {
+        box.innerHTML = `
+          <div class="bg-amber-50 border border-amber-200 text-amber-800 p-3 sm:p-4 rounded-xl text-center font-bold text-xs sm:text-sm">
+            ℹ️ Sistem belum aktif pada tanggal ini (Aktif per ${tanggalMulaiSistem}).
+          </div>`;
+        return;
+      }
+
+      if (!kelas) {
+        // TAMPILAN PERTAMA: REKAP STATISTIK SELURUH SISWA HARI INI
+        box.className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 sm:gap-3";
+        box.innerHTML = `
+          <div class="bg-indigo-50/90 border border-indigo-200 p-3 rounded-xl flex items-center gap-3 shadow-sm">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-base sm:text-lg flex-shrink-0">
+              <i class="fa-solid fa-users"></i>
+            </div>
+            <div>
+              <p class="text-[9px] sm:text-[10px] font-extrabold uppercase text-indigo-700 tracking-wider">Total Siswa</p>
+              <p class="text-base sm:text-xl font-black text-slate-800">${stats.totalSiswa}</p>
+            </div>
+          </div>
+
+          <div class="bg-emerald-50/90 border border-emerald-200 p-3 rounded-xl flex items-center gap-3 shadow-sm">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-base sm:text-lg flex-shrink-0">
+              <i class="fa-solid fa-user-check"></i>
+            </div>
+            <div>
+              <p class="text-[9px] sm:text-[10px] font-extrabold uppercase text-emerald-700 tracking-wider">Total Hadir</p>
+              <p class="text-base sm:text-xl font-black text-emerald-800">${stats.countHadir}</p>
+            </div>
+          </div>
+
+          <div class="bg-amber-50/90 border border-amber-200 p-3 rounded-xl flex items-center gap-3 shadow-sm">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-amber-500 text-white flex items-center justify-center font-bold text-base sm:text-lg flex-shrink-0">
+              <i class="fa-solid fa-notes-medical"></i>
+            </div>
+            <div>
+              <p class="text-[9px] sm:text-[10px] font-extrabold uppercase text-amber-700 tracking-wider">Sakit</p>
+              <p class="text-base sm:text-xl font-black text-amber-800">${stats.countSakit}</p>
+            </div>
+          </div>
+
+          <div class="bg-blue-50/90 border border-blue-200 p-3 rounded-xl flex items-center gap-3 shadow-sm">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-base sm:text-lg flex-shrink-0">
+              <i class="fa-solid fa-user-clock"></i>
+            </div>
+            <div>
+              <p class="text-[9px] sm:text-[10px] font-extrabold uppercase text-blue-700 tracking-wider">Izin</p>
+              <p class="text-base sm:text-xl font-black text-blue-800">${stats.countIzin}</p>
+            </div>
+          </div>
+
+          <div class="bg-rose-50/90 border border-rose-200 p-3 rounded-xl flex items-center gap-3 shadow-sm col-span-2 sm:col-span-1">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-rose-600 text-white flex items-center justify-center font-bold text-base sm:text-lg flex-shrink-0">
+              <i class="fa-solid fa-user-xmark"></i>
+            </div>
+            <div>
+              <p class="text-[9px] sm:text-[10px] font-extrabold uppercase text-rose-700 tracking-wider">Alpa</p>
+              <p class="text-base sm:text-xl font-black text-rose-800">${stats.countAlpa}</p>
+            </div>
+          </div>
+        `;
+      } else {
+        // TAMPILAN SETELAH MEMILIH KELAS
+        box.className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 sm:gap-3";
+        box.innerHTML = `
+          <div class="bg-indigo-50/90 border border-indigo-200 p-3 rounded-xl flex items-center gap-3 shadow-sm">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-base sm:text-lg flex-shrink-0">
+              <i class="fa-solid fa-users"></i>
+            </div>
+            <div>
+              <p class="text-[9px] sm:text-[10px] font-extrabold uppercase text-indigo-700 tracking-wider">Siswa Kelas ${kelas}</p>
+              <p class="text-base sm:text-xl font-black text-slate-800">${stats.totalSiswa}</p>
+            </div>
+          </div>
+
+          <div class="bg-emerald-50/90 border border-emerald-200 p-3 rounded-xl flex items-center gap-3 shadow-sm">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-base sm:text-lg flex-shrink-0">
+              <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div>
+              <p class="text-[9px] sm:text-[10px] font-extrabold uppercase text-emerald-700 tracking-wider">Siswa Hadir</p>
+              <p class="text-base sm:text-xl font-black text-emerald-800">${stats.countHadir}</p>
+            </div>
+          </div>
+
+          <div class="bg-rose-50/90 border border-rose-200 p-3 rounded-xl flex items-center gap-3 shadow-sm">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-rose-600 text-white flex items-center justify-center font-bold text-base sm:text-lg flex-shrink-0">
+              <i class="fa-solid fa-circle-xmark"></i>
+            </div>
+            <div>
+              <p class="text-[9px] sm:text-[10px] font-extrabold uppercase text-rose-700 tracking-wider">Siswa Tidak Hadir</p>
+              <p class="text-base sm:text-xl font-black text-rose-800">${stats.countTidakHadir}</p>
+            </div>
+          </div>
+
+          <div class="bg-slate-50 border border-slate-200 p-2.5 sm:p-3 rounded-xl flex flex-col justify-center shadow-sm col-span-2 sm:col-span-1">
+            <p class="text-[9px] sm:text-[10px] font-extrabold uppercase text-slate-500 tracking-wider mb-1">Rincian Tidak Hadir</p>
+            <div class="flex items-center gap-1.5 sm:gap-2 text-[11px] font-bold">
+              <span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded-md">S: ${stats.countSakit}</span>
+              <span class="px-2 py-0.5 bg-blue-100 text-blue-800 rounded-md">I: ${stats.countIzin}</span>
+              <span class="px-2 py-0.5 bg-rose-100 text-rose-800 rounded-md">A: ${stats.countAlpa}</span>
+            </div>
+          </div>
+        `;
+      }
+    }
+
     function renderTable() {
       const kelas = document.getElementById("filterKelas").value;
+
+      // Render statistik di atas tabel
+      renderStatistikSummary();
 
       if (!kelas) {
         document.getElementById("judulRekap").textContent = currentMode === "bulanan" 
@@ -364,8 +580,8 @@
             <td class="p-8 sm:p-10 text-center text-slate-400 font-medium">
               <div class="flex flex-col items-center justify-center gap-2">
                 <i class="fa-solid fa-users-rectangle text-4xl text-blue-500/70 animate-bounce"></i>
-                <p class="text-slate-600 font-bold text-sm mt-1">Data Belum Ditampilkan</p>
-                <p class="text-xs text-slate-400 max-w-sm">Silakan pilih kelas pada opsi dropdown filter di atas untuk melihat data presensi.</p>
+                <p class="text-slate-600 font-bold text-sm mt-1">Data Tabel Belum Ditampilkan</p>
+                <p class="text-xs text-slate-400 max-w-sm">Silakan pilih kelas pada opsi dropdown filter di atas untuk melihat rincian tabel presensi.</p>
               </div>
             </td>
           </tr>`;
