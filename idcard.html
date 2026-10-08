@@ -43,12 +43,14 @@
       image-rendering: crisp-edges;
     }
 
-    /* TATA LETAK CETAK MEDIA A4 & F4 */
+    /* TATA LETAK CETAK MEDIA A4 & F4 - DIPAKSA KE ATAS */
     @media print {
       body {
         background: #ffffff !important;
         padding: 0 !important;
         margin: 0 !important;
+        display: block !important;
+        min-height: auto !important;
       }
       .no-print,
       .fixed,
@@ -64,6 +66,7 @@
         box-shadow: none !important;
         background: none !important;
         padding: 0 !important;
+        margin: 0 !important;
         max-width: 100% !important;
       }
       #cardContainer {
@@ -71,11 +74,14 @@
         grid-template-columns: repeat(2, 85.6mm) !important;
         gap: 4mm 6mm !important;
         padding: 0 !important;
+        margin: 0 !important;
         max-height: none !important;
         overflow: visible !important;
         border: none !important;
         background: none !important;
         justify-content: start !important;
+        align-content: start !important;
+        align-items: start !important;
       }
       .card-wrapper {
         page-break-inside: avoid !important;
