@@ -317,9 +317,10 @@
       
       loadData(false);
 
+      // DIUBAH JADI 60 DETIK (60000ms) AGAR TIDAK SPAM KE GOOGLE APPS SCRIPT
       setInterval(() => {
         loadData(true);
-      }, 10000);
+      }, 60000);
     });
 
     // --- TAB SWITCHING LOGIC ---
@@ -916,4 +917,53 @@
               bgCell = isToday ? "bg-amber-200 text-amber-950 font-black" : "bg-amber-100 text-amber-800 font-bold"; 
             } else { 
               code = "A"; countA++; 
-              bgCell = isToday ? "bg-amber-200
+              bgCell = isToday ? "bg-amber-200 text-rose-900 font-black" : "bg-rose-100 text-rose-800 font-bold"; 
+            }
+          } else if (logMasuk) {
+            code = "H"; countH++; 
+            bgCell = isToday ? "bg-amber-300 text-emerald-950 font-black" : "bg-emerald-100 text-emerald-800 font-bold";
+          } else {
+            countA++;
+          }
+
+          html += `<td class="p-0.5 border border-slate-200 ${bgCell} ${highlightTodayClass}">${code}</td>`;
+        }
+
+        html += `<td class="p-1 border border-slate-200 font-black bg-emerald-50 text-emerald-700">${countH}</td>
+                 <td class="p-1 border border-slate-200 font-black bg-blue-50 text-blue-700">${countI}</td>
+                 <td class="p-1 border border-slate-200 font-black bg-amber-50 text-amber-700">${countS}</td>
+                 <td class="p-1 border border-slate-200 font-black bg-rose-50 text-rose-700">${countA}</td></tr>`;
+      });
+
+      html += `</tbody>`;
+      tabel.innerHTML = html;
+    }
+
+    // --- EXPORT TO EXCEL ---
+    function downloadExcel() {
+      const kelas = document.getElementById("filterKelas").value;
+      if (!kelas) {
+        alert("Pilih kelas terlebih dahulu sebelum mengunduh file Excel!");
+        return;
+      }
+
+      const password = prompt("Masukkan Password Khusus Guru untuk mengunduh rekap Excel:");
+      
+      if (password === null) return;
+
+      if (password.trim() !== "GURU2026") {
+        alert("❌ Password Salah! Anda tidak memiliki otoritas untuk mengunduh file Excel ini.");
+        return;
+      }
+
+      const table = document.getElementById("tabelUtama");
+      const filename = currentMode === "harian" 
+        ? `Rekap_Harian_Kelas_${kelas}_${document.getElementById("filterTanggal").value}.xlsx`
+        : `Rekap_Bulanan_Kelas_${kelas}_${document.getElementById("filterBulan").value}.xlsx`;
+
+      const wb = XLSX.utils.table_to_book(table, { sheet: "Rekap Presensi" });
+      XLSX.writeFile(wb, filename);
+    }
+  </script>
+</body>
+</html>
