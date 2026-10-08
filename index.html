@@ -82,6 +82,58 @@
     }
 
     /* =========================================================
+       ANIMASI MARIO & LUIGI KE SEKOLAH
+       ========================================================= */
+    .mario-character {
+      animation: marioWalk 8s linear infinite;
+    }
+
+    .luigi-character {
+      animation: luigiWalk 8s linear infinite;
+      animation-delay: 1.1s;
+    }
+
+    .mario-block {
+      animation: bumpBlock 8s ease-in-out infinite;
+    }
+
+    .mario-coin {
+      animation: coinPop 8s ease-in-out infinite;
+    }
+
+    @keyframes marioWalk {
+      0% { left: -35px; opacity: 1; transform: translateY(0); }
+      38% { left: calc(45% - 24px); transform: translateY(0); }
+      42% { left: calc(45% - 12px); transform: translateY(-24px); } /* Lompat Sundul Kotak ? */
+      46% { left: 45%; transform: translateY(0); }
+      82% { left: calc(100% - 65px); opacity: 1; transform: translateY(0); }
+      88% { left: calc(100% - 45px); opacity: 0; transform: translateY(0); }
+      100% { left: -35px; opacity: 0; }
+    }
+
+    @keyframes luigiWalk {
+      0% { left: -35px; opacity: 1; transform: translateY(0); }
+      48% { left: calc(45% - 24px); transform: translateY(0); }
+      52% { left: calc(45% - 12px); transform: translateY(-24px); } /* Luigi Sundul Kotak ? */
+      56% { left: 45%; transform: translateY(0); }
+      85% { left: calc(100% - 65px); opacity: 1; transform: translateY(0); }
+      91% { left: calc(100% - 45px); opacity: 0; transform: translateY(0); }
+      100% { left: -35px; opacity: 0; }
+    }
+
+    @keyframes bumpBlock {
+      0%, 41%, 45%, 51%, 55%, 100% { transform: translateY(0) scale(1); }
+      42% { transform: translateY(-8px) scale(1.1); } /* Mental pas disundul Mario */
+      52% { transform: translateY(-8px) scale(1.1); } /* Mental pas disundul Luigi */
+    }
+
+    @keyframes coinPop {
+      0%, 41%, 46%, 51%, 56%, 100% { opacity: 0; transform: translateY(0) scale(0.5); }
+      42%, 52% { opacity: 1; transform: translateY(-26px) scale(1.2); }
+      44%, 54% { opacity: 0; transform: translateY(-40px) scale(0.8); }
+    }
+
+    /* =========================================================
        KHUSUS TAMPILAN HP (RESPONSIF & BEBAS MENUMPUK)
        ========================================================= */
     @media (max-width: 640px) {
@@ -133,6 +185,63 @@
     <!-- HEADER & JAM REAL-TIME -->
     <header class="bg-gradient-to-r from-blue-700 via-indigo-700 to-indigo-800 text-white rounded-2xl p-3 sm:p-6 md:p-8 shadow-lg relative overflow-hidden">
       <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+
+      <!-- ANIMASI PANGGUNG MARIO & LUIGI PERGI KE SEKOLAH -->
+      <div class="relative w-full h-14 sm:h-16 bg-blue-950/40 backdrop-blur-sm rounded-xl overflow-hidden mb-3 sm:mb-5 border border-white/15 flex items-end px-2">
+        
+        <!-- Ground / Garis Tanah Super Mario -->
+        <div class="absolute bottom-0 left-0 right-0 h-2.5 bg-amber-800 border-t-2 border-emerald-500 flex overflow-hidden z-10">
+          <div class="w-full h-full bg-[linear-gradient(90deg,#10b981_50%,#b45309_50%)] bg-[length:12px_100%] opacity-80"></div>
+        </div>
+
+        <!-- Kotak Tanda Tanya (?) & Efek Koin -->
+        <div class="absolute bottom-6 left-[45%] -translate-x-1/2 flex flex-col items-center z-10">
+          <div class="mario-coin absolute -top-5 text-amber-300 text-xs font-black drop-shadow-md">🪙</div>
+          <div class="mario-block w-6 h-6 sm:w-7 sm:h-7 bg-amber-400 border-2 border-amber-600 rounded-md shadow-md flex items-center justify-center text-amber-950 font-black text-xs sm:text-sm">
+            ?
+          </div>
+        </div>
+
+        <!-- Gedung Sekolah Tujuan di Ujung Kanan -->
+        <div class="absolute bottom-2.5 right-2 sm:right-6 flex flex-col items-center z-10">
+          <div class="text-[8px] sm:text-[10px] font-extrabold text-amber-300 bg-blue-950/90 px-1.5 py-0.5 rounded border border-amber-400/40 mb-0.5 whitespace-nowrap shadow-sm">
+            🏫 SMPN 1 RANCAH
+          </div>
+          <div class="text-xl sm:text-2xl drop-shadow">🏫</div>
+        </div>
+
+        <!-- Mario Sprite SVG -->
+        <div class="mario-character absolute bottom-2 z-20 flex flex-col items-center">
+          <svg class="w-6 h-7 sm:w-7 sm:h-8 drop-shadow-md" viewBox="0 0 24 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6 3H18V7H6V3Z" fill="#E52521"/>
+            <path d="M4 7H20V9H4V7Z" fill="#E52521"/>
+            <path d="M6 9H18V13H6V9Z" fill="#FFC999"/>
+            <path d="M12 11H18V13H12V11Z" fill="#401B00"/>
+            <path d="M6 13H18V17H6V13Z" fill="#E52521"/>
+            <path d="M7 17H17V23H7V17Z" fill="#0038A8"/>
+            <circle cx="9" cy="19" r="1" fill="#F8B800"/>
+            <circle cx="15" cy="19" r="1" fill="#F8B800"/>
+            <path d="M4 23H10V26H4V23Z" fill="#78350F"/>
+            <path d="M14 23H20V26H14V23Z" fill="#78350F"/>
+          </svg>
+        </div>
+
+        <!-- Luigi Sprite SVG -->
+        <div class="luigi-character absolute bottom-2 z-20 flex flex-col items-center">
+          <svg class="w-6 h-7 sm:w-7 sm:h-8 drop-shadow-md" viewBox="0 0 24 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6 2H18V6H6V2Z" fill="#16A34A"/>
+            <path d="M4 6H20V8H4V6Z" fill="#16A34A"/>
+            <path d="M6 8H18V12H6V8Z" fill="#FFC999"/>
+            <path d="M12 10H18V12H12V10Z" fill="#401B00"/>
+            <path d="M6 12H18V16H6V12Z" fill="#16A34A"/>
+            <path d="M7 16H17V23H7V16Z" fill="#0038A8"/>
+            <circle cx="9" cy="18" r="1" fill="#F8B800"/>
+            <circle cx="15" cy="18" r="1" fill="#F8B800"/>
+            <path d="M4 23H10V26H4V23Z" fill="#78350F"/>
+            <path d="M14 23H20V26H14V23Z" fill="#78350F"/>
+          </svg>
+        </div>
+      </div>
 
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4 relative z-10">
         
