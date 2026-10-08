@@ -20,20 +20,29 @@
       -webkit-tap-highlight-color: transparent;
     }
 
+    /* WADAH TABEL RESPONSIF SCROLL HORIZONTAL */
+    #containerTabel {
+      overflow-x: auto;
+      max-width: 100%;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    #tabelUtama {
+      white-space: nowrap;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
     /* FORMAT TEKS VERTIKAL KOLOM LIBUR */
     .libur-text-vertical {
       writing-mode: vertical-rl;
       transform: rotate(180deg);
       white-space: nowrap;
       display: inline-block;
+      letter-spacing: 1px;
     }
 
     /* BARIS MENYALA / HIGHLIGHT SAAT DIKLIK */
-    .row-highlight {
-      background-color: #fef08a !important; /* Yellow-200 */
-      transition: background-color 0.15s ease-in-out;
-    }
-    
     .row-highlight td {
       background-color: #fef08a !important;
       color: #0f172a !important;
@@ -42,7 +51,7 @@
       border-bottom: 2px solid #eab308 !important;
     }
 
-    /* STICKY COLUMN UNTUK TAMPILAN DESKTOP/TABLET */
+    /* STICKY COLUMN (NO & NAMA SISWA TERKUNCI SAAT DI-SCROLL) */
     .sticky-col-no {
       position: sticky;
       left: 0;
@@ -53,13 +62,13 @@
       position: sticky;
       left: 36px;
       z-index: 20;
-      box-shadow: 3px 0 6px -2px rgba(0, 0, 0, 0.15);
+      box-shadow: 3px 0 6px -2px rgba(0, 0, 0, 0.12);
     }
 
-    /* Custom Scrollbar Responsif */
+    /* Custom Scrollbar */
     ::-webkit-scrollbar {
-      height: 8px;
-      width: 8px;
+      height: 6px;
+      width: 6px;
     }
     ::-webkit-scrollbar-track {
       background: #f1f5f9;
@@ -73,61 +82,46 @@
     }
 
     /* =========================================================
-       KHUSUS TAMPILAN HP (TANPA SCROLL & TEKS DIESUAIKAN/DIPERKECIL)
+       KHUSUS TAMPILAN HP (RESPONSIF & BEBAS MENUMPUK)
        ========================================================= */
     @media (max-width: 640px) {
       body {
-        padding: 4px !important;
+        padding: 6px !important;
       }
 
-      /* Hilangkan overflow / scrollbar utama */
-      #containerTabel {
-        overflow-x: hidden !important;
-        overflow-y: hidden !important;
-        width: 100% !important;
-      }
-
-      /* Paksa tabel pas 100% lebar layar HP */
       #tabelUtama {
-        table-layout: fixed !important;
-        width: 100% !important;
-        font-size: 7.5px !important;
+        font-size: 10px !important;
       }
 
-      /* Lepas sticky di HP agar tidak bertumpuk saat tabel difitkan */
-      .sticky-col-no, .sticky-col-nama {
-        position: static !important;
-        box-shadow: none !important;
-      }
-
-      /* Padding sel dibuat sangat ringkas */
       #tabelUtama th, #tabelUtama td {
-        padding: 2px 0.5px !important;
-        white-space: nowrap !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
+        padding: 5px 3px !important;
       }
 
-      /* Mengatur proporsi kolom di HP */
-      #tabelUtama th:nth-child(1), #tabelUtama td:nth-child(1) {
-        width: 6% !important;
+      /* Penyesuaian Sticky Column di HP */
+      .sticky-col-no {
+        left: 0 !important;
+        min-width: 28px !important;
+        max-width: 28px !important;
+        text-align: center;
       }
 
-      #tabelUtama th:nth-child(2), #tabelUtama td:nth-child(2) {
-        width: 25% !important;
-        text-align: left !important;
+      .sticky-col-nama {
+        left: 28px !important;
+        min-width: 110px !important;
+        max-width: 110px !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
-      /* Penyesuaian ukuran badge keterangan di HP */
-      #tabelUtama span {
-        padding: 1px 3px !important;
-        font-size: 6.5px !important;
-        border-radius: 4px !important;
+      /* Lebar Kolom Tanggal Bulanan di HP */
+      .col-tanggal {
+        min-width: 25px !important;
+        text-align: center;
       }
 
-      /* Penyesuaian teks vertikal libur */
       .libur-text-vertical {
-        font-size: 6.5px !important;
+        font-size: 8px !important;
       }
     }
   </style>
@@ -254,7 +248,7 @@
       <!-- WADAH CARD RINGKASAN STATISTIK -->
       <div id="boxStatistik"></div>
 
-      <!-- TABLE AREA (RESPONSIF AUTO-FIT DI HP TANPA SCROLLBAR) -->
+      <!-- TABLE AREA RESPONSIF -->
       <div id="containerTabel" class="border border-slate-200 shadow-sm bg-white rounded-xl relative">
         <table id="tabelUtama" class="w-full text-center border-collapse text-xs sm:text-sm">
           <!-- Digenerate via JS -->
@@ -317,7 +311,7 @@
       
       loadData(false);
 
-      // DIUBAH JADI 60 DETIK (60000ms) AGAR TIDAK SPAM KE GOOGLE APPS SCRIPT
+      // SINKRONISASI OTOMATIS TIAP 60 DETIK
       setInterval(() => {
         loadData(true);
       }, 60000);
@@ -722,7 +716,7 @@
         let jamPulang = logPulang ? (logPulang.timestamp.split(" ")[1] || logPulang.timestamp) : "-";
         
         let statusBadge = '<span class="inline-block px-1.5 py-0.5 bg-rose-100 text-rose-700 rounded font-bold">Alpa</span>';
-        let bgRow = (index % 2 === 0) ? "bg-white" : "bg-slate-50/60";
+        let bgRow = (index % 2 === 0) ? "bg-white" : "bg-slate-50";
 
         if (logManual) {
           if (logManual.keterangan === "Izin") {
@@ -825,15 +819,15 @@
           bgHeader = "text-slate-600";
         }
         
-        html += `<th class="p-0.5 border border-slate-200 ${bgHeader}" title="${titleHeader}">
+        html += `<th class="p-0.5 border border-slate-200 col-tanggal ${bgHeader}" title="${titleHeader}">
                   ${d}${isToday ? '<span class="block text-[7px] font-extrabold text-slate-900 leading-none">▲</span>' : ''}
                  </th>`;
       }
 
-      html += `<th class="p-1 border border-slate-200 bg-emerald-100 text-emerald-800" title="Hadir">H</th>
-               <th class="p-1 border border-slate-200 bg-blue-100 text-blue-800" title="Izin">I</th>
-               <th class="p-1 border border-slate-200 bg-amber-100 text-amber-800" title="Sakit">S</th>
-               <th class="p-1 border border-slate-200 bg-rose-100 text-rose-800" title="Alpa">A</th>
+      html += `<th class="p-1 border border-slate-200 bg-emerald-100 text-emerald-800 col-tanggal" title="Hadir">H</th>
+               <th class="p-1 border border-slate-200 bg-blue-100 text-blue-800 col-tanggal" title="Izin">I</th>
+               <th class="p-1 border border-slate-200 bg-amber-100 text-amber-800 col-tanggal" title="Sakit">S</th>
+               <th class="p-1 border border-slate-200 bg-rose-100 text-rose-800 col-tanggal" title="Alpa">A</th>
              </tr>
            </thead>
            <tbody>`;
@@ -848,7 +842,7 @@
 
       filteredMaster.forEach((siswa, index) => {
         let countH = 0, countI = 0, countS = 0, countA = 0;
-        let bgRow = (index % 2 === 0) ? "bg-white" : "bg-slate-50/60";
+        let bgRow = (index % 2 === 0) ? "bg-white" : "bg-slate-50";
 
         html += `<tr class="${bgRow} cursor-pointer hover:bg-yellow-100/70 transition duration-150" onclick="sorotBarisSiswa(this)">
                   <td class="p-1 border border-slate-200 text-slate-500 sticky-col-no ${bgRow}">${index + 1}</td>
@@ -878,7 +872,7 @@
                 bgLibur = "bg-rose-100 text-rose-700 border-rose-200";
               }
 
-              html += `<td rowspan="${totalStudents}" class="p-0.5 border ${bgLibur} font-extrabold text-center align-middle tracking-wider ${highlightTodayClass}">
+              html += `<td rowspan="${totalStudents}" class="p-0.5 border col-tanggal ${bgLibur} font-extrabold text-center align-middle tracking-wider ${highlightTodayClass}">
                         <span class="libur-text-vertical">${textLibur}</span>
                       </td>`;
             }
@@ -886,12 +880,12 @@
           }
 
           if (tanggalMulaiSistem && dateStr < tanggalMulaiSistem) {
-            html += `<td class="p-0.5 border border-slate-200 text-slate-400 font-medium ${highlightTodayClass}" title="Sistem Belum Dimulai">-</td>`;
+            html += `<td class="p-0.5 border border-slate-200 col-tanggal text-slate-400 font-medium ${highlightTodayClass}" title="Sistem Belum Dimulai">-</td>`;
             continue;
           }
 
           if (dateStr > todayStr) {
-            html += `<td class="p-0.5 border border-slate-200 text-slate-300 font-medium ${highlightTodayClass}" title="Tanggal Belum Berjalan">-</td>`;
+            html += `<td class="p-0.5 border border-slate-200 col-tanggal text-slate-300 font-medium ${highlightTodayClass}" title="Tanggal Belum Berjalan">-</td>`;
             continue;
           }
 
@@ -926,13 +920,13 @@
             countA++;
           }
 
-          html += `<td class="p-0.5 border border-slate-200 ${bgCell} ${highlightTodayClass}">${code}</td>`;
+          html += `<td class="p-0.5 border border-slate-200 col-tanggal ${bgCell} ${highlightTodayClass}">${code}</td>`;
         }
 
-        html += `<td class="p-1 border border-slate-200 font-black bg-emerald-50 text-emerald-700">${countH}</td>
-                 <td class="p-1 border border-slate-200 font-black bg-blue-50 text-blue-700">${countI}</td>
-                 <td class="p-1 border border-slate-200 font-black bg-amber-50 text-amber-700">${countS}</td>
-                 <td class="p-1 border border-slate-200 font-black bg-rose-50 text-rose-700">${countA}</td></tr>`;
+        html += `<td class="p-1 border border-slate-200 font-black bg-emerald-50 text-emerald-700 col-tanggal">${countH}</td>
+                 <td class="p-1 border border-slate-200 font-black bg-blue-50 text-blue-700 col-tanggal">${countI}</td>
+                 <td class="p-1 border border-slate-200 font-black bg-amber-50 text-amber-700 col-tanggal">${countS}</td>
+                 <td class="p-1 border border-slate-200 font-black bg-rose-50 text-rose-700 col-tanggal">${countA}</td></tr>`;
       });
 
       html += `</tbody>`;
