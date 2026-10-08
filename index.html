@@ -42,7 +42,7 @@
       border-bottom: 2px solid #eab308 !important;
     }
 
-    /* STICKY COLUMN UNTUK TAMPILAN HP */
+    /* STICKY COLUMN UNTUK TAMPILAN DESKTOP/TABLET */
     .sticky-col-no {
       position: sticky;
       left: 0;
@@ -71,6 +71,65 @@
     ::-webkit-scrollbar-thumb:hover {
       background: #94a3b8;
     }
+
+    /* =========================================================
+       KHUSUS TAMPILAN HP (TANPA SCROLL & TEKS DIESUAIKAN/DIPERKECIL)
+       ========================================================= */
+    @media (max-width: 640px) {
+      body {
+        padding: 4px !important;
+      }
+
+      /* Hilangkan overflow / scrollbar utama */
+      #containerTabel {
+        overflow-x: hidden !important;
+        overflow-y: hidden !important;
+        width: 100% !important;
+      }
+
+      /* Paksa tabel pas 100% lebar layar HP */
+      #tabelUtama {
+        table-layout: fixed !important;
+        width: 100% !important;
+        font-size: 7.5px !important;
+      }
+
+      /* Lepas sticky di HP agar tidak bertumpuk saat tabel difitkan */
+      .sticky-col-no, .sticky-col-nama {
+        position: static !important;
+        box-shadow: none !important;
+      }
+
+      /* Padding sel dibuat sangat ringkas */
+      #tabelUtama th, #tabelUtama td {
+        padding: 2px 0.5px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+      }
+
+      /* Mengatur proporsi kolom di HP */
+      #tabelUtama th:nth-child(1), #tabelUtama td:nth-child(1) {
+        width: 6% !important;
+      }
+
+      #tabelUtama th:nth-child(2), #tabelUtama td:nth-child(2) {
+        width: 25% !important;
+        text-align: left !important;
+      }
+
+      /* Penyesuaian ukuran badge keterangan di HP */
+      #tabelUtama span {
+        padding: 1px 3px !important;
+        font-size: 6.5px !important;
+        border-radius: 4px !important;
+      }
+
+      /* Penyesuaian teks vertikal libur */
+      .libur-text-vertical {
+        font-size: 6.5px !important;
+      }
+    }
   </style>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen p-2 sm:p-4 md:p-6">
@@ -78,43 +137,43 @@
   <div class="max-w-7xl mx-auto space-y-3 sm:space-y-5">
 
     <!-- HEADER & JAM REAL-TIME -->
-    <header class="bg-gradient-to-r from-blue-700 via-indigo-700 to-indigo-800 text-white rounded-2xl p-4 sm:p-6 md:p-8 shadow-lg relative overflow-hidden">
+    <header class="bg-gradient-to-r from-blue-700 via-indigo-700 to-indigo-800 text-white rounded-2xl p-3 sm:p-6 md:p-8 shadow-lg relative overflow-hidden">
       <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
 
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 relative z-10">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4 relative z-10">
         
         <!-- LOGO & JUDUL -->
-        <div class="flex items-center gap-3 sm:gap-5">
-          <img src="assets/logo-smpn1rancah.png" alt="Logo SMPN 1 Rancah" class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain drop-shadow-xl flex-shrink-0">
+        <div class="flex items-center gap-2.5 sm:gap-5">
+          <img src="assets/logo-smpn1rancah.png" alt="Logo SMPN 1 Rancah" class="w-12 h-12 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain drop-shadow-xl flex-shrink-0">
           
           <div>
-            <div class="flex items-center gap-2 mb-1">
-              <span class="px-2.5 py-0.5 bg-white/20 backdrop-blur-md rounded-full text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-blue-100">
+            <div class="flex items-center gap-1.5 mb-0.5">
+              <span class="px-2 py-0.5 bg-white/20 backdrop-blur-md rounded-full text-[9px] sm:text-xs font-semibold uppercase tracking-wider text-blue-100">
                 Sistem Presensi Digital
               </span>
-              <span class="px-2 py-0.5 bg-amber-400 text-slate-900 font-black text-[10px] sm:text-[11px] rounded-full shadow-sm">
+              <span class="px-1.5 py-0.5 bg-amber-400 text-slate-900 font-black text-[9px] sm:text-[11px] rounded-full shadow-sm">
                 v2.5
               </span>
             </div>
-            <h1 class="text-lg sm:text-2xl md:text-3xl font-extrabold tracking-tight leading-tight">REKAPITULASI PRESENSI SISWA</h1>
-            <p class="text-blue-200 text-xs sm:text-base font-bold mt-0.5">
+            <h1 class="text-sm sm:text-2xl md:text-3xl font-extrabold tracking-tight leading-tight">REKAPITULASI PRESENSI SISWA</h1>
+            <p class="text-blue-200 text-[11px] sm:text-base font-bold">
               SMPN 1 RANCAH
             </p>
           </div>
         </div>
 
-        <!-- Live Digital Clock Badge + Indikator Sync -->
-        <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 text-left md:text-right self-stretch md:self-auto min-w-[180px] flex md:flex-col justify-between items-center md:items-end">
+        <!-- Live Digital Clock Badge -->
+        <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-2.5 sm:p-3 text-left md:text-right self-stretch md:self-auto min-w-[160px] flex md:flex-col justify-between items-center md:items-end">
           <div>
-            <div class="text-[10px] sm:text-xs text-blue-200 font-medium flex items-center gap-1.5 justify-start md:justify-end">
+            <div class="text-[9px] sm:text-xs text-blue-200 font-medium flex items-center gap-1 justify-start md:justify-end">
               <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Waktu Server (WIB)
             </div>
-            <div id="liveClock" class="text-lg sm:text-xl md:text-2xl font-black font-mono mt-0.5 text-white">00:00:00</div>
+            <div id="liveClock" class="text-base sm:text-xl md:text-2xl font-black font-mono text-white">00:00:00</div>
           </div>
           <div class="text-right">
-            <div id="liveDate" class="text-[11px] sm:text-xs text-blue-100 font-medium">Memuat tanggal...</div>
-            <div id="lastSync" class="text-[10px] text-emerald-300 font-semibold mt-0.5 flex items-center gap-1 justify-end">
-              <i class="fa-solid fa-arrows-rotate fa-spin text-[9px]"></i> Syncing...
+            <div id="liveDate" class="text-[10px] sm:text-xs text-blue-100 font-medium">Memuat tanggal...</div>
+            <div id="lastSync" class="text-[9px] sm:text-[10px] text-emerald-300 font-semibold flex items-center gap-1 justify-end">
+              <i class="fa-solid fa-arrows-rotate fa-spin text-[8px]"></i> Syncing...
             </div>
           </div>
         </div>
@@ -122,72 +181,72 @@
     </header>
 
     <!-- MAIN CONTAINER CARD -->
-    <main class="bg-white rounded-2xl shadow-sm border border-slate-200 p-3 sm:p-5 md:p-6 space-y-4 sm:space-y-6">
+    <main class="bg-white rounded-2xl shadow-sm border border-slate-200 p-2.5 sm:p-5 md:p-6 space-y-3 sm:space-y-6">
 
       <!-- MENU TABS & ACTION BUTTONS -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-100 pb-2.5">
         <!-- Navigation Tabs -->
         <div class="flex bg-slate-100 p-1 rounded-xl w-full sm:w-auto">
-          <button id="tabHarian" onclick="switchTab('harian')" class="flex-1 sm:flex-none px-4 py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 bg-white text-blue-600 shadow-sm">
+          <button id="tabHarian" onclick="switchTab('harian')" class="flex-1 sm:flex-none px-3 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all duration-200 flex items-center justify-center gap-1.5 bg-white text-blue-600 shadow-sm">
             <i class="fa-solid fa-calendar-day"></i> Presensi Harian
           </button>
-          <button id="tabBulanan" onclick="switchTab('bulanan')" class="flex-1 sm:flex-none px-4 py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 text-slate-500 hover:text-slate-800">
+          <button id="tabBulanan" onclick="switchTab('bulanan')" class="flex-1 sm:flex-none px-3 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all duration-200 flex items-center justify-center gap-1.5 text-slate-500 hover:text-slate-800">
             <i class="fa-solid fa-calendar-days"></i> Presensi Bulanan
           </button>
         </div>
 
-        <!-- Tombol Aksi: Segarkan & Download Excel -->
+        <!-- Tombol Aksi -->
         <div class="flex items-center gap-2 w-full sm:w-auto">
-          <button onclick="manualRefresh()" title="Segarkan Data Sekarang" class="flex-1 sm:flex-initial bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold py-2.5 px-3.5 rounded-xl transition duration-150 shadow-sm flex items-center justify-center gap-2 text-xs sm:text-sm">
+          <button onclick="manualRefresh()" title="Segarkan Data Sekarang" class="flex-1 sm:flex-initial bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold py-2 px-3 rounded-xl transition duration-150 shadow-sm flex items-center justify-center gap-1.5 text-xs sm:text-sm">
             <i id="iconRefresh" class="fa-solid fa-rotate"></i>
             <span>Refresh</span>
           </button>
 
-          <button onclick="downloadExcel()" class="flex-1 sm:flex-initial bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold py-2.5 px-4 rounded-xl transition duration-150 shadow-sm flex items-center justify-center gap-2 text-xs sm:text-sm">
-            <i class="fa-solid fa-file-excel text-base"></i> Export Excel
+          <button onclick="downloadExcel()" class="flex-1 sm:flex-initial bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold py-2 px-3 rounded-xl transition duration-150 shadow-sm flex items-center justify-center gap-1.5 text-xs sm:text-sm">
+            <i class="fa-solid fa-file-excel text-sm"></i> Export Excel
           </button>
         </div>
       </div>
 
       <!-- FILTER CONTROLS -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 bg-slate-50 p-3 sm:p-4 rounded-xl border border-slate-200/80">
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 bg-slate-50 p-2.5 sm:p-4 rounded-xl border border-slate-200/80">
         <!-- Filter Tanggal Harian -->
         <div id="boxTanggal">
-          <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-600 mb-1 flex items-center gap-1.5">
+          <label class="block text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-slate-600 mb-1 flex items-center gap-1">
             <i class="fa-regular fa-calendar text-blue-600"></i> Pilih Tanggal:
           </label>
-          <input type="date" id="filterTanggal" onchange="renderTable()" class="w-full bg-white px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none transition min-h-[42px]">
+          <input type="date" id="filterTanggal" onchange="renderTable()" class="w-full bg-white px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs sm:text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none transition min-h-[38px]">
         </div>
 
         <!-- Filter Bulan -->
         <div id="boxBulan" class="hidden">
-          <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-600 mb-1 flex items-center gap-1.5">
+          <label class="block text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-slate-600 mb-1 flex items-center gap-1">
             <i class="fa-regular fa-calendar-check text-blue-600"></i> Pilih Bulan:
           </label>
-          <input type="month" id="filterBulan" onchange="renderTable()" class="w-full bg-white px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none transition min-h-[42px]">
+          <input type="month" id="filterBulan" onchange="renderTable()" class="w-full bg-white px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs sm:text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none transition min-h-[38px]">
         </div>
 
         <!-- Filter Kelas -->
         <div>
-          <label class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-600 mb-1 flex items-center gap-1.5">
+          <label class="block text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-slate-600 mb-1 flex items-center gap-1">
             <i class="fa-solid fa-users text-blue-600"></i> Pilih Kelas:
           </label>
-          <select id="filterKelas" onchange="renderTable()" class="w-full bg-white px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none transition min-h-[42px]">
+          <select id="filterKelas" onchange="renderTable()" class="w-full bg-white px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs sm:text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none transition min-h-[38px]">
             <option value="">-- Pilih Kelas --</option>
           </select>
         </div>
       </div>
 
       <!-- TITLE INFORMER -->
-      <div class="text-center py-1 sm:py-2 border-b border-slate-100">
-        <h2 id="judulRekap" class="text-base sm:text-lg md:text-xl font-extrabold text-slate-800">REKAPITULASI PRESENSI SISWA</h2>
-        <p id="subJudulRekap" class="text-xs sm:text-sm font-medium text-slate-500 mt-0.5"></p>
-        <div class="flex flex-wrap items-center justify-center gap-2 mt-1.5 text-[10px]">
-          <span class="bg-amber-50 text-amber-800 font-bold px-2.5 py-1 rounded-full border border-amber-200">
-            💡 Sentuh nama siswa untuk sorotan baris
+      <div class="text-center py-1 border-b border-slate-100">
+        <h2 id="judulRekap" class="text-sm sm:text-lg md:text-xl font-extrabold text-slate-800">REKAPITULASI PRESENSI SISWA</h2>
+        <p id="subJudulRekap" class="text-[11px] sm:text-sm font-medium text-slate-500 mt-0.5"></p>
+        <div class="flex flex-wrap items-center justify-center gap-1.5 mt-1 text-[9px] sm:text-[10px]">
+          <span class="bg-amber-50 text-amber-800 font-bold px-2 py-0.5 rounded-full border border-amber-200">
+            💡 Sentuh nama untuk sorot baris
           </span>
-          <span class="bg-amber-400 text-slate-900 font-extrabold px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1">
-            <i class="fa-solid fa-star text-[9px]"></i> Kolom Kuning = Tanggal Hari Ini
+          <span class="bg-amber-400 text-slate-900 font-extrabold px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1">
+            <i class="fa-solid fa-star text-[8px]"></i> Kolom Kuning = Hari Ini
           </span>
         </div>
       </div>
@@ -195,8 +254,8 @@
       <!-- WADAH CARD RINGKASAN STATISTIK -->
       <div id="boxStatistik"></div>
 
-      <!-- TABLE AREA (RESPONSIF DENGAN STICKY NAMA & HIGHLIGHT HARI INI) -->
-      <div id="containerTabel" class="overflow-x-auto border border-slate-200 shadow-sm bg-white rounded-xl relative">
+      <!-- TABLE AREA (RESPONSIF AUTO-FIT DI HP TANPA SCROLLBAR) -->
+      <div id="containerTabel" class="border border-slate-200 shadow-sm bg-white rounded-xl relative">
         <table id="tabelUtama" class="w-full text-center border-collapse text-xs sm:text-sm">
           <!-- Digenerate via JS -->
         </table>
@@ -205,7 +264,7 @@
     </main>
 
     <!-- FOOTER -->
-    <footer class="text-center text-xs text-slate-400 py-2">
+    <footer class="text-center text-[10px] sm:text-xs text-slate-400 py-2">
       &copy; 2026 Presensi Digital v2.5 • <span class="font-semibold text-slate-600">SMPN 1 RANCAH</span>
     </footer>
 
@@ -272,13 +331,13 @@
       const boxBulan = document.getElementById("boxBulan");
 
       if (mode === 'harian') {
-        btnHarian.className = "flex-1 sm:flex-none px-4 py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 bg-white text-blue-600 shadow-sm";
-        btnBulanan.className = "flex-1 sm:flex-none px-4 py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 text-slate-500 hover:text-slate-800";
+        btnHarian.className = "flex-1 sm:flex-none px-3 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all duration-200 flex items-center justify-center gap-1.5 bg-white text-blue-600 shadow-sm";
+        btnBulanan.className = "flex-1 sm:flex-none px-3 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all duration-200 flex items-center justify-center gap-1.5 text-slate-500 hover:text-slate-800";
         boxTanggal.classList.remove("hidden");
         boxBulan.classList.add("hidden");
       } else {
-        btnBulanan.className = "flex-1 sm:flex-none px-4 py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 bg-white text-blue-600 shadow-sm";
-        btnHarian.className = "flex-1 sm:flex-none px-4 py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 text-slate-500 hover:text-slate-800";
+        btnBulanan.className = "flex-1 sm:flex-none px-3 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all duration-200 flex items-center justify-center gap-1.5 bg-white text-blue-600 shadow-sm";
+        btnHarian.className = "flex-1 sm:flex-none px-3 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all duration-200 flex items-center justify-center gap-1.5 text-slate-500 hover:text-slate-800";
         boxBulan.classList.remove("hidden");
         boxTanggal.classList.add("hidden");
       }
@@ -295,7 +354,7 @@
       if (iconRefresh) iconRefresh.classList.add("fa-spin");
 
       if (!isSilent && rawMaster.length === 0) {
-        document.getElementById("tabelUtama").innerHTML = '<tr><td class="p-8 text-slate-400 font-medium"><i class="fa-solid fa-spinner fa-spin text-blue-600 mr-2"></i> Mengambil data dari server...</td></tr>';
+        document.getElementById("tabelUtama").innerHTML = '<tr><td class="p-6 text-slate-400 font-medium"><i class="fa-solid fa-spinner fa-spin text-blue-600 mr-2"></i> Mengambil data dari server...</td></tr>';
       }
       
       fetch(WEB_APP_URL)
@@ -442,120 +501,118 @@
 
       if (stats.isWeekendOrHoliday) {
         box.innerHTML = `
-          <div class="bg-purple-50 border border-purple-200 text-purple-800 p-3 sm:p-4 rounded-xl text-center font-bold text-xs sm:text-sm">
+          <div class="bg-purple-50 border border-purple-200 text-purple-800 p-2.5 sm:p-4 rounded-xl text-center font-bold text-xs sm:text-sm">
             🎉 Hari Libur (${stats.isWeekendOrHoliday.keterangan || 'Libur'}). Tidak ada presensi.
           </div>`;
         return;
       }
       if (stats.isFuture) {
         box.innerHTML = `
-          <div class="bg-slate-50 border border-slate-200 text-slate-600 p-3 sm:p-4 rounded-xl text-center font-bold text-xs sm:text-sm">
+          <div class="bg-slate-50 border border-slate-200 text-slate-600 p-2.5 sm:p-4 rounded-xl text-center font-bold text-xs sm:text-sm">
             ⏳ Tanggal belum berjalan. Belum ada rekap presensi.
           </div>`;
         return;
       }
       if (stats.isBeforeStart) {
         box.innerHTML = `
-          <div class="bg-amber-50 border border-amber-200 text-amber-800 p-3 sm:p-4 rounded-xl text-center font-bold text-xs sm:text-sm">
+          <div class="bg-amber-50 border border-amber-200 text-amber-800 p-2.5 sm:p-4 rounded-xl text-center font-bold text-xs sm:text-sm">
             ℹ️ Sistem belum aktif pada tanggal ini (Aktif per ${tanggalMulaiSistem}).
           </div>`;
         return;
       }
 
       if (!kelas) {
-        // TAMPILAN PERTAMA: REKAP STATISTIK SELURUH SISWA HARI INI
-        box.className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 sm:gap-3";
+        box.className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-3";
         box.innerHTML = `
-          <div class="bg-indigo-50/90 border border-indigo-200 p-3 rounded-xl flex items-center gap-3 shadow-sm">
-            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-base sm:text-lg flex-shrink-0">
+          <div class="bg-indigo-50/90 border border-indigo-200 p-2.5 sm:p-3 rounded-xl flex items-center gap-2.5 shadow-sm">
+            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-sm sm:text-lg flex-shrink-0">
               <i class="fa-solid fa-users"></i>
             </div>
             <div>
-              <p class="text-[9px] sm:text-[10px] font-extrabold uppercase text-indigo-700 tracking-wider">Total Siswa</p>
-              <p class="text-base sm:text-xl font-black text-slate-800">${stats.totalSiswa}</p>
+              <p class="text-[8px] sm:text-[10px] font-extrabold uppercase text-indigo-700 tracking-wider">Total Siswa</p>
+              <p class="text-sm sm:text-xl font-black text-slate-800">${stats.totalSiswa}</p>
             </div>
           </div>
 
-          <div class="bg-emerald-50/90 border border-emerald-200 p-3 rounded-xl flex items-center gap-3 shadow-sm">
-            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-base sm:text-lg flex-shrink-0">
+          <div class="bg-emerald-50/90 border border-emerald-200 p-2.5 sm:p-3 rounded-xl flex items-center gap-2.5 shadow-sm">
+            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-sm sm:text-lg flex-shrink-0">
               <i class="fa-solid fa-user-check"></i>
             </div>
             <div>
-              <p class="text-[9px] sm:text-[10px] font-extrabold uppercase text-emerald-700 tracking-wider">Total Hadir</p>
-              <p class="text-base sm:text-xl font-black text-emerald-800">${stats.countHadir}</p>
+              <p class="text-[8px] sm:text-[10px] font-extrabold uppercase text-emerald-700 tracking-wider">Total Hadir</p>
+              <p class="text-sm sm:text-xl font-black text-emerald-800">${stats.countHadir}</p>
             </div>
           </div>
 
-          <div class="bg-amber-50/90 border border-amber-200 p-3 rounded-xl flex items-center gap-3 shadow-sm">
-            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-amber-500 text-white flex items-center justify-center font-bold text-base sm:text-lg flex-shrink-0">
+          <div class="bg-amber-50/90 border border-amber-200 p-2.5 sm:p-3 rounded-xl flex items-center gap-2.5 shadow-sm">
+            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-amber-500 text-white flex items-center justify-center font-bold text-sm sm:text-lg flex-shrink-0">
               <i class="fa-solid fa-notes-medical"></i>
             </div>
             <div>
-              <p class="text-[9px] sm:text-[10px] font-extrabold uppercase text-amber-700 tracking-wider">Sakit</p>
-              <p class="text-base sm:text-xl font-black text-amber-800">${stats.countSakit}</p>
+              <p class="text-[8px] sm:text-[10px] font-extrabold uppercase text-amber-700 tracking-wider">Sakit</p>
+              <p class="text-sm sm:text-xl font-black text-amber-800">${stats.countSakit}</p>
             </div>
           </div>
 
-          <div class="bg-blue-50/90 border border-blue-200 p-3 rounded-xl flex items-center gap-3 shadow-sm">
-            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-base sm:text-lg flex-shrink-0">
+          <div class="bg-blue-50/90 border border-blue-200 p-2.5 sm:p-3 rounded-xl flex items-center gap-2.5 shadow-sm">
+            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-sm sm:text-lg flex-shrink-0">
               <i class="fa-solid fa-user-clock"></i>
             </div>
             <div>
-              <p class="text-[9px] sm:text-[10px] font-extrabold uppercase text-blue-700 tracking-wider">Izin</p>
-              <p class="text-base sm:text-xl font-black text-blue-800">${stats.countIzin}</p>
+              <p class="text-[8px] sm:text-[10px] font-extrabold uppercase text-blue-700 tracking-wider">Izin</p>
+              <p class="text-sm sm:text-xl font-black text-blue-800">${stats.countIzin}</p>
             </div>
           </div>
 
-          <div class="bg-rose-50/90 border border-rose-200 p-3 rounded-xl flex items-center gap-3 shadow-sm col-span-2 sm:col-span-1">
-            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-rose-600 text-white flex items-center justify-center font-bold text-base sm:text-lg flex-shrink-0">
+          <div class="bg-rose-50/90 border border-rose-200 p-2.5 sm:p-3 rounded-xl flex items-center gap-2.5 shadow-sm col-span-2 sm:col-span-1">
+            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-rose-600 text-white flex items-center justify-center font-bold text-sm sm:text-lg flex-shrink-0">
               <i class="fa-solid fa-user-xmark"></i>
             </div>
             <div>
-              <p class="text-[9px] sm:text-[10px] font-extrabold uppercase text-rose-700 tracking-wider">Alpa</p>
-              <p class="text-base sm:text-xl font-black text-rose-800">${stats.countAlpa}</p>
+              <p class="text-[8px] sm:text-[10px] font-extrabold uppercase text-rose-700 tracking-wider">Alpa</p>
+              <p class="text-sm sm:text-xl font-black text-rose-800">${stats.countAlpa}</p>
             </div>
           </div>
         `;
       } else {
-        // TAMPILAN SETELAH MEMILIH KELAS
-        box.className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 sm:gap-3";
+        box.className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3";
         box.innerHTML = `
-          <div class="bg-indigo-50/90 border border-indigo-200 p-3 rounded-xl flex items-center gap-3 shadow-sm">
-            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-base sm:text-lg flex-shrink-0">
+          <div class="bg-indigo-50/90 border border-indigo-200 p-2.5 sm:p-3 rounded-xl flex items-center gap-2.5 shadow-sm">
+            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-sm sm:text-lg flex-shrink-0">
               <i class="fa-solid fa-users"></i>
             </div>
             <div>
-              <p class="text-[9px] sm:text-[10px] font-extrabold uppercase text-indigo-700 tracking-wider">Siswa Kelas ${kelas}</p>
-              <p class="text-base sm:text-xl font-black text-slate-800">${stats.totalSiswa}</p>
+              <p class="text-[8px] sm:text-[10px] font-extrabold uppercase text-indigo-700 tracking-wider">Siswa Kelas ${kelas}</p>
+              <p class="text-sm sm:text-xl font-black text-slate-800">${stats.totalSiswa}</p>
             </div>
           </div>
 
-          <div class="bg-emerald-50/90 border border-emerald-200 p-3 rounded-xl flex items-center gap-3 shadow-sm">
-            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-base sm:text-lg flex-shrink-0">
+          <div class="bg-emerald-50/90 border border-emerald-200 p-2.5 sm:p-3 rounded-xl flex items-center gap-2.5 shadow-sm">
+            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-sm sm:text-lg flex-shrink-0">
               <i class="fa-solid fa-circle-check"></i>
             </div>
             <div>
-              <p class="text-[9px] sm:text-[10px] font-extrabold uppercase text-emerald-700 tracking-wider">Siswa Hadir</p>
-              <p class="text-base sm:text-xl font-black text-emerald-800">${stats.countHadir}</p>
+              <p class="text-[8px] sm:text-[10px] font-extrabold uppercase text-emerald-700 tracking-wider">Siswa Hadir</p>
+              <p class="text-sm sm:text-xl font-black text-emerald-800">${stats.countHadir}</p>
             </div>
           </div>
 
-          <div class="bg-rose-50/90 border border-rose-200 p-3 rounded-xl flex items-center gap-3 shadow-sm">
-            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-rose-600 text-white flex items-center justify-center font-bold text-base sm:text-lg flex-shrink-0">
+          <div class="bg-rose-50/90 border border-rose-200 p-2.5 sm:p-3 rounded-xl flex items-center gap-2.5 shadow-sm">
+            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-rose-600 text-white flex items-center justify-center font-bold text-sm sm:text-lg flex-shrink-0">
               <i class="fa-solid fa-circle-xmark"></i>
             </div>
             <div>
-              <p class="text-[9px] sm:text-[10px] font-extrabold uppercase text-rose-700 tracking-wider">Siswa Tidak Hadir</p>
-              <p class="text-base sm:text-xl font-black text-rose-800">${stats.countTidakHadir}</p>
+              <p class="text-[8px] sm:text-[10px] font-extrabold uppercase text-rose-700 tracking-wider">Tidak Hadir</p>
+              <p class="text-sm sm:text-xl font-black text-rose-800">${stats.countTidakHadir}</p>
             </div>
           </div>
 
-          <div class="bg-slate-50 border border-slate-200 p-2.5 sm:p-3 rounded-xl flex flex-col justify-center shadow-sm col-span-2 sm:col-span-1">
-            <p class="text-[9px] sm:text-[10px] font-extrabold uppercase text-slate-500 tracking-wider mb-1">Rincian Tidak Hadir</p>
-            <div class="flex items-center gap-1.5 sm:gap-2 text-[11px] font-bold">
-              <span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded-md">S: ${stats.countSakit}</span>
-              <span class="px-2 py-0.5 bg-blue-100 text-blue-800 rounded-md">I: ${stats.countIzin}</span>
-              <span class="px-2 py-0.5 bg-rose-100 text-rose-800 rounded-md">A: ${stats.countAlpa}</span>
+          <div class="bg-slate-50 border border-slate-200 p-2 sm:p-3 rounded-xl flex flex-col justify-center shadow-sm col-span-2 sm:col-span-1">
+            <p class="text-[8px] sm:text-[10px] font-extrabold uppercase text-slate-500 tracking-wider mb-0.5">Rincian Tidak Hadir</p>
+            <div class="flex items-center gap-1 sm:gap-2 text-[10px] font-bold">
+              <span class="px-1.5 py-0.5 bg-amber-100 text-amber-800 rounded">S: ${stats.countSakit}</span>
+              <span class="px-1.5 py-0.5 bg-blue-100 text-blue-800 rounded">I: ${stats.countIzin}</span>
+              <span class="px-1.5 py-0.5 bg-rose-100 text-rose-800 rounded">A: ${stats.countAlpa}</span>
             </div>
           </div>
         `;
@@ -565,7 +622,6 @@
     function renderTable() {
       const kelas = document.getElementById("filterKelas").value;
 
-      // Render statistik di atas tabel
       renderStatistikSummary();
 
       if (!kelas) {
@@ -573,15 +629,15 @@
           ? `REKAP BULANAN PRESENSI SISWA (${document.getElementById("filterBulan").value})` 
           : `REKAP HARIAN PRESENSI SISWA (${document.getElementById("filterTanggal").value})`;
         
-        document.getElementById("subJudulRekap").innerHTML = `<span class="inline-block mt-1 px-3 py-1 bg-amber-100 text-amber-800 rounded-full font-bold text-xs">⚠️ Silakan pilih kelas terlebih dahulu</span>`;
+        document.getElementById("subJudulRekap").innerHTML = `<span class="inline-block mt-1 px-3 py-0.5 bg-amber-100 text-amber-800 rounded-full font-bold text-[11px] sm:text-xs">⚠️ Silakan pilih kelas terlebih dahulu</span>`;
         
         document.getElementById("tabelUtama").innerHTML = `
           <tr>
-            <td class="p-8 sm:p-10 text-center text-slate-400 font-medium">
+            <td class="p-6 sm:p-10 text-center text-slate-400 font-medium">
               <div class="flex flex-col items-center justify-center gap-2">
-                <i class="fa-solid fa-users-rectangle text-4xl text-blue-500/70 animate-bounce"></i>
-                <p class="text-slate-600 font-bold text-sm mt-1">Data Tabel Belum Ditampilkan</p>
-                <p class="text-xs text-slate-400 max-w-sm">Silakan pilih kelas pada opsi dropdown filter di atas untuk melihat rincian tabel presensi.</p>
+                <i class="fa-solid fa-users-rectangle text-3xl sm:text-4xl text-blue-500/70 animate-bounce"></i>
+                <p class="text-slate-600 font-bold text-xs sm:text-sm mt-1">Data Tabel Belum Ditampilkan</p>
+                <p class="text-[11px] text-slate-400 max-w-sm">Silakan pilih kelas pada opsi dropdown filter di atas untuk melihat rincian tabel presensi.</p>
               </div>
             </td>
           </tr>`;
@@ -595,7 +651,7 @@
       }
     }
 
-    // --- REKAP HARIAN RENDER (TANPA NISN & KELAS) ---
+    // --- REKAP HARIAN RENDER ---
     function renderRekapHarian(kelasSelected) {
       const tgl = document.getElementById("filterTanggal").value;
       const todayStr = getTodayString();
@@ -604,11 +660,11 @@
       document.getElementById("judulRekap").textContent = `REKAP HARIAN PRESENSI SISWA (${tgl})`;
       
       if (infoLibur) {
-        document.getElementById("subJudulRekap").innerHTML = `<span class="inline-block mt-1 px-3 py-1 bg-purple-100 text-purple-800 rounded-full font-bold text-xs">🎉 Hari Libur: ${infoLibur.keterangan}</span>`;
+        document.getElementById("subJudulRekap").innerHTML = `<span class="inline-block mt-1 px-3 py-0.5 bg-purple-100 text-purple-800 rounded-full font-bold text-[11px] sm:text-xs">🎉 Hari Libur: ${infoLibur.keterangan}</span>`;
       } else if (tanggalMulaiSistem && tgl < tanggalMulaiSistem) {
-        document.getElementById("subJudulRekap").innerHTML = `<span class="inline-block mt-1 px-3 py-1 bg-slate-100 text-slate-600 rounded-full font-bold text-xs">ℹ Sistem Belum Dimulai (Aktif Per ${tanggalMulaiSistem})</span>`;
+        document.getElementById("subJudulRekap").innerHTML = `<span class="inline-block mt-1 px-3 py-0.5 bg-slate-100 text-slate-600 rounded-full font-bold text-[11px] sm:text-xs">ℹ Sistem Belum Dimulai (Aktif Per ${tanggalMulaiSistem})</span>`;
       } else if (tgl > todayStr) {
-        document.getElementById("subJudulRekap").innerHTML = `<span class="inline-block mt-1 px-3 py-1 bg-slate-100 text-slate-500 rounded-full font-bold text-xs">⏳ Tanggal Belum Berjalan</span>`;
+        document.getElementById("subJudulRekap").innerHTML = `<span class="inline-block mt-1 px-3 py-0.5 bg-slate-100 text-slate-500 rounded-full font-bold text-[11px] sm:text-xs">⏳ Tanggal Belum Berjalan</span>`;
       } else {
         document.getElementById("subJudulRekap").textContent = `Kelas: ${kelasSelected}`;
       }
@@ -627,19 +683,18 @@
         filteredMaster = Array.from(uniqueMap.values());
       }
 
-      // SOTIR NAMA DENGAN URUTAN ALFABET (A-Z)
       filteredMaster.sort((a, b) => (a.nama || "").localeCompare(b.nama || "", "id", { sensitivity: "base" }));
 
       const tabel = document.getElementById("tabelUtama");
 
       let html = `
         <thead>
-          <tr class="bg-slate-200 text-slate-700 font-bold uppercase text-[11px] sm:text-xs tracking-wider border-b border-slate-300">
-            <th class="p-2.5 sm:p-3 border border-slate-300 sticky-col-no bg-slate-200">No</th>
-            <th class="p-2.5 sm:p-3 border border-slate-300 text-left min-w-[160px] sm:min-w-[200px] sticky-col-nama bg-slate-200">Nama Siswa</th>
-            <th class="p-2.5 sm:p-3 border border-slate-300">Jam Masuk</th>
-            <th class="p-2.5 sm:p-3 border border-slate-300">Jam Pulang</th>
-            <th class="p-2.5 sm:p-3 border border-slate-300">Keterangan</th>
+          <tr class="bg-slate-200 text-slate-700 font-bold uppercase text-[10px] sm:text-xs tracking-wider border-b border-slate-300">
+            <th class="p-2 sm:p-3 border border-slate-300 sticky-col-no bg-slate-200">No</th>
+            <th class="p-2 sm:p-3 border border-slate-300 text-left sticky-col-nama bg-slate-200">Nama Siswa</th>
+            <th class="p-2 sm:p-3 border border-slate-300">Masuk</th>
+            <th class="p-2 sm:p-3 border border-slate-300">Pulang</th>
+            <th class="p-2 sm:p-3 border border-slate-300">Ket.</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-200">`;
@@ -665,46 +720,46 @@
         let jamMasuk = logMasuk ? (logMasuk.timestamp.split(" ")[1] || logMasuk.timestamp) : "-";
         let jamPulang = logPulang ? (logPulang.timestamp.split(" ")[1] || logPulang.timestamp) : "-";
         
-        let statusBadge = '<span class="inline-block px-2 py-0.5 sm:px-2.5 sm:py-1 bg-rose-100 text-rose-700 rounded-full font-bold text-[11px]">Alpa</span>';
+        let statusBadge = '<span class="inline-block px-1.5 py-0.5 bg-rose-100 text-rose-700 rounded font-bold">Alpa</span>';
         let bgRow = (index % 2 === 0) ? "bg-white" : "bg-slate-50/60";
 
         if (logManual) {
           if (logManual.keterangan === "Izin") {
-            statusBadge = '<span class="inline-block px-2 py-0.5 sm:px-2.5 sm:py-1 bg-blue-100 text-blue-700 rounded-full font-bold text-[11px]">Izin</span>';
+            statusBadge = '<span class="inline-block px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded font-bold">Izin</span>';
           } else if (logManual.keterangan === "Sakit") {
-            statusBadge = '<span class="inline-block px-2 py-0.5 sm:px-2.5 sm:py-1 bg-amber-100 text-amber-700 rounded-full font-bold text-[11px]">Sakit</span>';
+            statusBadge = '<span class="inline-block px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded font-bold">Sakit</span>';
           } else {
-            statusBadge = '<span class="inline-block px-2 py-0.5 sm:px-2.5 sm:py-1 bg-rose-100 text-rose-700 rounded-full font-bold text-[11px]">Alpa</span>';
+            statusBadge = '<span class="inline-block px-1.5 py-0.5 bg-rose-100 text-rose-700 rounded font-bold">Alpa</span>';
           }
         } else if (logMasuk) {
           if (!logPulang) {
             statusBadge = logMasuk.keterangan === "Terlambat Masuk" 
-              ? '<span class="inline-block px-2 py-0.5 sm:px-2.5 sm:py-1 bg-amber-100 text-amber-800 rounded-full font-bold text-[11px]">Terlambat</span>'
-              : '<span class="inline-block px-2 py-0.5 sm:px-2.5 sm:py-1 bg-emerald-100 text-emerald-800 rounded-full font-bold text-[11px]">Hadir</span>';
+              ? '<span class="inline-block px-1.5 py-0.5 bg-amber-100 text-amber-800 rounded font-bold">Terlambat</span>'
+              : '<span class="inline-block px-1.5 py-0.5 bg-emerald-100 text-emerald-800 rounded font-bold">Hadir</span>';
             bgRow = "bg-emerald-50/40";
           } else if (logMasuk.keterangan === "Terlambat Masuk") {
-            statusBadge = '<span class="inline-block px-2 py-0.5 sm:px-2.5 sm:py-1 bg-amber-200 text-amber-900 rounded-full font-bold text-[11px]">Terlambat</span>';
+            statusBadge = '<span class="inline-block px-1.5 py-0.5 bg-amber-200 text-amber-900 rounded font-bold">Terlambat</span>';
             bgRow = "bg-amber-50/50";
           } else {
-            statusBadge = '<span class="inline-block px-2 py-0.5 sm:px-2.5 sm:py-1 bg-emerald-200 text-emerald-900 rounded-full font-bold text-[11px]">Hadir Lengkap</span>';
+            statusBadge = '<span class="inline-block px-1.5 py-0.5 bg-emerald-200 text-emerald-900 rounded font-bold">Hadir</span>';
             bgRow = "bg-emerald-50/80";
           }
         } else if (infoLibur) {
-          statusBadge = `<span class="inline-block px-2 py-0.5 sm:px-2.5 sm:py-1 bg-purple-100 text-purple-800 rounded-full font-bold text-[11px]">Libur (${infoLibur.keterangan})</span>`;
+          statusBadge = `<span class="inline-block px-1.5 py-0.5 bg-purple-100 text-purple-800 rounded font-bold">Libur</span>`;
           bgRow = "bg-purple-50/30";
         } else if (tanggalMulaiSistem && tgl < tanggalMulaiSistem) {
-          statusBadge = '<span class="inline-block px-2 py-0.5 sm:px-2.5 sm:py-1 bg-slate-100 text-slate-500 rounded-full font-bold text-[11px]">Belum Dimulai</span>';
+          statusBadge = '<span class="inline-block px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded font-bold">-</span>';
         } else if (tgl > todayStr) {
-          statusBadge = '<span class="inline-block px-2 py-0.5 sm:px-2.5 sm:py-1 bg-slate-100 text-slate-400 rounded-full font-bold text-[11px]">Belum Berjalan</span>';
+          statusBadge = '<span class="inline-block px-1.5 py-0.5 bg-slate-100 text-slate-400 rounded font-bold">-</span>';
         }
 
         html += `
           <tr class="${bgRow} cursor-pointer hover:bg-yellow-100/70 transition duration-150" onclick="sorotBarisSiswa(this)">
-            <td class="p-2.5 sm:p-3 border border-slate-200 text-slate-500 font-medium sticky-col-no ${bgRow}">${index + 1}</td>
-            <td class="p-2.5 sm:p-3 border border-slate-200 text-left font-bold text-slate-800 sticky-col-nama ${bgRow}">${siswa.nama}</td>
-            <td class="p-2.5 sm:p-3 border border-slate-200 font-medium text-slate-700">${jamMasuk}</td>
-            <td class="p-2.5 sm:p-3 border border-slate-200 font-medium text-slate-700">${jamPulang}</td>
-            <td class="p-2.5 sm:p-3 border border-slate-200">${statusBadge}</td>
+            <td class="p-2 sm:p-3 border border-slate-200 text-slate-500 font-medium sticky-col-no ${bgRow}">${index + 1}</td>
+            <td class="p-2 sm:p-3 border border-slate-200 text-left font-bold text-slate-800 sticky-col-nama ${bgRow}">${siswa.nama}</td>
+            <td class="p-2 sm:p-3 border border-slate-200 font-medium text-slate-700">${jamMasuk}</td>
+            <td class="p-2 sm:p-3 border border-slate-200 font-medium text-slate-700">${jamPulang}</td>
+            <td class="p-2 sm:p-3 border border-slate-200">${statusBadge}</td>
           </tr>`;
       });
 
@@ -736,22 +791,19 @@
         filteredMaster = Array.from(uniqueMap.values());
       }
 
-      // SOTIR NAMA DENGAN URUTAN ALFABET (A-Z)
       filteredMaster.sort((a, b) => (a.nama || "").localeCompare(b.nama || "", "id", { sensitivity: "base" }));
 
       const tabel = document.getElementById("tabelUtama");
 
-      // HEADER ROW 1: TANGGAL & KETERANGAN
       let html = `<thead>
-        <tr class="bg-slate-200 font-extrabold text-[11px] sm:text-xs text-slate-700 border-b border-slate-300">
-          <th rowspan="2" class="p-2 border border-slate-300 align-middle sticky-col-no bg-slate-200">No</th>
-          <th rowspan="2" class="p-2 border border-slate-300 text-left min-w-[150px] sm:min-w-[180px] align-middle sticky-col-nama bg-slate-200">Nama Siswa</th>
-          <th colspan="${totalDays}" class="p-1.5 border border-slate-300 bg-blue-100 text-blue-900 text-center uppercase tracking-wider font-extrabold">Tanggal</th>
-          <th colspan="4" class="p-1.5 border border-slate-300 bg-indigo-100 text-indigo-900 text-center uppercase tracking-wider font-extrabold">Keterangan</th>
+        <tr class="bg-slate-200 font-extrabold text-[10px] sm:text-xs text-slate-700 border-b border-slate-300">
+          <th rowspan="2" class="p-1 border border-slate-300 align-middle sticky-col-no bg-slate-200">No</th>
+          <th rowspan="2" class="p-1 border border-slate-300 text-left align-middle sticky-col-nama bg-slate-200">Nama Siswa</th>
+          <th colspan="${totalDays}" class="p-1 border border-slate-300 bg-blue-100 text-blue-900 text-center uppercase tracking-wider font-extrabold">Tanggal</th>
+          <th colspan="4" class="p-1 border border-slate-300 bg-indigo-100 text-indigo-900 text-center uppercase tracking-wider font-extrabold">Ket.</th>
         </tr>
-        <tr class="bg-slate-100 font-bold text-[11px] sm:text-xs border-b border-slate-200">`;
+        <tr class="bg-slate-100 font-bold text-[10px] sm:text-xs border-b border-slate-200">`;
 
-      // HEADER ROW 2: ANGKA TANGGAL (1-31) + MENYALAKAN KOLOM HARI INI
       for (let d = 1; d <= totalDays; d++) {
         const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
         const dayOfWeek = new Date(year, month - 1, d).getDay();
@@ -762,7 +814,7 @@
         let titleHeader = infoLibur ? infoLibur.keterangan : (dayOfWeek === 0 || dayOfWeek === 6 ? "Libur Akhir Pekan" : "");
 
         if (isToday) {
-          bgHeader = "bg-amber-400 text-slate-900 font-black border-x-2 border-x-amber-600 shadow-inner z-10";
+          bgHeader = "bg-amber-400 text-slate-900 font-black border-x border-x-amber-600 shadow-inner z-10";
           titleHeader = "HARI INI (" + dateStr + ")";
         } else if (dayOfWeek === 0 || dayOfWeek === 6) {
           bgHeader = "bg-rose-200 text-rose-800";
@@ -772,16 +824,15 @@
           bgHeader = "text-slate-600";
         }
         
-        html += `<th class="p-1 border border-slate-200 min-w-[28px] ${bgHeader}" title="${titleHeader}">
-                  ${d}${isToday ? '<span class="block text-[8px] font-extrabold text-slate-900 leading-none">▲</span>' : ''}
+        html += `<th class="p-0.5 border border-slate-200 ${bgHeader}" title="${titleHeader}">
+                  ${d}${isToday ? '<span class="block text-[7px] font-extrabold text-slate-900 leading-none">▲</span>' : ''}
                  </th>`;
       }
 
-      // HEADER ROW 2: H, I, S, A
-      html += `<th class="p-2 border border-slate-200 bg-emerald-100 text-emerald-800" title="Hadir">H</th>
-               <th class="p-2 border border-slate-200 bg-blue-100 text-blue-800" title="Izin">I</th>
-               <th class="p-2 border border-slate-200 bg-amber-100 text-amber-800" title="Sakit">S</th>
-               <th class="p-2 border border-slate-200 bg-rose-100 text-rose-800" title="Alpa">A</th>
+      html += `<th class="p-1 border border-slate-200 bg-emerald-100 text-emerald-800" title="Hadir">H</th>
+               <th class="p-1 border border-slate-200 bg-blue-100 text-blue-800" title="Izin">I</th>
+               <th class="p-1 border border-slate-200 bg-amber-100 text-amber-800" title="Sakit">S</th>
+               <th class="p-1 border border-slate-200 bg-rose-100 text-rose-800" title="Alpa">A</th>
              </tr>
            </thead>
            <tbody>`;
@@ -799,8 +850,8 @@
         let bgRow = (index % 2 === 0) ? "bg-white" : "bg-slate-50/60";
 
         html += `<tr class="${bgRow} cursor-pointer hover:bg-yellow-100/70 transition duration-150" onclick="sorotBarisSiswa(this)">
-                  <td class="p-2 border border-slate-200 text-slate-500 sticky-col-no ${bgRow}">${index + 1}</td>
-                  <td class="p-2 border border-slate-200 text-left font-bold text-slate-800 whitespace-nowrap sticky-col-nama ${bgRow}">${siswa.nama}</td>`;
+                  <td class="p-1 border border-slate-200 text-slate-500 sticky-col-no ${bgRow}">${index + 1}</td>
+                  <td class="p-1 border border-slate-200 text-left font-bold text-slate-800 sticky-col-nama ${bgRow}">${siswa.nama}</td>`;
 
         for (let d = 1; d <= totalDays; d++) {
           const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
@@ -808,10 +859,8 @@
           const infoLibur = rawLibur.find(l => l.tanggal === dateStr);
           const isToday = (dateStr === todayStr);
 
-          // EFEK TAMPILAN HIGHLIGHT KHUSUS UNTUK TANGGAL HARI INI
-          const highlightTodayClass = isToday ? "border-x-2 border-x-amber-500 shadow-sm" : "";
+          const highlightTodayClass = isToday ? "border-x border-x-amber-500 shadow-sm" : "";
 
-          // 1. Cek Hari Sabtu/Minggu ATAU Hari Libur Terdaftar
           if (dayOfWeek === 0 || dayOfWeek === 6 || infoLibur) {
             if (index === 0) {
               let textLibur = "";
@@ -828,22 +877,20 @@
                 bgLibur = "bg-rose-100 text-rose-700 border-rose-200";
               }
 
-              html += `<td rowspan="${totalStudents}" class="p-1 border ${bgLibur} text-[10px] font-extrabold text-center align-middle tracking-wider ${highlightTodayClass}">
+              html += `<td rowspan="${totalStudents}" class="p-0.5 border ${bgLibur} font-extrabold text-center align-middle tracking-wider ${highlightTodayClass}">
                         <span class="libur-text-vertical">${textLibur}</span>
                       </td>`;
             }
             continue;
           }
 
-          // 2. Cek Tanggal Sebelum Sistem Resmi Dimulai
           if (tanggalMulaiSistem && dateStr < tanggalMulaiSistem) {
-            html += `<td class="p-1 border border-slate-200 text-slate-400 font-medium text-xs ${highlightTodayClass}" title="Sistem Belum Dimulai">-</td>`;
+            html += `<td class="p-0.5 border border-slate-200 text-slate-400 font-medium ${highlightTodayClass}" title="Sistem Belum Dimulai">-</td>`;
             continue;
           }
 
-          // 3. Cek Tanggal Masa Depan (Belum Terjadi)
           if (dateStr > todayStr) {
-            html += `<td class="p-1 border border-slate-200 text-slate-300 font-medium text-xs ${highlightTodayClass}" title="Tanggal Belum Berjalan">-</td>`;
+            html += `<td class="p-0.5 border border-slate-200 text-slate-300 font-medium ${highlightTodayClass}" title="Tanggal Belum Berjalan">-</td>`;
             continue;
           }
 
@@ -869,57 +916,4 @@
               bgCell = isToday ? "bg-amber-200 text-amber-950 font-black" : "bg-amber-100 text-amber-800 font-bold"; 
             } else { 
               code = "A"; countA++; 
-              bgCell = isToday ? "bg-amber-200 text-rose-900 font-black" : "bg-rose-100 text-rose-800 font-bold"; 
-            }
-          } else if (logMasuk) {
-            code = "H"; countH++; 
-            bgCell = isToday ? "bg-amber-300 text-emerald-950 font-black" : "bg-emerald-100 text-emerald-800 font-bold";
-          } else {
-            countA++;
-          }
-
-          html += `<td class="p-1 border border-slate-200 ${bgCell} ${highlightTodayClass}">${code}</td>`;
-        }
-
-        html += `<td class="p-2 border border-slate-200 font-black bg-emerald-50 text-emerald-700">${countH}</td>
-                 <td class="p-2 border border-slate-200 font-black bg-blue-50 text-blue-700">${countI}</td>
-                 <td class="p-2 border border-slate-200 font-black bg-amber-50 text-amber-700">${countS}</td>
-                 <td class="p-2 border border-slate-200 font-black bg-rose-50 text-rose-700">${countA}</td></tr>`;
-      });
-
-      html += `</tbody>`;
-      tabel.innerHTML = html;
-    }
-
-    // --- EXPORT TO EXCEL (WITH PASSWORD PROTECTION) ---
-    function downloadExcel() {
-      const kelas = document.getElementById("filterKelas").value;
-      if (!kelas) {
-        alert("Pilih kelas terlebih dahulu sebelum mengunduh file Excel!");
-        return;
-      }
-
-      // POP-UP VERIFIKASI PASSWORD KHUSUS
-      const password = prompt("Masukkan Password Khusus Guru untuk mengunduh rekap Excel:");
-      
-      if (password === null) {
-        return; // Pengguna menekan tombol Batal / Cancel
-      }
-
-      if (password.trim() !== "GURU2026") {
-        alert("❌ Password Salah! Anda tidak memiliki otoritas untuk mengunduh file Excel ini.");
-        return;
-      }
-
-      // JIKA PASSWORD BENAR (GURU2026), JALANKAN PROSES UNDUH EXCEL
-      const table = document.getElementById("tabelUtama");
-      const filename = currentMode === "harian" 
-        ? `Rekap_Harian_Kelas_${kelas}_${document.getElementById("filterTanggal").value}.xlsx`
-        : `Rekap_Bulanan_Kelas_${kelas}_${document.getElementById("filterBulan").value}.xlsx`;
-
-      const wb = XLSX.utils.table_to_book(table, { sheet: "Rekap Presensi" });
-      XLSX.writeFile(wb, filename);
-    }
-  </script>
-</body>
-</html>
+              bgCell = isToday ? "bg-amber-200
