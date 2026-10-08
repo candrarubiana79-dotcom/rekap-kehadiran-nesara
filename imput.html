@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Portal Guru & Piket - SMPN 1 RANCAH (Mario Theme)</title>
+  <title>Portal Guru & Piket - SMPN 1 RANCAH (Mario Edition)</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts: Press Start 2P & Plus Jakarta Sans -->
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Plus+Jakarta+Sans:wght@600;700;800;900&display=swap" rel="stylesheet">
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -16,17 +16,18 @@
     body { 
       font-family: 'Plus Jakarta Sans', sans-serif;
       background-color: #5c94fc; /* Mario Sky Blue */
-      image-rendering: pixelated;
+      overflow-x: hidden;
+      touch-action: manipulation;
     }
 
     .font-pixel {
       font-family: 'Press Start 2P', monospace;
     }
 
-    /* Retro Pixel Card & Box Styles */
-    .pixel-box {
+    /* Pixel Box Shadows & Borders */
+    .pixel-card {
       border: 4px solid #000000;
-      box-shadow: 6px 6px 0px #000000;
+      box-shadow: 0 8px 0 #000000, 0 12px 20px rgba(0,0,0,0.3);
     }
 
     .pixel-box-sm {
@@ -34,111 +35,150 @@
       box-shadow: 3px 3px 0px #000000;
     }
 
-    /* Interactive Retro Buttons */
     .pixel-btn {
       border: 3px solid #000000;
-      box-shadow: 4px 4px 0px #000000;
-      transition: all 0.05s ease-in-out;
+      box-shadow: 0 5px 0 #000000;
+      transition: all 0.08s ease-in-out;
     }
 
     .pixel-btn:active:not(:disabled) {
-      transform: translate(3px, 3px);
-      box-shadow: 1px 1px 0px #000000;
+      transform: translateY(4px);
+      box-shadow: 0 1px 0 #000000;
     }
 
-    /* Custom Color Palettes */
+    /* Color Palette Mario Retro */
     .bg-mario-red { background-color: #e52521; }
     .bg-mario-green { background-color: #43b047; }
     .bg-mario-yellow { background-color: #f8b800; }
     .bg-mario-blue { background-color: #0078f8; }
+    
+    /* Warp Pipe Gradient */
     .bg-mario-pipe { 
-      background: linear-gradient(90deg, #108000 0%, #43b047 30%, #43b047 70%, #108000 100%);
+      background: linear-gradient(180deg, #51cf56 0%, #43b047 40%, #1a821e 100%);
     }
 
+    /* Animasi Dinamis Retro */
+    @keyframes cloudFloat {
+      0% { transform: translateX(-10%); }
+      50% { transform: translateX(10%); }
+      100% { transform: translateX(-10%); }
+    }
+
+    @keyframes questionBounce {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-6px) scale(1.05); }
+    }
+
+    @keyframes coinSpin {
+      0%, 100% { transform: rotateY(0deg); }
+      50% { transform: rotateY(180deg); }
+    }
+
+    .animate-cloud-slow { animation: cloudFloat 18s infinite ease-in-out; }
+    .animate-cloud-fast { animation: cloudFloat 12s infinite ease-in-out reverse; }
+    .animate-question { animation: questionBounce 2.5s infinite ease-in-out; }
+    .animate-coin { animation: coinSpin 1.8s infinite linear; }
+
+    /* Input Custom Styles */
     input, select, button { font-size: 13px !important; }
   </style>
 </head>
-<body class="text-slate-900 min-h-screen flex flex-col justify-between p-3 sm:p-4 relative overflow-x-hidden selection:bg-red-500 selection:text-white">
+<body class="text-slate-900 min-h-screen flex flex-col justify-between p-3 sm:p-5 relative selection:bg-red-500 selection:text-white">
 
-  <!-- BACKGROUND DEKORASI CLOUDS & BRICKS -->
-  <div class="fixed top-4 left-6 text-white/40 text-4xl pointer-events-none z-0">☁️</div>
-  <div class="fixed top-12 right-10 text-white/40 text-5xl pointer-events-none z-0">☁️</div>
-  <div class="fixed bottom-12 left-12 text-white/30 text-6xl pointer-events-none z-0">☁️</div>
+  <!-- BACKGROUND DEKORASI ANIMASI CLOUDS & BUSHES -->
+  <div class="fixed top-3 left-4 text-white/50 text-4xl pointer-events-none z-0 animate-cloud-slow">☁️</div>
+  <div class="fixed top-14 right-6 text-white/40 text-5xl pointer-events-none z-0 animate-cloud-fast">☁️</div>
+  <div class="fixed top-1/3 left-10 text-white/20 text-6xl pointer-events-none z-0 animate-cloud-slow">☁️</div>
 
-  <!-- CONTAINER UTAMA -->
-  <div class="w-full max-w-md mx-auto my-auto relative z-10 space-y-3">
+  <!-- DEKORASI BUKIT & BRICK DI BAWAH HAP -->
+  <div class="fixed bottom-0 left-0 right-0 h-6 bg-[#d84800] border-t-4 border-black z-0 flex justify-between px-2 items-center opacity-90">
+    <div class="flex gap-1">
+      <div class="w-4 h-4 bg-[#fc9838] border border-black"></div>
+      <div class="w-4 h-4 bg-[#fc9838] border border-black"></div>
+      <div class="w-4 h-4 bg-[#fc9838] border border-black"></div>
+    </div>
+    <div class="text-[10px] font-pixel text-yellow-300">STAGE 1-1</div>
+  </div>
+
+  <!-- CONTAINER UTAMA (RESPONSIVE HP OPTIMIZED) -->
+  <div class="w-full max-w-md mx-auto my-auto relative z-10 space-y-3 pb-8">
 
     <!-- 1. LOGIN SECTION -->
-    <div id="loginSection" class="bg-mario-yellow p-5 rounded-2xl pixel-box transition-all relative">
-      <!-- Decorative Question Mark Corner -->
-      <div class="absolute -top-3 -right-3 w-8 h-8 bg-amber-400 border-2 border-black flex items-center justify-center font-pixel text-xs font-bold shadow-[2px_2px_0px_#000]">?</div>
+    <div id="loginSection" class="bg-mario-yellow p-5 rounded-2xl pixel-card transition-all relative">
+      <!-- Animated Block Header -->
+      <div class="absolute -top-4 -right-2 w-9 h-9 bg-amber-400 border-3 border-black rounded-lg flex items-center justify-center font-pixel text-sm font-extrabold shadow-[3px_3px_0px_#000] animate-question">
+        ?
+      </div>
 
       <div class="text-center mb-5">
-        <div class="w-14 h-14 bg-mario-red text-white border-4 border-black rounded-xl flex items-center justify-center mx-auto mb-2 text-2xl shadow-[4px_4px_0px_#000]">
+        <div class="w-16 h-16 bg-mario-red text-white border-4 border-black rounded-2xl flex items-center justify-center mx-auto mb-2 text-3xl shadow-[4px_4px_0px_#000]">
           🍄
         </div>
         <div class="flex items-center justify-center gap-1.5">
-          <h1 class="text-base font-pixel font-bold text-slate-900 tracking-tight">PORTAL GURU</h1>
-          <span class="text-[9px] font-pixel bg-mario-red text-white border border-black px-1.5 py-0.5 rounded">v3.0</span>
+          <h1 class="text-base font-pixel font-black text-slate-900 tracking-tight">PORTAL GURU</h1>
+          <span class="text-[8px] font-pixel bg-mario-red text-white border border-black px-1.5 py-0.5 rounded shadow-[1px_1px_0px_#000]">v3.0</span>
         </div>
-        <p class="text-[10px] font-extrabold text-amber-900 tracking-wider uppercase mt-1">SMPN 1 RANCAH • MARIO ZONE</p>
+        <p class="text-[10px] font-extrabold text-amber-950 tracking-wider uppercase mt-1">SMPN 1 RANCAH • MARIO ZONE</p>
       </div>
 
-      <form onsubmit="handleLogin(event)" class="space-y-3.5">
+      <form onsubmit="handleLogin(event)" class="space-y-4">
         <div>
-          <label class="block text-[10px] font-pixel uppercase tracking-wider text-slate-900 mb-1.5">🔑 Token Akses</label>
-          <div class="relative">
-            <input type="password" id="inputToken" placeholder="Masukkan token guru..." required
-              class="w-full px-3 py-2.5 bg-white border-3 border-black rounded-xl font-bold focus:ring-2 focus:ring-red-500 focus:outline-none transition">
-          </div>
+          <label class="block text-[10px] font-pixel uppercase tracking-wider text-slate-900 mb-1.5 flex items-center gap-1">
+            <span>🔑 TOKEN AKSES</span>
+          </label>
+          <input type="password" id="inputToken" placeholder="Masukkan token guru..." required
+            class="w-full px-3.5 py-3 bg-white border-3 border-black rounded-xl font-bold text-slate-900 focus:ring-4 focus:ring-red-400 focus:outline-none shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] transition">
         </div>
-        <button type="submit" class="w-full bg-mario-red hover:bg-red-700 text-white font-pixel text-xs font-bold py-3.5 rounded-xl pixel-btn flex items-center justify-center gap-2">
+        <button type="submit" class="w-full bg-mario-red hover:bg-red-600 text-white font-pixel text-xs font-bold py-3.5 rounded-xl pixel-btn flex items-center justify-center gap-2">
           <span>⭐ MASUK SISTEM</span>
         </button>
       </form>
     </div>
 
-    <!-- 2. MAIN FORM SECTION -->
-    <div id="formSection" class="hidden bg-white p-4 sm:p-5 rounded-2xl pixel-box space-y-3.5 transition-all duration-300">
+    <!-- 2. MAIN FORM SECTION (MOBILE OPTIMIZED HUD) -->
+    <div id="formSection" class="hidden bg-white p-4 sm:p-5 rounded-2xl pixel-card space-y-3.5 transition-all duration-300">
       
-      <!-- Header Ringkas -->
+      <!-- Header HUD Style -->
       <div class="flex items-center justify-between border-b-4 border-black pb-3">
-        <div class="flex items-center gap-2">
-          <div class="w-9 h-9 bg-mario-yellow text-slate-900 border-2 border-black rounded-lg flex items-center justify-center text-base font-bold shadow-[2px_2px_0px_#000]">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 bg-mario-yellow text-slate-900 border-3 border-black rounded-xl flex items-center justify-center text-xl shadow-[3px_3px_0px_#000]">
             🏰
           </div>
           <div>
             <div class="flex items-center gap-1.5">
-              <h2 id="sectionTitle" class="text-xs sm:text-sm font-pixel font-bold text-slate-900 leading-tight">Input Presensi</h2>
+              <h2 id="sectionTitle" class="text-xs sm:text-sm font-pixel font-extrabold text-slate-900 leading-tight">Input Presensi</h2>
               <span class="text-[8px] font-pixel bg-mario-yellow text-black border border-black px-1 py-0.5 rounded">v3.0</span>
             </div>
             <p class="text-[9px] font-extrabold text-indigo-700 uppercase tracking-wider mt-0.5">SMPN 1 RANCAH</p>
           </div>
         </div>
-        <button onclick="logout()" class="text-[9px] font-pixel font-bold text-white bg-mario-red hover:bg-red-700 px-2.5 py-1.5 rounded-lg border-2 border-black pixel-btn flex items-center gap-1">
+        <button onclick="logout()" class="text-[9px] font-pixel font-bold text-white bg-mario-red hover:bg-red-700 px-2.5 py-2 rounded-xl border-2 border-black pixel-btn flex items-center gap-1">
           🚪 Keluar
         </button>
       </div>
 
       <!-- INDIKATOR STATUS MEMUAT DATA -->
-      <div id="statusDataMaster" class="p-2.5 rounded-xl text-[11px] font-bold flex items-center justify-center gap-2 bg-amber-100 text-amber-900 border-2 border-black">
+      <div id="statusDataMaster" class="p-2.5 rounded-xl text-[11px] font-bold flex items-center justify-center gap-2 bg-amber-100 text-amber-950 border-2 border-black shadow-[2px_2px_0px_#000]">
         <i class="fa-solid fa-spinner fa-spin text-amber-700 text-xs"></i>
         <span>Memuat data master siswa...</span>
       </div>
 
-      <!-- TAB MENU RETRO MARIO -->
-      <div class="grid grid-cols-3 gap-1.5 bg-slate-200 p-1.5 rounded-xl border-2 border-black">
+      <!-- TAB MENU RETRO MARIO GAMING -->
+      <div class="grid grid-cols-3 gap-1.5 bg-slate-900 p-1.5 rounded-2xl border-3 border-black shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]">
         <button id="tabTidakHadir" type="button" onclick="switchMenu('tidak_hadir')"
-          class="py-2 px-1 rounded-xl transition-all text-center flex items-center justify-center gap-1 bg-mario-yellow text-slate-900 border-2 border-black font-extrabold text-[10px] shadow-[2px_2px_0px_#000]">
-          <span>❓ 1. Absen</span>
+          class="py-2.5 px-1 rounded-xl transition-all text-center flex flex-col sm:flex-row items-center justify-center gap-1 bg-mario-yellow text-slate-950 border-2 border-black font-extrabold text-[9px] font-pixel shadow-[2px_2px_0px_#000]">
+          <span class="text-xs">❓</span>
+          <span>1. Absen</span>
         </button>
         <button id="tabLupaAbsen" type="button" onclick="switchMenu('lupa_absen')"
-          class="py-2 px-1 rounded-xl transition-all text-center flex items-center justify-center gap-1 text-slate-700 bg-amber-100 border-2 border-black font-semibold text-[10px]">
-          <span>⭐ 2. Susulan</span>
+          class="py-2.5 px-1 rounded-xl transition-all text-center flex flex-col sm:flex-row items-center justify-center gap-1 text-white bg-slate-800 hover:bg-slate-700 border-2 border-black font-bold text-[9px] font-pixel">
+          <span class="text-xs">⭐</span>
+          <span>2. Susulan</span>
         </button>
         <a href="tools.html"
-          class="py-2 px-1 rounded-xl transition-all text-center flex items-center justify-center gap-1 text-slate-700 bg-amber-100 border-2 border-black font-semibold text-[10px]">
-          <span>🔧 3. Tools</span>
+          class="py-2.5 px-1 rounded-xl transition-all text-center flex flex-col sm:flex-row items-center justify-center gap-1 text-white bg-slate-800 hover:bg-slate-700 border-2 border-black font-bold text-[9px] font-pixel">
+          <span class="text-xs">🔧</span>
+          <span>3. Tools</span>
         </a>
       </div>
 
@@ -148,83 +188,89 @@
         <!-- DROPDOWN PILIHAN UMUM -->
         <div id="commonInputs" class="space-y-2.5">
           <div>
-            <label class="block text-[10px] font-pixel uppercase tracking-wider text-slate-700 mb-1">📅 Tanggal Presensi</label>
+            <label class="block text-[10px] font-pixel uppercase tracking-wider text-slate-800 mb-1 flex items-center gap-1">
+              <span>📅 TANGGAL PRESENSI</span>
+            </label>
             <input type="date" id="inputTanggal" required
-              class="w-full px-3 py-2 bg-slate-50 border-2 border-black rounded-xl font-bold focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:outline-none transition">
+              class="w-full px-3 py-2.5 bg-slate-50 border-3 border-black rounded-xl font-bold focus:ring-4 focus:ring-amber-400 focus:bg-white focus:outline-none transition shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)]">
           </div>
 
           <div>
-            <label class="block text-[10px] font-pixel uppercase tracking-wider text-slate-700 mb-1">🏰 Pilih Kelas</label>
+            <label class="block text-[10px] font-pixel uppercase tracking-wider text-slate-800 mb-1 flex items-center gap-1">
+              <span>🏰 PILIH KELAS</span>
+            </label>
             <select id="selectKelas" onchange="filterSiswaByKelas()" required disabled
-              class="w-full px-3 py-2 bg-slate-50 border-2 border-black rounded-xl font-bold focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:outline-none disabled:bg-slate-200 disabled:text-slate-400 transition">
+              class="w-full px-3 py-2.5 bg-slate-50 border-3 border-black rounded-xl font-bold focus:ring-4 focus:ring-amber-400 focus:bg-white focus:outline-none disabled:bg-slate-200 disabled:text-slate-400 transition shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)]">
               <option value="">-- Memuat Data... --</option>
             </select>
           </div>
 
           <div>
-            <label class="block text-[10px] font-pixel uppercase tracking-wider text-slate-700 mb-1">👨‍🎓 Pilih Siswa (A-Z)</label>
+            <label class="block text-[10px] font-pixel uppercase tracking-wider text-slate-800 mb-1 flex items-center gap-1">
+              <span>👨‍🎓 PILIH SISWA (A-Z)</span>
+            </label>
             <select id="selectSiswa" required disabled
-              class="w-full px-3 py-2 bg-slate-50 border-2 border-black rounded-xl font-bold focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:outline-none disabled:bg-slate-200 disabled:text-slate-400 transition">
+              class="w-full px-3 py-2.5 bg-slate-50 border-3 border-black rounded-xl font-bold focus:ring-4 focus:ring-amber-400 focus:bg-white focus:outline-none disabled:bg-slate-200 disabled:text-slate-400 transition shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)]">
               <option value="">-- Pilih Kelas Terlebih Dahulu --</option>
             </select>
           </div>
         </div>
 
         <!-- KONTEN MENU 1: SISWA TIDAK HADIR -->
-        <div id="sectionTidakHadir" class="space-y-1.5 pt-0.5">
-          <label class="block text-[10px] font-pixel uppercase tracking-wider text-slate-700 mb-1">Keterangan Tidak Hadir</label>
+        <div id="sectionTidakHadir" class="space-y-1.5 pt-1">
+          <label class="block text-[10px] font-pixel uppercase tracking-wider text-slate-800 mb-1.5">KETERANGAN ABSENSI</label>
           <div class="grid grid-cols-3 gap-2">
-            <label class="flex flex-col items-center justify-center p-2.5 border-2 border-black bg-red-50 rounded-xl cursor-pointer hover:bg-red-100 has-[:checked]:bg-mario-red has-[:checked]:text-white transition pixel-box-sm">
-              <input type="radio" name="statusTidakHadir" value="Izin" class="accent-red-600 mb-0.5 scale-90">
-              <span class="text-[10px] font-pixel font-bold">🍄 Izin</span>
+            <label class="flex flex-col items-center justify-center p-2.5 border-3 border-black bg-red-50 rounded-xl cursor-pointer hover:bg-red-100 has-[:checked]:bg-mario-red has-[:checked]:text-white transition pixel-box-sm active:scale-95">
+              <input type="radio" name="statusTidakHadir" value="Izin" class="accent-red-600 mb-1 scale-110">
+              <span class="text-[9px] font-pixel font-bold">🍄 Izin</span>
             </label>
-            <label class="flex flex-col items-center justify-center p-2.5 border-2 border-black bg-emerald-50 rounded-xl cursor-pointer hover:bg-emerald-100 has-[:checked]:bg-mario-green has-[:checked]:text-white transition pixel-box-sm">
-              <input type="radio" name="statusTidakHadir" value="Sakit" class="accent-emerald-600 mb-0.5 scale-90">
-              <span class="text-[10px] font-pixel font-bold">🧪 Sakit</span>
+            <label class="flex flex-col items-center justify-center p-2.5 border-3 border-black bg-emerald-50 rounded-xl cursor-pointer hover:bg-emerald-100 has-[:checked]:bg-mario-green has-[:checked]:text-white transition pixel-box-sm active:scale-95">
+              <input type="radio" name="statusTidakHadir" value="Sakit" class="accent-emerald-600 mb-1 scale-110">
+              <span class="text-[9px] font-pixel font-bold">🧪 Sakit</span>
             </label>
-            <label class="flex flex-col items-center justify-center p-2.5 border-2 border-black bg-amber-50 rounded-xl cursor-pointer hover:bg-amber-100 has-[:checked]:bg-mario-yellow has-[:checked]:text-black transition pixel-box-sm">
-              <input type="radio" name="statusTidakHadir" value="Alpa" class="accent-amber-600 mb-0.5 scale-90">
-              <span class="text-[10px] font-pixel font-bold">🐢 Alpa</span>
+            <label class="flex flex-col items-center justify-center p-2.5 border-3 border-black bg-amber-50 rounded-xl cursor-pointer hover:bg-amber-100 has-[:checked]:bg-mario-yellow has-[:checked]:text-slate-950 transition pixel-box-sm active:scale-95">
+              <input type="radio" name="statusTidakHadir" value="Alpa" class="accent-amber-600 mb-1 scale-110">
+              <span class="text-[9px] font-pixel font-bold">🐢 Alpa</span>
             </label>
           </div>
         </div>
 
         <!-- KONTEN MENU 2: SISWA LUPA ABSEN -->
-        <div id="sectionLupaAbsen" class="hidden space-y-2.5 bg-amber-100 p-3 rounded-xl border-2 border-black">
-          <div class="flex items-center gap-1.5 text-[10px] font-bold text-amber-900 leading-tight">
+        <div id="sectionLupaAbsen" class="hidden space-y-2.5 bg-amber-100 p-3 rounded-2xl border-3 border-black shadow-[3px_3px_0px_#000]">
+          <div class="flex items-center gap-1.5 text-[10px] font-bold text-amber-950 leading-tight">
             <span>ℹ️ Isi jam masuk / pulang susulan siswa.</span>
           </div>
 
           <div class="grid grid-cols-2 gap-2">
             <div>
               <div class="flex items-center justify-between mb-1">
-                <label class="block text-[9px] font-pixel uppercase tracking-wider text-slate-800">Jam Masuk</label>
-                <button type="button" onclick="setJam('inputJamMasuk', '06:59')" class="text-[9px] text-black font-extrabold bg-mario-yellow px-1.5 py-0.5 rounded border border-black active:scale-95 transition">
+                <label class="block text-[9px] font-pixel uppercase tracking-wider text-slate-900">Jam Masuk</label>
+                <button type="button" onclick="setJam('inputJamMasuk', '06:59')" class="text-[9px] text-black font-black bg-mario-yellow px-1.5 py-0.5 rounded border border-black active:scale-95 transition">
                   ⚡ 06:59
                 </button>
               </div>
               <input type="time" id="inputJamMasuk" value=""
-                class="w-full px-2 py-1.5 bg-white border-2 border-black rounded-lg font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                class="w-full px-2.5 py-2 bg-white border-2 border-black rounded-xl font-bold focus:ring-2 focus:ring-amber-500 focus:outline-none">
             </div>
             <div>
               <div class="flex items-center justify-between mb-1">
-                <label class="block text-[9px] font-pixel uppercase tracking-wider text-slate-800">Jam Pulang</label>
-                <button type="button" onclick="setJam('inputJamPulang', '14:20')" class="text-[9px] text-white font-extrabold bg-mario-red px-1.5 py-0.5 rounded border border-black active:scale-95 transition">
+                <label class="block text-[9px] font-pixel uppercase tracking-wider text-slate-900">Jam Pulang</label>
+                <button type="button" onclick="setJam('inputJamPulang', '14:20')" class="text-[9px] text-white font-black bg-mario-red px-1.5 py-0.5 rounded border border-black active:scale-95 transition">
                   ⚡ 14:20
                 </button>
               </div>
               <input type="time" id="inputJamPulang" value=""
-                class="w-full px-2 py-1.5 bg-white border-2 border-black rounded-lg font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                class="w-full px-2.5 py-2 bg-white border-2 border-black rounded-xl font-bold focus:ring-2 focus:ring-amber-500 focus:outline-none">
             </div>
           </div>
         </div>
 
         <!-- NOTIFIKASI TOAST -->
-        <div id="notif" class="hidden p-3 rounded-xl text-[11px] font-bold text-center border-2 border-black transition-all duration-300"></div>
+        <div id="notif" class="hidden p-3 rounded-xl text-[11px] font-bold text-center border-3 border-black transition-all duration-300"></div>
 
-        <!-- TOMBOL SIMPAN (PIPA HIJAU 3D) -->
+        <!-- TOMBOL SIMPAN (WARP PIPE HIJAU 3D) -->
         <button type="submit" id="btnSubmit" disabled
-          class="w-full bg-mario-pipe hover:brightness-110 active:scale-95 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-pixel text-xs font-bold py-3.5 rounded-xl border-3 border-black pixel-btn flex items-center justify-center gap-2 shadow-[4px_4px_0px_#000]">
+          class="w-full bg-mario-pipe hover:brightness-110 active:scale-95 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-pixel text-xs font-bold py-4 rounded-xl border-3 border-black pixel-btn flex items-center justify-center gap-2 shadow-[0_6px_0_#105e14,#0_10px_15px_rgba(0,0,0,0.3)]">
           <span>🧪 SIMPAN PRESENSI</span>
         </button>
       </form>
@@ -234,7 +280,7 @@
   </div>
 
   <!-- FOOTER -->
-  <footer class="text-center text-[10px] font-bold text-white drop-shadow-[1px_1px_0px_#000] py-1.5 relative z-10">
+  <footer class="text-center text-[10px] font-bold text-white drop-shadow-[2px_2px_0px_#000] py-2 relative z-10">
     Presensi Digital • SMPN 1 Rancah <span class="text-amber-300 font-pixel">v3.0 MARIO EDITION</span>
   </footer>
 
@@ -326,7 +372,7 @@
       tabs.forEach(tabId => {
         const elem = document.getElementById(tabId);
         if(elem) {
-          elem.className = "py-2 px-1 rounded-xl transition-all text-center flex items-center justify-center gap-1 text-slate-700 bg-amber-100 border-2 border-black font-semibold text-[10px]";
+          elem.className = "py-2.5 px-1 rounded-xl transition-all text-center flex flex-col sm:flex-row items-center justify-center gap-1 text-white bg-slate-800 hover:bg-slate-700 border-2 border-black font-bold text-[9px] font-pixel";
         }
       });
 
@@ -337,12 +383,12 @@
 
       if (mode === 'tidak_hadir') {
         title.textContent = "Input Presensi";
-        document.getElementById("tabTidakHadir").className = "py-2 px-1 rounded-xl transition-all text-center flex items-center justify-center gap-1 bg-mario-yellow text-slate-900 border-2 border-black font-extrabold text-[10px] shadow-[2px_2px_0px_#000]";
+        document.getElementById("tabTidakHadir").className = "py-2.5 px-1 rounded-xl transition-all text-center flex flex-col sm:flex-row items-center justify-center gap-1 bg-mario-yellow text-slate-950 border-2 border-black font-extrabold text-[9px] font-pixel shadow-[2px_2px_0px_#000]";
         mainForm.classList.remove("hidden");
         document.getElementById("sectionTidakHadir").classList.remove("hidden");
       } else if (mode === 'lupa_absen') {
         title.textContent = "Input Susulan";
-        document.getElementById("tabLupaAbsen").className = "py-2 px-1 rounded-xl transition-all text-center flex items-center justify-center gap-1 bg-mario-yellow text-slate-900 border-2 border-black font-extrabold text-[10px] shadow-[2px_2px_0px_#000]";
+        document.getElementById("tabLupaAbsen").className = "py-2.5 px-1 rounded-xl transition-all text-center flex flex-col sm:flex-row items-center justify-center gap-1 bg-mario-yellow text-slate-950 border-2 border-black font-extrabold text-[9px] font-pixel shadow-[2px_2px_0px_#000]";
         mainForm.classList.remove("hidden");
         document.getElementById("sectionLupaAbsen").classList.remove("hidden");
       }
@@ -353,7 +399,7 @@
       const selectKelas = document.getElementById("selectKelas");
       const btnSubmit = document.getElementById("btnSubmit");
 
-      statusBox.className = "p-2.5 rounded-xl text-[11px] font-bold flex items-center justify-center gap-2 bg-amber-100 text-amber-900 border-2 border-black";
+      statusBox.className = "p-2.5 rounded-xl text-[11px] font-bold flex items-center justify-center gap-2 bg-amber-100 text-amber-950 border-2 border-black shadow-[2px_2px_0px_#000]";
       statusBox.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-amber-700 text-xs"></i> <span>Memuat data master siswa...</span>';
       
       selectKelas.disabled = true;
@@ -366,14 +412,14 @@
           masterSiswa = data.master || [];
           populateKelas();
 
-          statusBox.className = "p-2.5 rounded-xl text-[11px] font-bold flex items-center justify-center gap-2 bg-emerald-100 text-emerald-900 border-2 border-black";
-          statusBox.innerHTML = '<span>🪙 Data siap! (' + masterSiswa.length + ' Siswa)</span>';
+          statusBox.className = "p-2.5 rounded-xl text-[11px] font-bold flex items-center justify-center gap-2 bg-emerald-100 text-emerald-950 border-2 border-black shadow-[2px_2px_0px_#000]";
+          statusBox.innerHTML = '<span class="animate-coin">🪙</span> <span>Data siap! (' + masterSiswa.length + ' Siswa)</span>';
           
           selectKelas.disabled = false;
           btnSubmit.disabled = false;
         })
         .catch(err => {
-          statusBox.className = "p-2.5 rounded-xl text-[11px] font-bold flex items-center justify-center gap-2 bg-red-100 text-red-900 border-2 border-black";
+          statusBox.className = "p-2.5 rounded-xl text-[11px] font-bold flex items-center justify-center gap-2 bg-red-100 text-red-950 border-2 border-black shadow-[2px_2px_0px_#000]";
           statusBox.innerHTML = '<span>👾 Gagal memuat data! Cek internet.</span>';
         });
     }
@@ -471,7 +517,7 @@
       .then(res => {
         notif.classList.remove("hidden");
         if (res.status === "success") {
-          notif.className = "p-2.5 rounded-xl text-[11px] font-bold text-center bg-emerald-100 text-emerald-900 border-2 border-black shadow-sm";
+          notif.className = "p-2.5 rounded-xl text-[11px] font-bold text-center bg-emerald-100 text-emerald-950 border-3 border-black shadow-[3px_3px_0px_#000]";
           notif.innerHTML = '<span>🌟 ' + (res.message || "Data berhasil disimpan!") + '</span>';
 
           document.getElementById("selectSiswa").value = "";
@@ -479,13 +525,13 @@
           document.getElementById("inputJamPulang").value = "";
           document.querySelectorAll('input[name="statusTidakHadir"]').forEach(r => r.checked = false);
         } else {
-          notif.className = "p-2.5 rounded-xl text-[11px] font-bold text-center bg-red-100 text-red-900 border-2 border-black shadow-sm";
+          notif.className = "p-2.5 rounded-xl text-[11px] font-bold text-center bg-red-100 text-red-950 border-3 border-black shadow-[3px_3px_0px_#000]";
           notif.innerHTML = '<span>👾 ' + (res.message || "Gagal menyimpan data!") + '</span>';
         }
       })
       .catch(err => {
         notif.classList.remove("hidden");
-        notif.className = "p-2.5 rounded-xl text-[11px] font-bold text-center bg-red-100 text-red-900 border-2 border-black shadow-sm";
+        notif.className = "p-2.5 rounded-xl text-[11px] font-bold text-center bg-red-100 text-red-950 border-3 border-black shadow-[3px_3px_0px_#000]";
         notif.innerHTML = '<span>💥 Gagal terhubung ke server! Cek koneksi internet.</span>';
       })
       .finally(() => {
