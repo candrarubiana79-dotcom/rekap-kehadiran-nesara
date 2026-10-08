@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cetak ID Card QR Siswa - SMPN 1 RANCAH (v3.3)</title>
+  <title>Cetak ID Card QR Siswa - SMPN 1 RANCAH (v3.4)</title>
   
   <!-- SKRIP PENGAMAN & AUTO LOGOUT -->
   <script src="auth-guard.js"></script>
@@ -110,7 +110,7 @@
         <div>
           <div class="flex items-center gap-2">
             <h2 class="text-lg font-extrabold text-slate-900 leading-tight">Cetak & Download ID Card QR</h2>
-            <span class="text-[9px] font-extrabold bg-indigo-500/10 text-indigo-600 border border-indigo-500/20 px-2 py-0.5 rounded-full">v3.3</span>
+            <span class="text-[9px] font-extrabold bg-indigo-500/10 text-indigo-600 border border-indigo-500/20 px-2 py-0.5 rounded-full">v3.4</span>
           </div>
           <p class="text-xs font-bold text-indigo-600 uppercase tracking-wider">SMPN 1 RANCAH</p>
         </div>
@@ -140,7 +140,7 @@
             <i class="fa-solid fa-chevron-down text-slate-400 text-xs ml-1 flex-shrink-0"></i>
           </button>
 
-          <!-- Menu Checkbox Dropdown -->
+          <!-- Menu Checkbox Dropdown Kelas -->
           <div id="menuKelas" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-30 p-2 max-h-56 overflow-y-auto space-y-1">
             <label class="flex items-center gap-2 p-1.5 hover:bg-indigo-50 rounded-lg cursor-pointer text-xs font-bold text-indigo-700 border-b border-slate-100 mb-1">
               <input type="checkbox" id="checkSemuaKelas" onchange="toggleSelectAllKelas(this)" class="accent-indigo-600 w-4 h-4 rounded">
@@ -152,13 +152,27 @@
           </div>
         </div>
 
-        <!-- 2. Filter Nama Siswa Perorangan (Opsional) -->
-        <div class="sm:col-span-3">
+        <!-- 2. Multi-Select Filter Siswa -->
+        <div class="relative sm:col-span-3" id="dropdownSiswaWrapper">
           <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Pilih Siswa (Opsional)</label>
-          <select id="selectSiswa" disabled
-            class="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none disabled:bg-slate-100 disabled:text-slate-400">
-            <option value="">-- Pilih 1 Kelas Dulu --</option>
-          </select>
+
+          <button type="button" id="btnDropdownSiswa" onclick="toggleDropdownSiswa()" disabled
+            class="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-left text-slate-700 flex items-center justify-between focus:ring-2 focus:ring-indigo-500 focus:outline-none disabled:bg-slate-100 disabled:text-slate-400">
+            <span id="labelDropdownSiswa" class="truncate">-- Pilih Kelas Dulu --</span>
+            <i class="fa-solid fa-chevron-down text-slate-400 text-xs ml-1 flex-shrink-0"></i>
+          </button>
+
+          <!-- Menu Checkbox Dropdown Siswa -->
+          <div id="menuSiswa" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-30 p-2 max-h-60 overflow-y-auto space-y-1">
+            <input type="text" id="searchSiswaInput" oninput="filterSiswaList()" placeholder="🔍 Cari nama siswa..." class="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-lg mb-1 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <label class="flex items-center gap-2 p-1.5 hover:bg-indigo-50 rounded-lg cursor-pointer text-xs font-bold text-indigo-700 border-b border-slate-100 mb-1">
+              <input type="checkbox" id="checkSemuaSiswa" onchange="toggleSelectAllSiswa(this)" class="accent-indigo-600 w-4 h-4 rounded">
+              <span>🌟 Pilih Semua Siswa</span>
+            </label>
+            <div id="containerCheckboxSiswa" class="space-y-1">
+              <!-- Digenerate via JS -->
+            </div>
+          </div>
         </div>
 
         <!-- 3. Tombol Generate -->
@@ -223,7 +237,7 @@
 
   <!-- FOOTER -->
   <footer class="text-center text-[10px] text-slate-400 py-1.5 relative z-10 no-print">
-    Presensi Digital • SMPN 1 Rancah <span class="font-bold text-slate-300">v3.3</span>
+    Presensi Digital • SMPN 1 Rancah <span class="font-bold text-slate-300">v3.4</span>
   </footer>
 
   <script>
@@ -236,10 +250,16 @@
 
       // Tutup menu dropdown saat mengklik di luar area dropdown
       document.addEventListener("click", (e) => {
-        const wrapper = document.getElementById("dropdownKelasWrapper");
-        const menu = document.getElementById("menuKelas");
-        if (wrapper && !wrapper.contains(e.target) && menu) {
-          menu.classList.add("hidden");
+        const wrapperKelas = document.getElementById("dropdownKelasWrapper");
+        const menuKelas = document.getElementById("menuKelas");
+        if (wrapperKelas && !wrapperKelas.contains(e.target) && menuKelas) {
+          menuKelas.classList.add("hidden");
+        }
+
+        const wrapperSiswa = document.getElementById("dropdownSiswaWrapper");
+        const menuSiswa = document.getElementById("menuSiswa");
+        if (wrapperSiswa && !wrapperSiswa.contains(e.target) && menuSiswa) {
+          menuSiswa.classList.add("hidden");
         }
       });
     });
@@ -273,7 +293,7 @@
       masterSiswa.forEach(s => { if(s.kelas) setKelas.add(s.kelas); });
       
       container.innerHTML = "";
-      const sortedKelas = [...setKelas].sort();
+      const sortedKelas = [...setKelas].sort((a, b) => String(a).localeCompare(String(b), "id", { numeric: true }));
 
       sortedKelas.forEach(k => {
         const label = document.createElement("label");
@@ -285,7 +305,7 @@
         container.appendChild(label);
       });
 
-      updateDropdownLabel();
+      updateDropdownKelasLabel();
     }
 
     function toggleDropdownKelas() {
@@ -296,7 +316,7 @@
     function toggleSelectAllKelas(masterCheck) {
       const items = document.querySelectorAll(".check-kelas-item");
       items.forEach(item => item.checked = masterCheck.checked);
-      updateDropdownLabel();
+      updateDropdownKelasLabel();
     }
 
     function onKelasCheckChange() {
@@ -305,7 +325,7 @@
       const masterCheck = document.getElementById("checkSemuaKelas");
 
       masterCheck.checked = (items.length > 0 && items.length === checkedItems.length);
-      updateDropdownLabel();
+      updateDropdownKelasLabel();
     }
 
     function getSelectedClasses() {
@@ -313,7 +333,7 @@
       return Array.from(checkedItems).map(item => item.value);
     }
 
-    function updateDropdownLabel() {
+    function updateDropdownKelasLabel() {
       const selected = getSelectedClasses();
       const label = document.getElementById("labelDropdownKelas");
       const allItems = document.querySelectorAll(".check-kelas-item");
@@ -333,55 +353,140 @@
       updateSiswaDropdown(selected);
     }
 
+    /* --- DROPDOWN SISWA MULTI-SELECT --- */
+    function toggleDropdownSiswa() {
+      const menu = document.getElementById("menuSiswa");
+      menu.classList.toggle("hidden");
+    }
+
     function updateSiswaDropdown(selectedClasses) {
-      const selectSiswa = document.getElementById("selectSiswa");
+      const btnDropdownSiswa = document.getElementById("btnDropdownSiswa");
+      const container = document.getElementById("containerCheckboxSiswa");
+      const masterCheck = document.getElementById("checkSemuaSiswa");
+      const searchInput = document.getElementById("searchSiswaInput");
 
-      if (selectedClasses.length === 1) {
-        const targetKelas = selectedClasses[0];
-        const siswaInKelas = masterSiswa.filter(s => s.kelas === targetKelas);
+      if (searchInput) searchInput.value = "";
 
-        siswaInKelas.sort((a, b) => (a.nama || "").localeCompare(b.nama || "", "id", { sensitivity: "base" }));
+      if (!selectedClasses || selectedClasses.length === 0) {
+        btnDropdownSiswa.disabled = true;
+        container.innerHTML = "";
+        masterCheck.checked = false;
+        updateDropdownSiswaLabel();
+        return;
+      }
 
-        selectSiswa.innerHTML = `<option value="">-- Semua Siswa (Kelas ${targetKelas}) --</option>`;
-        siswaInKelas.forEach(s => {
-          const opt = document.createElement("option");
-          opt.value = s.nisn;
-          opt.textContent = `${s.nama} (${s.nisn})`;
-          selectSiswa.appendChild(opt);
-        });
-        selectSiswa.disabled = false;
-      } else if (selectedClasses.length > 1) {
-        selectSiswa.innerHTML = `<option value="">-- Semua Siswa di ${selectedClasses.length} Kelas --</option>`;
-        selectSiswa.disabled = true;
+      btnDropdownSiswa.disabled = false;
+      let siswaInClasses = masterSiswa.filter(s => selectedClasses.includes(s.kelas));
+
+      // Urutkan siswa berdasarkan Kelas, lalu Nama (A-Z)
+      siswaInClasses.sort((a, b) => {
+        const classComp = String(a.kelas || "").localeCompare(String(b.kelas || ""), "id", { numeric: true });
+        if (classComp !== 0) return classComp;
+        return String(a.nama || "").localeCompare(String(b.nama || ""), "id", { sensitivity: "base" });
+      });
+
+      container.innerHTML = "";
+      siswaInClasses.forEach(s => {
+        const label = document.createElement("label");
+        label.className = "item-siswa-wrapper flex items-center gap-2 p-1.5 hover:bg-slate-100 rounded-lg cursor-pointer text-xs font-semibold text-slate-700";
+        label.innerHTML = `
+          <input type="checkbox" value="${s.nisn}" checked class="check-siswa-item accent-indigo-600 w-4 h-4 rounded shrink-0" onchange="onSiswaCheckChange()">
+          <span class="truncate">${s.nama} <span class="text-[10px] text-indigo-600 font-bold">(${s.kelas})</span></span>
+        `;
+        container.appendChild(label);
+      });
+
+      masterCheck.checked = true;
+      updateDropdownSiswaLabel();
+    }
+
+    function filterSiswaList() {
+      const query = document.getElementById("searchSiswaInput").value.toLowerCase();
+      const items = document.querySelectorAll(".item-siswa-wrapper");
+      items.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        item.style.display = text.includes(query) ? "flex" : "none";
+      });
+    }
+
+    function toggleSelectAllSiswa(masterCheck) {
+      const items = document.querySelectorAll(".check-siswa-item");
+      items.forEach(item => {
+        const wrapper = item.closest(".item-siswa-wrapper");
+        if (!wrapper || wrapper.style.display !== "none") {
+          item.checked = masterCheck.checked;
+        }
+      });
+      updateDropdownSiswaLabel();
+    }
+
+    function onSiswaCheckChange() {
+      const items = document.querySelectorAll(".check-siswa-item");
+      const checkedItems = document.querySelectorAll(".check-siswa-item:checked");
+      const masterCheck = document.getElementById("checkSemuaSiswa");
+
+      masterCheck.checked = (items.length > 0 && items.length === checkedItems.length);
+      updateDropdownSiswaLabel();
+    }
+
+    function getSelectedSiswaNisn() {
+      const checkedItems = document.querySelectorAll(".check-siswa-item:checked");
+      return Array.from(checkedItems).map(item => String(item.value));
+    }
+
+    function updateDropdownSiswaLabel() {
+      const selected = getSelectedSiswaNisn();
+      const label = document.getElementById("labelDropdownSiswa");
+      const allItems = document.querySelectorAll(".check-siswa-item");
+
+      if (allItems.length === 0) {
+        label.textContent = "-- Pilih Kelas Dulu --";
+      } else if (selected.length === 0) {
+        label.textContent = "-- Pilih Siswa --";
+      } else if (selected.length === allItems.length) {
+        label.textContent = `🌟 Semua Siswa (${selected.length} Siswa)`;
       } else {
-        selectSiswa.innerHTML = `<option value="">-- Pilih 1 Kelas Dulu --</option>`;
-        selectSiswa.disabled = true;
+        label.textContent = `${selected.length} Siswa Terpilih`;
       }
     }
 
     function generateCards() {
       const container = document.getElementById("cardContainer");
       const selectedClasses = getSelectedClasses();
-      const selectedNisn = document.getElementById("selectSiswa").value;
+      const selectedSiswaNisn = getSelectedSiswaNisn();
       const btnDownloadZip = document.getElementById("btnDownloadZip");
       const btnCetakPilihan = document.getElementById("btnCetakPilihan");
       const summaryBox = document.getElementById("cardSummaryBox");
       const summaryText = document.getElementById("cardSummaryText");
-      const menu = document.getElementById("menuKelas");
+      
+      const menuKelas = document.getElementById("menuKelas");
+      const menuSiswa = document.getElementById("menuSiswa");
 
       if (selectedClasses.length === 0) {
         alert("Silakan pilih minimal 1 kelas terlebih dahulu!");
         return;
       }
 
-      menu.classList.add("hidden");
+      if (selectedSiswaNisn.length === 0) {
+        alert("Silakan pilih minimal 1 siswa terlebih dahulu!");
+        return;
+      }
+
+      menuKelas.classList.add("hidden");
+      menuSiswa.classList.add("hidden");
       container.innerHTML = "";
 
-      let filteredList = masterSiswa.filter(s => selectedClasses.includes(s.kelas));
+      // Filter siswa terpilih berdasarkan kelas & NISN
+      let filteredList = masterSiswa.filter(s => 
+        selectedClasses.includes(s.kelas) && selectedSiswaNisn.includes(String(s.nisn))
+      );
 
-      if (selectedNisn) {
-        filteredList = filteredList.filter(s => String(s.nisn) === String(selectedNisn));
-      }
+      // Urutkan presisi dari atas dulu (Kelas secara numerik, lalu Nama A-Z)
+      filteredList.sort((a, b) => {
+        const classComp = String(a.kelas || "").localeCompare(String(b.kelas || ""), "id", { numeric: true });
+        if (classComp !== 0) return classComp;
+        return String(a.nama || "").localeCompare(String(b.nama || ""), "id", { sensitivity: "base" });
+      });
 
       generatedSiswaList = filteredList;
 
@@ -397,12 +502,13 @@
         return;
       }
 
-      const allItems = document.querySelectorAll(".check-kelas-item");
+      const allClassItems = document.querySelectorAll(".check-kelas-item");
+      const allSiswaItems = document.querySelectorAll(".check-siswa-item");
       let textSummary = "";
       
-      if (selectedNisn && generatedSiswaList.length === 1) {
-        textSummary = `1 Siswa: ${generatedSiswaList[0].nama} (Kelas ${generatedSiswaList[0].kelas})`;
-      } else if (selectedClasses.length === allItems.length) {
+      if (selectedSiswaNisn.length < allSiswaItems.length) {
+        textSummary = `${generatedSiswaList.length} Siswa Terpilih dari ${selectedClasses.length} Kelas`;
+      } else if (selectedClasses.length === allClassItems.length) {
         textSummary = `${generatedSiswaList.length} Siswa (Semua Kelas)`;
       } else {
         textSummary = `${generatedSiswaList.length} Siswa (${selectedClasses.length} Kelas: ${selectedClasses.join(", ")})`;
@@ -531,14 +637,14 @@
 
       progressBox.innerHTML = "⚡ Menyusun file ZIP, harap tunggu sebentar...";
 
-      const selectedNisn = document.getElementById("selectSiswa").value;
+      const selectedSiswaNisn = getSelectedSiswaNisn();
       let labelZip = "";
       
-      if (selectedNisn && generatedSiswaList.length === 1) {
+      if (selectedSiswaNisn.length === 1) {
         labelZip = `${generatedSiswaList[0].nisn}_${generatedSiswaList[0].nama.replace(/\s+/g, "_")}`;
       } else {
-        const allItems = document.querySelectorAll(".check-kelas-item");
-        labelZip = (selectedClasses.length === allItems.length) 
+        const allClassItems = document.querySelectorAll(".check-kelas-item");
+        labelZip = (selectedClasses.length === allClassItems.length) 
           ? "Semua_Kelas" 
           : `Kelas_${selectedClasses.join("_")}`;
       }
