@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rekap Presensi Siswa v2.5 - SMPN 1 RANCAH</title>
+  <title>Rekap Presensi Siswa v2.6 - SMPN 1 RANCAH</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -146,7 +146,7 @@
                 Sistem Presensi Digital
               </span>
               <span class="px-1.5 py-0.5 bg-amber-400 text-slate-900 font-black text-[9px] sm:text-[11px] rounded-full shadow-sm">
-                v2.5
+                v2.6
               </span>
             </div>
             <h1 class="text-sm sm:text-2xl md:text-3xl font-extrabold tracking-tight leading-tight">REKAPITULASI PRESENSI SISWA</h1>
@@ -259,7 +259,7 @@
 
     <!-- FOOTER -->
     <footer class="text-center text-[10px] sm:text-xs text-slate-400 py-2">
-      &copy; 2026 Presensi Digital v2.5 • <span class="font-semibold text-slate-600">SMPN 1 RANCAH</span>
+      &copy; 2026 Presensi Digital v2.6 • <span class="font-semibold text-slate-600">SMPN 1 RANCAH</span>
     </footer>
 
   </div>
@@ -299,6 +299,32 @@
       const mm = String(now.getMonth() + 1).padStart(2, '0');
       const dd = String(now.getDate()).padStart(2, '0');
       return `${yyyy}-${mm}-${dd}`;
+    }
+
+    // --- FUNGSI CEK BATAS WAKTU ABSEN PULANG ---
+    // Senin-Kamis & Sabtu: Batas Jam 16:00
+    // Jumat: Batas Jam 15:00
+    function isSudahLewatBatasPulang(dateStr) {
+      const todayStr = getTodayString();
+      
+      // Jika tanggal sebelum hari ini (kemarin/lalu), pasti sudah lewat batas jam pulang
+      if (dateStr < todayStr) return true;
+      
+      // Jika tanggal akan datang (masa depan), belum lewat
+      if (dateStr > todayStr) return false;
+      
+      // Cek hari untuk tanggal tersebut (0: Minggu, 5: Jumat)
+      const parts = dateStr.split("-");
+      const d = new Date(parts[0], parts[1] - 1, parts[2]);
+      const dayOfWeek = d.getDay(); 
+      
+      const now = new Date();
+      const jamSekarang = String(now.getHours()).padStart(2, '0') + ":" + String(now.getMinutes()).padStart(2, '0');
+      
+      // Batas Akhir Jam Pulang (Jumat: 15:00, Hari Lain: 16:00)
+      const jamBatas = (dayOfWeek === 5) ? "15:00" : "16:00";
+      
+      return jamSekarang >= jamBatas;
     }
 
     // --- INITIALIZATION ---
@@ -450,6 +476,7 @@
           });
 
           const logMasuk = studentLogs.find(l => l.keterangan === "Masuk" || l.keterangan === "Terlambat Masuk");
+          const logPulang = studentLogs.find(l => l.keterangan === "Pulang");
           const logManual = studentLogs.find(l => ["Izin", "Sakit", "Alpa"].includes(l.keterangan));
 
           if (logManual) {
@@ -457,7 +484,12 @@
             else if (logManual.keterangan === "Sakit") countSakit++;
             else countAlpa++;
           } else if (logMasuk) {
-            countHadir++;
+            // Jika absen masuk tapi TIDAK absen pulang & sudah LEWAT batas jam pulang -> Alpa
+            if (!logPulang && isSudahLewatBatasPulang(tgl)) {
+              countAlpa++;
+            } else {
+              countHadir++;
+            }
           } else {
             countAlpa++;
           }
@@ -728,10 +760,16 @@
           }
         } else if (logMasuk) {
           if (!logPulang) {
-            statusBadge = logMasuk.keterangan === "Terlambat Masuk" 
-              ? '<span class="inline-block px-1.5 py-0.5 bg-amber-100 text-amber-800 rounded font-bold">Terlambat</span>'
-              : '<span class="inline-block px-1.5 py-0.5 bg-emerald-100 text-emerald-800 rounded font-bold">Hadir</span>';
-            bgRow = "bg-emerald-50/40";
+            // Jika belum absen pulang & sudah lewat batas jam pulang -> ALPA
+            if (isSudahLewatBatasPulang(tgl)) {
+              statusBadge = '<span class="inline-block px-1.5 py-0.5 bg-rose-100 text-rose-700 rounded font-bold">Alpa (Tidak Pulang)</span>';
+              bgRow = "bg-rose-50/50";
+            } else {
+              statusBadge = logMasuk.keterangan === "Terlambat Masuk" 
+                ? '<span class="inline-block px-1.5 py-0.5 bg-amber-100 text-amber-800 rounded font-bold">Terlambat</span>'
+                : '<span class="inline-block px-1.5 py-0.5 bg-emerald-100 text-emerald-800 rounded font-bold">Hadir</span>';
+              bgRow = "bg-emerald-50/40";
+            }
           } else if (logMasuk.keterangan === "Terlambat Masuk") {
             statusBadge = '<span class="inline-block px-1.5 py-0.5 bg-amber-200 text-amber-900 rounded font-bold">Terlambat</span>';
             bgRow = "bg-amber-50/50";
@@ -897,6 +935,7 @@
           });
 
           const logMasuk = studentLogs.find(l => l.keterangan === "Masuk" || l.keterangan === "Terlambat Masuk");
+          const logPulang = studentLogs.find(l => l.keterangan === "Pulang");
           const logManual = studentLogs.find(l => ["Izin", "Sakit", "Alpa"].includes(l.keterangan));
 
           let code = "A";
@@ -914,8 +953,16 @@
               bgCell = isToday ? "bg-amber-200 text-rose-900 font-black" : "bg-rose-100 text-rose-800 font-bold"; 
             }
           } else if (logMasuk) {
-            code = "H"; countH++; 
-            bgCell = isToday ? "bg-amber-300 text-emerald-950 font-black" : "bg-emerald-100 text-emerald-800 font-bold";
+            // JIKA ABSEN MASUK TAPI TIDAK ABSEN PULANG DAN SUDAH LEWAT BATAS JAM PULANG -> BERUBAH JADI ALPA (A)
+            if (!logPulang && isSudahLewatBatasPulang(dateStr)) {
+              code = "A"; 
+              countA++; 
+              bgCell = isToday ? "bg-amber-200 text-rose-900 font-black" : "bg-rose-100 text-rose-800 font-bold";
+            } else {
+              code = "H"; 
+              countH++; 
+              bgCell = isToday ? "bg-amber-300 text-emerald-950 font-black" : "bg-emerald-100 text-emerald-800 font-bold";
+            }
           } else {
             countA++;
           }
