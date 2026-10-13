@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cetak Kartu Pelajar (Depan / Belakang / Duplex) - SMPN 1 Rancah (v4.3 Smart Dynamic Zoom)</title>
+  <title>Cetak Kartu Pelajar (Depan / Belakang / Duplex) - SMPN 1 Rancah (v4.4 Manual Zoom & Pan)</title>
   
   <!-- SKRIP PENGAMAN & AUTO LOGOUT -->
   <script src="auth-guard.js"></script>
@@ -13,8 +13,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <!-- Library Generator QR Code -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <!-- Library AI Smart Crop (Deteksi Wajah Fast Engine) -->
-  <script src="https://unpkg.com/smartcrop@2.0.5/smartcrop.js"></script>
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -93,7 +91,7 @@
     
     .content-depan { display: flex; padding: 0 2.8mm; position: relative; z-index: 2; gap: 2mm; align-items: flex-start; }
     
-    /* BINGKAI FOTO SISWA PASFOTO IJAZAH (3x4) */
+    /* BINGKAI FOTO INTERAKTIF (ZOOM & PAN) */
     .foto-frame {
       width: 17.5mm;
       height: 23mm;
@@ -106,13 +104,19 @@
       align-items: center;
       justify-content: center;
       position: relative;
+      cursor: grab;
+      user-select: none;
+    }
+    .foto-frame:active {
+      cursor: grabbing;
     }
     .foto-box { 
       width: 100%; 
       height: 100%; 
       object-fit: cover; 
       object-position: center 10%; 
-      transition: all 0.15s ease-out;
+      pointer-events: none;
+      transition: transform 0.05s ease-out, object-position 0.05s ease-out;
     }
 
     .data-box { flex-grow: 1; background: rgba(255, 255, 255, 0.96); border: 0.35mm solid #dc2626; border-radius: 1.5mm; padding: 1.2mm 1.8mm; }
@@ -183,11 +187,19 @@
 
       <h2>
         <span>Cetak Kartu Pelajar</span>
-        <span class="badge-v">v4.3 Zoom AI</span>
+        <span class="badge-v">v4.4 Zoom & Pan</span>
       </h2>
       
       <div id="statusIndikator" class="status-box loading">
         Memuat data siswa...
+      </div>
+
+      <div class="form-group full-width" style="background:#e0f2fe; padding:10px; border-radius:8px; border:1px solid #0284c7; margin-bottom:12px;">
+        <span style="font-size:10px; color:#0369a1; font-weight:800; display:block; margin-bottom:4px;">🖱️ PANDUAN NSEDIT FOTO MANUALLY:</span>
+        <ul style="font-size:9px; color:#0f172a; padding-left:14px; line-height:1.4;">
+          <li><b>Scroll Mouse:</b> Zoom In / Zoom Out ukuran foto.</li>
+          <li><b>Klik & Geser (Drag):</b> Pindahkan posisi wajah ke atas, bawah, kiri, atau kanan.</li>
+        </ul>
       </div>
 
       <!-- TAHAP 1: LEGALITAS & UPLOAD -->
@@ -215,19 +227,9 @@
         </div>
       </div>
 
-      <!-- TAHAP 2: EDIT POSISI LIVE (CAP, TTD, & FOTO V4.3) -->
-      <div class="section-title">2. Edit Posisi Live (Cap, TTD & Foto)</div>
+      <!-- TAHAP 2: EDIT POSISI CAP & TTD -->
+      <div class="section-title">2. Edit Posisi Stempel & TTD</div>
       <div class="grid-form">
-        <div class="form-group">
-          <label>Fokus Potongan Y: <span id="valFotoY">10%</span></label>
-          <input type="range" id="fotoY" min="0" max="100" step="1" value="10" oninput="updatePosisiLive()">
-        </div>
-
-        <div class="form-group">
-          <label>Fokus Potongan X: <span id="valFotoX">50%</span></label>
-          <input type="range" id="fotoX" min="0" max="100" step="1" value="50" oninput="updatePosisiLive()">
-        </div>
-
         <div class="form-group">
           <label>Cap - Posisi X: <span id="valStempelX">-11mm</span></label>
           <input type="range" id="stempelX" min="-30" max="20" step="0.5" value="-11" oninput="updatePosisiLive()">
@@ -323,7 +325,7 @@
       <div class="preview-header">
         <div style="display: flex; align-items: center; gap: 8px;">
           <span>Preview Layout Cetak Kartu</span>
-          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v4.3 Smart Zoom AI</span>
+          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v4.4 Dynamic</span>
         </div>
         <span style="font-size: 11px; opacity: 0.7; font-weight: normal;">Presisi Standar KTP (85.6mm x 53.9mm)</span>
       </div>
@@ -339,8 +341,7 @@
 
     const defaultPosisi = {
       stempelX: '-11', stempelY: '1', stempelSize: '14',
-      ttdX: '0.5', ttdY: '2.5', ttdSize: '16', 
-      fotoY: '10', fotoX: '50'
+      ttdX: '0.5', ttdY: '2.5', ttdSize: '16'
     };
 
     let geserBelakangX = parseFloat(localStorage.getItem('geserBelakangX'));
@@ -364,9 +365,6 @@
       document.getElementById('ttdX').value = localStorage.getItem('ttdX') || defaultPosisi.ttdX;
       document.getElementById('ttdY').value = localStorage.getItem('ttdY') || defaultPosisi.ttdY;
       document.getElementById('ttdSize').value = localStorage.getItem('ttdSize') || defaultPosisi.ttdSize;
-
-      document.getElementById('fotoY').value = localStorage.getItem('fotoY') || defaultPosisi.fotoY;
-      document.getElementById('fotoX').value = localStorage.getItem('fotoX') || defaultPosisi.fotoX;
 
       updateLabelPosisi();
     }
@@ -394,9 +392,6 @@
       document.getElementById('valTtdX').innerText = document.getElementById('ttdX').value + 'mm';
       document.getElementById('valTtdY').innerText = document.getElementById('ttdY').value + 'mm';
       document.getElementById('valTtdSize').innerText = document.getElementById('ttdSize').value + 'mm';
-
-      document.getElementById('valFotoY').innerText = document.getElementById('fotoY').value + '%';
-      document.getElementById('valFotoX').innerText = document.getElementById('fotoX').value + '%';
     }
 
     function updatePosisiLive() {
@@ -410,9 +405,6 @@
       const tY = document.getElementById('ttdY').value;
       const tSize = document.getElementById('ttdSize').value;
 
-      const fY = document.getElementById('fotoY').value;
-      const fX = document.getElementById('fotoX').value;
-
       localStorage.setItem('stempelX', sX);
       localStorage.setItem('stempelY', sY);
       localStorage.setItem('stempelSize', sSize);
@@ -420,9 +412,6 @@
       localStorage.setItem('ttdX', tX);
       localStorage.setItem('ttdY', tY);
       localStorage.setItem('ttdSize', tSize);
-
-      localStorage.setItem('fotoY', fY);
-      localStorage.setItem('fotoX', fX);
 
       document.querySelectorAll('.img-stempel').forEach(img => {
         img.style.left = sX + 'mm';
@@ -435,12 +424,6 @@
         img.style.top = tY + 'mm';
         img.style.width = tSize + 'mm';
       });
-
-      document.querySelectorAll('.foto-box').forEach(img => {
-        if (!img.dataset.aiProcessed) {
-          img.style.objectPosition = `${fX}% ${fY}%`;
-        }
-      });
     }
 
     function resetPosisiDefault() {
@@ -452,9 +435,6 @@
       localStorage.setItem('ttdY', defaultPosisi.ttdY);
       localStorage.setItem('ttdSize', defaultPosisi.ttdSize);
 
-      localStorage.setItem('fotoY', defaultPosisi.fotoY);
-      localStorage.setItem('fotoX', defaultPosisi.fotoX);
-
       geserBelakangX = 1;
       localStorage.setItem('geserBelakangX', 1);
 
@@ -464,102 +444,68 @@
       renderDuplex();
     }
 
-    /* ENGINE FAST AI SMART DYNAMIC ZOOM (MEMOTONG LENGKAP SETENGAH BADAN, KURSI, & ATAP DENGAN DEDIKASI IJAZAH) */
-    function mulaiProsesFotoAI() {
-      const allImgs = Array.from(document.querySelectorAll('.foto-box'));
-      if (allImgs.length === 0) return;
+    /* ENGINE INTERAKTIF MANUAL ZOOM & PAN UNTUK MASING-MASING FOTO */
+    function pasangEventInteraktifFoto() {
+      document.querySelectorAll('.foto-frame').forEach(frame => {
+        const img = frame.querySelector('.foto-box');
+        if (!img) return;
 
-      const statusBox = document.getElementById('statusIndikator');
-      let total = allImgs.length;
-      let completed = 0;
+        let isDragging = false;
+        let startX = 0, startY = 0;
+        let posX = parseFloat(img.dataset.posX || 50);
+        let posY = parseFloat(img.dataset.posY || 10);
+        let zoomScale = parseFloat(img.dataset.zoom || 1.8); // Default zoom 1.8x untuk foto setengah badan
 
-      function updateProgressUI() {
-        completed++;
-        let percent = Math.round((completed / total) * 100);
-        if (statusBox) {
-          statusBox.className = 'status-box loading';
-          statusBox.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-              <span>🤖 Memotong AI Pasfoto Ijazah...</span>
-              <span><b>${percent}%</b> (${completed}/${total})</span>
-            </div>
-            <div style="width:100%; background:#fde68a; height:6px; border-radius:3px; overflow:hidden;">
-              <div style="width:${percent}%; background:#d97706; height:100%; transition:width 0.1s ease-out;"></div>
-            </div>
-          `;
-        }
+        const applyTransform = () => {
+          img.style.objectPosition = `${posX}% ${posY}%`;
+          img.style.transform = `scale(${zoomScale.toFixed(2)})`;
+          img.style.transformOrigin = `${posX}% ${posY}%`;
+        };
 
-        if (completed >= total) {
-          setTimeout(() => {
-            if (statusBox) {
-              statusBox.className = 'status-box ready';
-              statusBox.innerHTML = `<b>✅ Terbaca:</b> ${dataSiswaGlobal.length} Siswa (${daftarKelasGlobal.length} Kelas)`;
-            }
-          }, 300);
-        }
-      }
+        // Terapkan awal
+        applyTransform();
 
-      allImgs.forEach((img, idx) => {
-        setTimeout(() => {
-          prosesSingleFotoAI(img, updateProgressUI);
-        }, idx * 20);
+        // 1. Zoom via Wheel Mouse
+        frame.onwheel = function(e) {
+          e.preventDefault();
+          if (e.deltaY < 0) {
+            zoomScale = Math.min(4.0, zoomScale + 0.1);
+          } else {
+            zoomScale = Math.max(1.0, zoomScale - 0.1);
+          }
+          img.dataset.zoom = zoomScale;
+          applyTransform();
+        };
+
+        // 2. Drag untuk Pan (Menggeser Posisi Wajah)
+        frame.onmousedown = function(e) {
+          e.preventDefault();
+          isDragging = true;
+          startX = e.clientX;
+          startY = e.clientY;
+        };
+
+        window.addEventListener('mousemove', function(e) {
+          if (!isDragging) return;
+          const dx = e.clientX - startX;
+          const dy = e.clientY - startY;
+
+          // Hitung perubahan %
+          posX = Math.max(0, Math.min(100, posX - (dx * 0.25)));
+          posY = Math.max(0, Math.min(100, posY - (dy * 0.25)));
+
+          startX = e.clientX;
+          startY = e.clientY;
+
+          img.dataset.posX = posX;
+          img.dataset.posY = posY;
+          applyTransform();
+        });
+
+        window.addEventListener('mouseup', function() {
+          isDragging = false;
+        });
       });
-    }
-
-    function prosesSingleFotoAI(imgEl, callback) {
-      if (!imgEl) { if (callback) callback(); return; }
-
-      const runCrop = () => {
-        try {
-          const tempCanvas = document.createElement('canvas');
-          const ctx = tempCanvas.getContext('2d');
-          const tw = 100;
-          const th = Math.round((imgEl.naturalHeight / (imgEl.naturalWidth || 1)) * 100) || 133;
-          tempCanvas.width = tw;
-          tempCanvas.height = th;
-          ctx.drawImage(imgEl, 0, 0, tw, th);
-
-          smartcrop.crop(tempCanvas, { width: 35, height: 46, minScale: 1.0, ruleOfThirds: false }).then(result => {
-            if (result && result.topCrop) {
-              const crop = result.topCrop;
-              
-              // 1. Posisi Pusat X Wajah
-              const faceCenterX = Math.round(((crop.x + crop.width / 2) / tw) * 100);
-              
-              // 2. Hitung Rasio Wajah Terhadap Total Foto (Untuk Menentukan Berapa Banyak Perlu Zoom In)
-              const faceRatioInImage = crop.height / th; // Contoh: Foto setengah badan = 0.18 - 0.22
-              const targetFaceRatio = 0.48; // Target ideal pasfoto ijazah (wajah mengisi ~48% tinggi frame)
-              
-              let zoomScale = targetFaceRatio / faceRatioInImage;
-              // Batasi zoom antara 1.1x sampai 3.2x agar foto tidak pecah berlebihan
-              zoomScale = Math.min(3.2, Math.max(1.1, zoomScale));
-
-              // 3. Jarak Batas Atas Ubun-ubun / Kerudung (Headroom Lock 8% - 10%)
-              const faceTopY = Math.round((crop.y / th) * 100);
-              let targetY = faceTopY - 6; // Geser ke atas sedikit dari posisi awal deteksi AI
-              targetY = Math.max(2, Math.min(targetY, 22));
-
-              // Terapkan Zoom & Posisi
-              imgEl.style.objectPosition = `${faceCenterX}% ${targetY}%`;
-              imgEl.style.transform = `scale(${zoomScale.toFixed(2)})`;
-              imgEl.style.transformOrigin = `${faceCenterX}% ${targetY}%`;
-              imgEl.dataset.aiProcessed = "true";
-            }
-            if (callback) callback();
-          }).catch(() => {
-            if (callback) callback();
-          });
-        } catch (e) {
-          if (callback) callback();
-        }
-      };
-
-      if (imgEl.complete && imgEl.naturalWidth > 0) {
-        runCrop();
-      } else {
-        imgEl.onload = runCrop;
-        imgEl.onerror = () => { if (callback) callback(); };
-      }
     }
 
     function fetchDataSiswa() {
@@ -634,9 +580,6 @@
       const tY = localStorage.getItem('ttdY') || defaultPosisi.ttdY;
       const tSize = localStorage.getItem('ttdSize') || defaultPosisi.ttdSize;
 
-      const fY = localStorage.getItem('fotoY') || defaultPosisi.fotoY;
-      const fX = localStorage.getItem('fotoX') || defaultPosisi.fotoX;
-
       const nisn = (s[0] || '').trim();
       const nama = (s[1] || '').trim();
       const tempatLahir = (s[4] || '').trim();
@@ -682,8 +625,8 @@
           </div>
           <div class="judul-kartu">KARTU PELAJAR</div>
           <div class="content-depan">
-            <div class="foto-frame">
-              <img src="${fotoUrl}" class="foto-box" crossorigin="anonymous" style="object-position: ${fX}% ${fY}%;" onerror="this.src='https://via.placeholder.com/108x138?text=Foto'">
+            <div class="foto-frame" title="Scroll untuk Zoom, Klik & Geser untuk atur posisi foto">
+              <img src="${fotoUrl}" class="foto-box" crossorigin="anonymous" onerror="this.src='https://via.placeholder.com/108x138?text=Foto'">
             </div>
             <div class="data-box">
               <div class="data-row"><div class="data-label">Nama</div><div class="data-separator">:</div><div class="data-value" style="font-weight:800;">${nama}</div></div>
@@ -789,8 +732,8 @@
         });
       }
 
-      // MULAI MEMPROSES POTONG FOTO IJAZAH DENGAN AI DAN INDIKATOR PERSEN
-      mulaiProsesFotoAI();
+      // AKTIFKAN EVENT INTERAKTIF ZOOM & PAN PADA FOTO
+      pasangEventInteraktifFoto();
     }
 
     function cetakDuplex() {
