@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cetak Kartu Pelajar (Depan / Belakang / Duplex) - SMPN 1 Rancah (v4.1 Pasfoto Resmi)</title>
+  <title>Cetak Kartu Pelajar (Depan / Belakang / Duplex) - SMPN 1 Rancah (v4.2 Standar Ijazah)</title>
   
   <!-- SKRIP PENGAMAN & AUTO LOGOUT -->
   <script src="auth-guard.js"></script>
@@ -111,8 +111,8 @@
       width: 100%; 
       height: 100%; 
       object-fit: cover; 
-      object-position: center 15%; 
-      transition: object-position 0.15s ease-out;
+      object-position: center 12%; 
+      transition: all 0.15s ease-out;
     }
 
     .data-box { flex-grow: 1; background: rgba(255, 255, 255, 0.96); border: 0.35mm solid #dc2626; border-radius: 1.5mm; padding: 1.2mm 1.8mm; }
@@ -183,7 +183,7 @@
 
       <h2>
         <span>Cetak Kartu Pelajar</span>
-        <span class="badge-v">v4.1 AI</span>
+        <span class="badge-v">v4.2 AI</span>
       </h2>
       
       <div id="statusIndikator" class="status-box loading">
@@ -215,12 +215,12 @@
         </div>
       </div>
 
-      <!-- TAHAP 2: EDIT POSISI LIVE (CAP, TTD, & FOTO V4.1) -->
+      <!-- TAHAP 2: EDIT POSISI LIVE (CAP, TTD, & FOTO V4.2) -->
       <div class="section-title">2. Edit Posisi Live (Cap, TTD & Foto)</div>
       <div class="grid-form">
         <div class="form-group">
-          <label>Fokus Potongan Y: <span id="valFotoY">15%</span></label>
-          <input type="range" id="fotoY" min="0" max="100" step="1" value="15" oninput="updatePosisiLive()">
+          <label>Fokus Potongan Y: <span id="valFotoY">12%</span></label>
+          <input type="range" id="fotoY" min="0" max="100" step="1" value="12" oninput="updatePosisiLive()">
         </div>
 
         <div class="form-group">
@@ -323,7 +323,7 @@
       <div class="preview-header">
         <div style="display: flex; align-items: center; gap: 8px;">
           <span>Preview Layout Cetak Kartu</span>
-          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v4.1 Pasfoto Resmi</span>
+          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v4.2 Standar Ijazah</span>
         </div>
         <span style="font-size: 11px; opacity: 0.7; font-weight: normal;">Presisi Standar KTP (85.6mm x 53.9mm)</span>
       </div>
@@ -340,7 +340,7 @@
     const defaultPosisi = {
       stempelX: '-11', stempelY: '1', stempelSize: '14',
       ttdX: '0.5', ttdY: '2.5', ttdSize: '16', 
-      fotoY: '15', fotoX: '50'
+      fotoY: '12', fotoX: '50'
     };
 
     let geserBelakangX = parseFloat(localStorage.getItem('geserBelakangX'));
@@ -464,7 +464,7 @@
       renderDuplex();
     }
 
-    /* ENGINE FAST AI DETEKSI WAJAH IJAZAH / RAPORT (STANDAR PASFOTO FORMAL) */
+    /* ENGINE FAST AI DETEKSI WAJAH IJAZAH / RAPORT (AUTO-ZOOM & HEADROOM LOCKING) */
     function mulaiProsesFotoAI() {
       const allImgs = Array.from(document.querySelectorAll('.foto-box'));
       if (allImgs.length === 0) return;
@@ -480,7 +480,7 @@
           statusBox.className = 'status-box loading';
           statusBox.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-              <span>🤖 Memotong AI Pasfoto Resmi...</span>
+              <span>🤖 Memotong AI Pasfoto Ijazah...</span>
               <span><b>${percent}%</b> (${completed}/${total})</span>
             </div>
             <div style="width:100%; background:#fde68a; height:6px; border-radius:3px; overflow:hidden;">
@@ -519,17 +519,29 @@
           tempCanvas.height = th;
           ctx.drawImage(imgEl, 0, 0, tw, th);
 
-          // SMARTCROP CONFIG UNTUK STANDAR PASFOTO RESMI (HEADROOM 12-15%, DADA KE ATAS)
-          smartcrop.crop(tempCanvas, { width: 35, height: 46, ruleOfThirds: false }).then(result => {
+          // SMARTCROP CONFIG UNTUK KOMPOSISI PASFOTO IJAZAH / RAPORT
+          smartcrop.crop(tempCanvas, { width: 35, height: 46, minScale: 1.0, ruleOfThirds: false }).then(result => {
             if (result && result.topCrop) {
               const crop = result.topCrop;
+              
+              // 1. Posisi X (Pusat Wajah di Tengah)
               const cX = Math.round((crop.x + crop.width / 2) / tw * 100);
               
-              // Kunci cY di angka 12% - 25% dari atas kepala agar memberikan margin ubun-ubun pasfoto ijazah
-              let rawCY = Math.round((crop.y + crop.height * 0.12) / th * 100);
-              const cY = Math.max(8, Math.min(rawCY, 28));
+              // 2. Hitung Auto Scale (Zoom In jika foto mentah diambil dari jarak jauh)
+              const cropRatio = crop.height / th;
+              let zoomScale = 1;
+              if (cropRatio < 0.80) {
+                zoomScale = Math.min(2.2, Math.max(1.0, (0.80 / cropRatio)));
+              }
 
+              // 3. Headroom Locking (Sisa Margin Atas Ubun-Ubun 8% - 12%)
+              let cY = Math.round((crop.y + crop.height * 0.10) / th * 100);
+              cY = Math.max(6, Math.min(cY, 20));
+
+              // Terapkan Posisi dan Skala
               imgEl.style.objectPosition = `${cX}% ${cY}%`;
+              imgEl.style.transform = `scale(${zoomScale.toFixed(2)})`;
+              imgEl.style.transformOrigin = `${cX}% ${cY}%`;
               imgEl.dataset.aiProcessed = "true";
             }
             if (callback) callback();
