@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cetak Kartu Pelajar (Depan / Belakang / Duplex / Lipat) - SMPN 1 Rancah (v4.7 Lipat & Instant Save)</title>
+  <title>Cetak Kartu Pelajar - SMPN 1 Rancah (v4.8 Mode Lipat Stiker Presisi)</title>
   
   <!-- SKRIP PENGAMAN & AUTO LOGOUT -->
   <script src="auth-guard.js"></script>
@@ -67,8 +67,38 @@
       grid-template-columns: repeat(2, 85.6mm); gap: 4mm 6mm; justify-content: start;
     }
 
+    /* CSS KHUSUS MODE LIPAT STIKER */
+    .page-sheet.mode-lipat-sheet {
+      display: flex;
+      flex-direction: column;
+      gap: 3mm;
+      align-items: flex-start;
+      grid-template-columns: none !important;
+    }
+
+    .pair-lipat-wrapper {
+      display: flex;
+      flex-direction: row;
+      width: 171.2mm; /* 85.6mm x 2 */
+      height: 53.9mm;
+      box-sizing: border-box;
+      page-break-inside: avoid;
+    }
+
+    .pair-lipat-wrapper .kartu-container-depan {
+      border-top-right-radius: 0 !important;
+      border-bottom-right-radius: 0 !important;
+      border-right: 0.4mm dashed #64748b !important; /* Garis pandu lipatan stiker */
+    }
+
+    .pair-lipat-wrapper .kartu-container-belakang {
+      border-top-left-radius: 0 !important;
+      border-bottom-left-radius: 0 !important;
+      border-left: none !important;
+    }
+
     .page-title-tag {
-      grid-column: span 2; font-size: 10px; font-weight: 800; text-transform: uppercase;
+      width: 100%; font-size: 10px; font-weight: 800; text-transform: uppercase;
       color: #0284c7; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-bottom: 4px;
     }
 
@@ -172,6 +202,14 @@
         page-break-after: always !important; break-after: page; display: grid !important;
         grid-template-columns: repeat(2, 85.6mm) !important; gap: 4mm 6mm !important; justify-content: start !important;
       }
+      .page-sheet.mode-lipat-sheet {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 3mm !important;
+      }
+      .pair-lipat-wrapper .kartu-container-depan {
+        border-right: 0.4mm dashed #64748b !important;
+      }
       .page-title-tag { display: none !important; }
       .kartu-container-depan, .kartu-container-belakang { box-shadow: none !important; border-color: #000 !important; page-break-inside: avoid !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     }
@@ -188,7 +226,7 @@
 
       <h2>
         <span>Cetak Kartu Pelajar</span>
-        <span class="badge-v">v4.7 Lipat</span>
+        <span class="badge-v">v4.8 Lipat Stiker</span>
       </h2>
       
       <div id="statusIndikator" class="status-box loading">
@@ -196,9 +234,9 @@
       </div>
 
       <div class="form-group full-width" style="background:#e0f2fe; padding:10px; border-radius:8px; border:1px solid #0284c7; margin-bottom:12px;">
-        <span style="font-size:10px; color:#0369a1; font-weight:800; display:block; margin-bottom:4px;">💡 SIMPAN OTOMATIS PER NISN:</span>
+        <span style="font-size:10px; color:#0369a1; font-weight:800; display:block; margin-bottom:4px;">🏷️ FITUR CETAK KERTAS STIKER:</span>
         <p style="font-size:9px; color:#0f172a; line-height:1.4;">
-          Atur foto siswa dengan <b>Scroll (Zoom)</b> atau <b>Drag (Geser)</b>. Setelah dilepas, posisinya langsung otomatis tersimpan permanen berdasarkan NISN!
+          Pada pilihan <b>Mode Lipat</b>, kartu depan & belakang langsung menempel rapat tanpa celah, lengkap dengan garis lipat putus-putus. Setiap editan foto siswa langsung <b>tersimpan otomatis seketika</b> per NISN!
         </p>
         <button type="button" onclick="resetSemuaFotoTersimpan()" class="btn btn-danger" style="margin-top:8px; width:100%; height:26px; font-size:9px;">
           🗑️ Reset Semua Editan Foto Siswa
@@ -295,8 +333,8 @@
         <div class="form-group">
           <label>Sisi Halaman Cetak:</label>
           <select id="selectSisiCetak" onchange="renderDuplex()">
-            <option value="semua" selected>1. Bolak-Balik Halaman Beda (Duplex)</option>
-            <option value="lipat">2. Mode Lipat (Depan & Belakang Bersampingan)</option>
+            <option value="lipat" selected>1. Mode Lipat Stiker (Depan-Belakang Menempel)</option>
+            <option value="semua">2. Bolak-Balik Halaman Beda (Duplex)</option>
             <option value="depan">3. Sisi Depan Saja</option>
             <option value="belakang">4. Sisi Belakang Saja (Mirrored)</option>
           </select>
@@ -307,7 +345,7 @@
           <label>Kompensasi Geser Belakang: <span id="valGeserBelakang">1 mm</span></label>
           <input type="range" id="inputGeserBelakang" min="-5" max="5" step="0.5" value="1" oninput="updateGeserBelakang()">
           <p style="font-size: 8.5px; color: #64748b; margin-top: 2px;">
-            *Khusus mode Duplex: Ubah (+mm) jika cetakan belakang kurang presisi.
+            *Khusus mode Duplex bolak-balik: Ubah (+mm) jika cetakan belakang kurang pas.
           </p>
         </div>
 
@@ -329,7 +367,7 @@
       <div class="preview-header">
         <div style="display: flex; align-items: center; gap: 8px;">
           <span>Preview Layout Cetak Kartu</span>
-          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v4.7 Lipat & Instant Save</span>
+          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v4.8 Stiker Fit</span>
         </div>
         <span style="font-size: 11px; opacity: 0.7; font-weight: normal;">Presisi Standar KTP (85.6mm x 53.9mm)</span>
       </div>
@@ -475,11 +513,10 @@
       const statusBox = document.getElementById('statusIndikator');
       if (statusBox) {
         statusBox.className = 'status-box ready';
-        statusBox.innerHTML = `<b>💾 Posisi Foto NISN ${nisn} Tersimpan!</b>`;
+        statusBox.innerHTML = `<b>💾 Foto NISN ${nisn} Tersimpan!</b>`;
       }
     }
 
-    /* GLOBAL DRAG LISTENERS MENCEGAH PENUMPUKAN MEMORI DAN INSTANT SAVE ON MOUSEUP */
     function initGlobalDragListeners() {
       window.addEventListener('mousemove', function(e) {
         if (!isDragging || !activeFrame) return;
@@ -515,8 +552,6 @@
             const posX = parseFloat(img.getAttribute('data-pos-x') || 50);
             const posY = parseFloat(img.getAttribute('data-pos-y') || 10);
             const zoomScale = parseFloat(img.getAttribute('data-zoom') || 1.8);
-            
-            // SIMPAN SEKETIKA KE LOCALSTORAGE
             simpanFotoConfigInstant(nisn, posX, posY, zoomScale);
           }
         }
@@ -532,7 +567,6 @@
 
         const nisn = img.getAttribute('data-nisn');
 
-        // 1. Zoom via Wheel Mouse + Instant Save
         frame.onwheel = function(e) {
           e.preventDefault();
           let zoomScale = parseFloat(img.getAttribute('data-zoom') || 1.8);
@@ -549,11 +583,9 @@
           img.style.transform = `scale(${zoomScale.toFixed(2)})`;
           img.style.transformOrigin = `${posX}% ${posY}%`;
 
-          // SIMPAN SEKETIKA SAAT WHEEL SCROLL
           simpanFotoConfigInstant(nisn, posX, posY, zoomScale);
         };
 
-        // 2. Drag Start
         frame.onmousedown = function(e) {
           e.preventDefault();
           isDragging = true;
@@ -669,7 +701,6 @@
       const fotoRaw = (s[12] || '').trim();
       const fotoUrl = (fotoRaw.startsWith('http')) ? fotoRaw : `assets/foto_${nisn}.jpg`;
 
-      // KONSISTENSI PENANGANAN FOTO PER NISN
       let savedPosX = 50;
       let savedPosY = 10;
       let savedZoom = 1.8;
@@ -769,22 +800,24 @@
       const siswaKelas = dataSiswaGlobal.filter(s => (s[2]||'').trim() === kelasPilihan);
       let htmlAll = '';
 
-      // MODE 1: MODE LIPAT (DEPAN & BELAKANG BERSAMPINGAN)
+      // MODE 1: MODE LIPAT STIKER (DEPAN & BELAKANG MENEMPEL TANPA JEDAH)
       if (sisiPilihan === "lipat") {
-        const pairBatchSize = (ukuranKertas === "F4") ? 5 : 4; // 1 pasang = 2 kolom grid
+        const pairBatchSize = (ukuranKertas === "F4") ? 5 : 4;
         for (let i = 0; i < siswaKelas.length; i += pairBatchSize) {
           const chunk = siswaKelas.slice(i, i + pairBatchSize);
           const nomorLembar = Math.floor(i / pairBatchSize) + 1;
 
-          htmlAll += `<div class="page-sheet" style="padding: 8mm;"><div class="page-title-tag">📄 LEMBAR ${nomorLembar} - MODE LIPAT (DEPAN & BELAKANG BERSAMPINGAN)</div>`;
+          htmlAll += `<div class="page-sheet mode-lipat-sheet" style="padding: 8mm;"><div class="page-title-tag">📄 LEMBAR ${nomorLembar} - MODE LIPAT STIKER (PRESISI DENGAN GARIS LIPAT)</div>`;
           chunk.forEach(s => {
+            htmlAll += `<div class="pair-lipat-wrapper">`;
             htmlAll += buatHtmlDepan(s);
             htmlAll += buatHtmlBelakang(s);
+            htmlAll += `</div>`;
           });
           htmlAll += `</div>`;
         }
       } 
-      // MODE 2, 3, 4: DUPLEX, DEPAN SAJA, BELAKANG SAJA
+      // MODE DUPLEX / DEPAN SAJA / BELAKANG SAJA
       else {
         const batchSize = (ukuranKertas === "F4") ? 10 : 8;
         for (let i = 0; i < siswaKelas.length; i += batchSize) {
@@ -816,7 +849,6 @@
 
       wadah.innerHTML = htmlAll;
 
-      // GENERATE QR CODE UNTUK HALAMAN BELAKANG
       if (sisiPilihan === "semua" || sisiPilihan === "belakang" || sisiPilihan === "lipat") {
         siswaKelas.forEach(s => {
           const nisn = (s[0] || '').trim();
