@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cetak Kartu Pelajar (Depan / Belakang / Duplex) - SMPN 1 Rancah (v4.4 Manual Zoom & Pan)</title>
+  <title>Cetak Kartu Pelajar (Depan / Belakang / Duplex) - SMPN 1 Rancah (v4.5 Auto-Save Foto)</title>
   
   <!-- SKRIP PENGAMAN & AUTO LOGOUT -->
   <script src="auth-guard.js"></script>
@@ -53,6 +53,8 @@
     .btn-cetak:hover { background: #15803d; }
     .btn-reset { background: #64748b; color: #fff; }
     .btn-reset:hover { background: #475569; }
+    .btn-danger { background: #ef4444; color: #fff; }
+    .btn-danger:hover { background: #dc2626; }
     .badge-v { background: #0284c7; color: #ffffff; font-size: 10px; padding: 2px 8px; border-radius: 12px; font-weight: 800; }
 
     /* AREA PREVIEW KANAN */
@@ -114,7 +116,6 @@
       width: 100%; 
       height: 100%; 
       object-fit: cover; 
-      object-position: center 10%; 
       pointer-events: none;
       transition: transform 0.05s ease-out, object-position 0.05s ease-out;
     }
@@ -187,7 +188,7 @@
 
       <h2>
         <span>Cetak Kartu Pelajar</span>
-        <span class="badge-v">v4.4 Zoom & Pan</span>
+        <span class="badge-v">v4.5 Auto-Save</span>
       </h2>
       
       <div id="statusIndikator" class="status-box loading">
@@ -195,11 +196,13 @@
       </div>
 
       <div class="form-group full-width" style="background:#e0f2fe; padding:10px; border-radius:8px; border:1px solid #0284c7; margin-bottom:12px;">
-        <span style="font-size:10px; color:#0369a1; font-weight:800; display:block; margin-bottom:4px;">🖱️ PANDUAN NSEDIT FOTO MANUALLY:</span>
-        <ul style="font-size:9px; color:#0f172a; padding-left:14px; line-height:1.4;">
-          <li><b>Scroll Mouse:</b> Zoom In / Zoom Out ukuran foto.</li>
-          <li><b>Klik & Geser (Drag):</b> Pindahkan posisi wajah ke atas, bawah, kiri, atau kanan.</li>
-        </ul>
+        <span style="font-size:10px; color:#0369a1; font-weight:800; display:block; margin-bottom:4px;">💾 STATUS PENYIMPANAN OTOMATIS:</span>
+        <p style="font-size:9px; color:#0f172a; line-height:1.4;">
+          Setiap kali kamu <b>Scroll (Zoom)</b> atau <b>Drag (Geser)</b> foto siswa, posisinya langsung tersimpan otomatis. Pilih sisi cetak (depan/belakang) tanpa khawatir foto bergeser kembali!
+        </p>
+        <button type="button" onclick="resetSemuaFotoTersimpan()" class="btn btn-danger" style="margin-top:8px; width:100%; height:26px; font-size:9px;">
+          🗑️ Reset Semua Editan Foto Siswa
+        </button>
       </div>
 
       <!-- TAHAP 1: LEGALITAS & UPLOAD -->
@@ -313,7 +316,7 @@
               🖨️ Jalankan Cetak
             </button>
             <button type="button" onclick="resetPosisiDefault()" class="btn btn-reset">
-              Reset Posisi
+              Reset Stempel & TTD
             </button>
           </div>
         </div>
@@ -325,7 +328,7 @@
       <div class="preview-header">
         <div style="display: flex; align-items: center; gap: 8px;">
           <span>Preview Layout Cetak Kartu</span>
-          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v4.4 Dynamic</span>
+          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v4.5 Auto-Save</span>
         </div>
         <span style="font-size: 11px; opacity: 0.7; font-weight: normal;">Presisi Standar KTP (85.6mm x 53.9mm)</span>
       </div>
@@ -444,26 +447,45 @@
       renderDuplex();
     }
 
-    /* ENGINE INTERAKTIF MANUAL ZOOM & PAN UNTUK MASING-MASING FOTO */
+    function resetSemuaFotoTersimpan() {
+      if (confirm("Apakah kamu yakin ingin menghapus seluruh editan posisi & zoom foto semua siswa?")) {
+        Object.keys(localStorage).forEach(key => {
+          if (key.startsWith('foto_config_')) {
+            localStorage.removeItem(key);
+          }
+        });
+        renderDuplex();
+      }
+    }
+
+    /* ENGINE INTERAKTIF MANUAL ZOOM & PAN + SIMPAN OTOMATIS BERDASARKAN NISN */
     function pasangEventInteraktifFoto() {
       document.querySelectorAll('.foto-frame').forEach(frame => {
         const img = frame.querySelector('.foto-box');
         if (!img) return;
 
+        const nisn = img.dataset.nisn;
         let isDragging = false;
         let startX = 0, startY = 0;
+
         let posX = parseFloat(img.dataset.posX || 50);
         let posY = parseFloat(img.dataset.posY || 10);
-        let zoomScale = parseFloat(img.dataset.zoom || 1.8); // Default zoom 1.8x untuk foto setengah badan
+        let zoomScale = parseFloat(img.dataset.zoom || 1.8);
 
-        const applyTransform = () => {
+        const applyAndSaveTransform = () => {
           img.style.objectPosition = `${posX}% ${posY}%`;
           img.style.transform = `scale(${zoomScale.toFixed(2)})`;
           img.style.transformOrigin = `${posX}% ${posY}%`;
-        };
 
-        // Terapkan awal
-        applyTransform();
+          // SIMPAN DENGAN KUNCI NISN PADA LOCALSTORAGE
+          if (nisn) {
+            localStorage.setItem(`foto_config_${nisn}`, JSON.stringify({
+              posX: posX,
+              posY: posY,
+              zoom: zoomScale
+            }));
+          }
+        };
 
         // 1. Zoom via Wheel Mouse
         frame.onwheel = function(e) {
@@ -474,7 +496,7 @@
             zoomScale = Math.max(1.0, zoomScale - 0.1);
           }
           img.dataset.zoom = zoomScale;
-          applyTransform();
+          applyAndSaveTransform();
         };
 
         // 2. Drag untuk Pan (Menggeser Posisi Wajah)
@@ -490,7 +512,6 @@
           const dx = e.clientX - startX;
           const dy = e.clientY - startY;
 
-          // Hitung perubahan %
           posX = Math.max(0, Math.min(100, posX - (dx * 0.25)));
           posY = Math.max(0, Math.min(100, posY - (dy * 0.25)));
 
@@ -499,7 +520,7 @@
 
           img.dataset.posX = posX;
           img.dataset.posY = posY;
-          applyTransform();
+          applyAndSaveTransform();
         });
 
         window.addEventListener('mouseup', function() {
@@ -613,6 +634,21 @@
       const fotoRaw = (s[12] || '').trim();
       const fotoUrl = (fotoRaw.startsWith('http')) ? fotoRaw : `assets/foto_${nisn}.jpg`;
 
+      // AMBIL POSISI TERSIMPAN BERDASARKAN NISN
+      let savedPosX = 50;
+      let savedPosY = 10;
+      let savedZoom = 1.8;
+
+      const savedData = localStorage.getItem(`foto_config_${nisn}`);
+      if (savedData) {
+        try {
+          const cfg = JSON.parse(savedData);
+          savedPosX = cfg.posX ?? 50;
+          savedPosY = cfg.posY ?? 10;
+          savedZoom = cfg.zoom ?? 1.8;
+        } catch(e) {}
+      }
+
       return `
         <div class="kartu-container-depan">
           <div class="header-depan">
@@ -626,7 +662,13 @@
           <div class="judul-kartu">KARTU PELAJAR</div>
           <div class="content-depan">
             <div class="foto-frame" title="Scroll untuk Zoom, Klik & Geser untuk atur posisi foto">
-              <img src="${fotoUrl}" class="foto-box" crossorigin="anonymous" onerror="this.src='https://via.placeholder.com/108x138?text=Foto'">
+              <img src="${fotoUrl}" class="foto-box" crossorigin="anonymous" 
+                   data-nisn="${nisn}" 
+                   data-pos-x="${savedPosX}" 
+                   data-pos-y="${savedPosY}" 
+                   data-zoom="${savedZoom}"
+                   style="object-position: ${savedPosX}% ${savedPosY}%; transform: scale(${savedZoom}); transform-origin: ${savedPosX}% ${savedPosY}%;" 
+                   onerror="this.src='https://via.placeholder.com/108x138?text=Foto'">
             </div>
             <div class="data-box">
               <div class="data-row"><div class="data-label">Nama</div><div class="data-separator">:</div><div class="data-value" style="font-weight:800;">${nama}</div></div>
