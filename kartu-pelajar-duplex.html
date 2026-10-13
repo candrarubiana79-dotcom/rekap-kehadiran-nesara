@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cetak Kartu Pelajar (Depan / Belakang / Duplex) - SMPN 1 Rancah (v4.5 Auto-Save Foto)</title>
+  <title>Cetak Kartu Pelajar (Depan / Belakang / Duplex) - SMPN 1 Rancah (v4.6 Persistent Storage)</title>
   
   <!-- SKRIP PENGAMAN & AUTO LOGOUT -->
   <script src="auth-guard.js"></script>
@@ -188,7 +188,7 @@
 
       <h2>
         <span>Cetak Kartu Pelajar</span>
-        <span class="badge-v">v4.5 Auto-Save</span>
+        <span class="badge-v">v4.6 Lock Fix</span>
       </h2>
       
       <div id="statusIndikator" class="status-box loading">
@@ -196,9 +196,9 @@
       </div>
 
       <div class="form-group full-width" style="background:#e0f2fe; padding:10px; border-radius:8px; border:1px solid #0284c7; margin-bottom:12px;">
-        <span style="font-size:10px; color:#0369a1; font-weight:800; display:block; margin-bottom:4px;">💾 STATUS PENYIMPANAN OTOMATIS:</span>
+        <span style="font-size:10px; color:#0369a1; font-weight:800; display:block; margin-bottom:4px;">🔒 PENYIMPANAN OTOMATIS AKTIF:</span>
         <p style="font-size:9px; color:#0f172a; line-height:1.4;">
-          Setiap kali kamu <b>Scroll (Zoom)</b> atau <b>Drag (Geser)</b> foto siswa, posisinya langsung tersimpan otomatis. Pilih sisi cetak (depan/belakang) tanpa khawatir foto bergeser kembali!
+          Posisi dan zoom foto tersimpan otomatis per NISN. Mengubah ukuran kertas (A4/F4) atau mode cetak <b>TIDAK AKAN</b> mengubah editan fotomu.
         </p>
         <button type="button" onclick="resetSemuaFotoTersimpan()" class="btn btn-danger" style="margin-top:8px; width:100%; height:26px; font-size:9px;">
           🗑️ Reset Semua Editan Foto Siswa
@@ -328,7 +328,7 @@
       <div class="preview-header">
         <div style="display: flex; align-items: center; gap: 8px;">
           <span>Preview Layout Cetak Kartu</span>
-          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v4.5 Auto-Save</span>
+          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v4.6 Lock Fix</span>
         </div>
         <span style="font-size: 11px; opacity: 0.7; font-weight: normal;">Presisi Standar KTP (85.6mm x 53.9mm)</span>
       </div>
@@ -350,6 +350,11 @@
     let geserBelakangX = parseFloat(localStorage.getItem('geserBelakangX'));
     if (isNaN(geserBelakangX)) geserBelakangX = 1;
 
+    // VARIABEL GLOBAL UNTUK MENCEGAH EVENT DRAG DOUBLE SAAT SWITCH KERTAS
+    let activeFrame = null;
+    let isDragging = false;
+    let startX = 0, startY = 0;
+
     window.onload = function() {
       if (localStorage.getItem('namaKepsek')) document.getElementById('inputNamaKepsek').value = localStorage.getItem('namaKepsek');
       if (localStorage.getItem('nipKepsek')) document.getElementById('inputNipKepsek').value = localStorage.getItem('nipKepsek');
@@ -357,6 +362,7 @@
 
       initSliders();
       initGeserBelakang();
+      initGlobalDragListeners();
       fetchDataSiswa();
     };
 
@@ -458,26 +464,74 @@
       }
     }
 
-    /* ENGINE INTERAKTIF MANUAL ZOOM & PAN + SIMPAN OTOMATIS BERDASARKAN NISN */
+    /* GLOBAL DRAG LISTENERS MENCEGAH PENUMPUKAN EVENT MEMORI */
+    function initGlobalDragListeners() {
+      window.addEventListener('mousemove', function(e) {
+        if (!isDragging || !activeFrame) return;
+        const img = activeFrame.querySelector('.foto-box');
+        if (!img) return;
+
+        const nisn = img.getAttribute('data-nisn');
+        let posX = parseFloat(img.getAttribute('data-pos-x') || 50);
+        let posY = parseFloat(img.getAttribute('data-pos-y') || 10);
+        let zoomScale = parseFloat(img.getAttribute('data-zoom') || 1.8);
+
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+
+        posX = Math.max(0, Math.min(100, posX - (dx * 0.25)));
+        posY = Math.max(0, Math.min(100, posY - (dy * 0.25)));
+
+        startX = e.clientX;
+        startY = e.clientY;
+
+        img.setAttribute('data-pos-x', posX);
+        img.setAttribute('data-pos-y', posY);
+
+        img.style.objectPosition = `${posX}% ${posY}%`;
+        img.style.transform = `scale(${zoomScale.toFixed(2)})`;
+        img.style.transformOrigin = `${posX}% ${posY}%`;
+
+        if (nisn) {
+          localStorage.setItem(`foto_config_${nisn}`, JSON.stringify({
+            posX: posX,
+            posY: posY,
+            zoom: zoomScale
+          }));
+        }
+      });
+
+      window.addEventListener('mouseup', function() {
+        isDragging = false;
+        activeFrame = null;
+      });
+    }
+
+    /* ENGINE INTERAKTIF BINDING FOTO BATCH AMAN */
     function pasangEventInteraktifFoto() {
       document.querySelectorAll('.foto-frame').forEach(frame => {
         const img = frame.querySelector('.foto-box');
         if (!img) return;
 
-        const nisn = img.dataset.nisn;
-        let isDragging = false;
-        let startX = 0, startY = 0;
+        const nisn = img.getAttribute('data-nisn');
 
-        let posX = parseFloat(img.dataset.posX || 50);
-        let posY = parseFloat(img.dataset.posY || 10);
-        let zoomScale = parseFloat(img.dataset.zoom || 1.8);
+        // 1. Zoom via Wheel Mouse
+        frame.onwheel = function(e) {
+          e.preventDefault();
+          let zoomScale = parseFloat(img.getAttribute('data-zoom') || 1.8);
+          let posX = parseFloat(img.getAttribute('data-pos-x') || 50);
+          let posY = parseFloat(img.getAttribute('data-pos-y') || 10);
 
-        const applyAndSaveTransform = () => {
-          img.style.objectPosition = `${posX}% ${posY}%`;
+          if (e.deltaY < 0) {
+            zoomScale = Math.min(4.0, zoomScale + 0.1);
+          } else {
+            zoomScale = Math.max(1.0, zoomScale - 0.1);
+          }
+
+          img.setAttribute('data-zoom', zoomScale);
           img.style.transform = `scale(${zoomScale.toFixed(2)})`;
           img.style.transformOrigin = `${posX}% ${posY}%`;
 
-          // SIMPAN DENGAN KUNCI NISN PADA LOCALSTORAGE
           if (nisn) {
             localStorage.setItem(`foto_config_${nisn}`, JSON.stringify({
               posX: posX,
@@ -487,45 +541,14 @@
           }
         };
 
-        // 1. Zoom via Wheel Mouse
-        frame.onwheel = function(e) {
-          e.preventDefault();
-          if (e.deltaY < 0) {
-            zoomScale = Math.min(4.0, zoomScale + 0.1);
-          } else {
-            zoomScale = Math.max(1.0, zoomScale - 0.1);
-          }
-          img.dataset.zoom = zoomScale;
-          applyAndSaveTransform();
-        };
-
-        // 2. Drag untuk Pan (Menggeser Posisi Wajah)
+        // 2. Drag Start
         frame.onmousedown = function(e) {
           e.preventDefault();
           isDragging = true;
+          activeFrame = frame;
           startX = e.clientX;
           startY = e.clientY;
         };
-
-        window.addEventListener('mousemove', function(e) {
-          if (!isDragging) return;
-          const dx = e.clientX - startX;
-          const dy = e.clientY - startY;
-
-          posX = Math.max(0, Math.min(100, posX - (dx * 0.25)));
-          posY = Math.max(0, Math.min(100, posY - (dy * 0.25)));
-
-          startX = e.clientX;
-          startY = e.clientY;
-
-          img.dataset.posX = posX;
-          img.dataset.posY = posY;
-          applyAndSaveTransform();
-        });
-
-        window.addEventListener('mouseup', function() {
-          isDragging = false;
-        });
       });
     }
 
@@ -634,7 +657,7 @@
       const fotoRaw = (s[12] || '').trim();
       const fotoUrl = (fotoRaw.startsWith('http')) ? fotoRaw : `assets/foto_${nisn}.jpg`;
 
-      // AMBIL POSISI TERSIMPAN BERDASARKAN NISN
+      // AMBIL KONSISTEN BACA DARI LOCALSTORAGE
       let savedPosX = 50;
       let savedPosY = 10;
       let savedZoom = 1.8;
@@ -643,9 +666,9 @@
       if (savedData) {
         try {
           const cfg = JSON.parse(savedData);
-          savedPosX = cfg.posX ?? 50;
-          savedPosY = cfg.posY ?? 10;
-          savedZoom = cfg.zoom ?? 1.8;
+          if (cfg.posX !== undefined) savedPosX = cfg.posX;
+          if (cfg.posY !== undefined) savedPosY = cfg.posY;
+          if (cfg.zoom !== undefined) savedZoom = cfg.zoom;
         } catch(e) {}
       }
 
@@ -774,7 +797,7 @@
         });
       }
 
-      // AKTIFKAN EVENT INTERAKTIF ZOOM & PAN PADA FOTO
+      // PASANG ULANG BINDING HANDLER DENGAN AMAN
       pasangEventInteraktifFoto();
     }
 
