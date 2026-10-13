@@ -91,7 +91,7 @@
     
     .content-depan { display: flex; padding: 0 2.8mm; position: relative; z-index: 2; gap: 2mm; align-items: flex-start; }
     
-    /* STYLING FOTO DENGAN AUTO-CROP PASFOTO KTP PRESISI */
+    /* STYLING FOTO DENGAN FOKUS KONTROL KUSTUM */
     .foto-box { 
       width: 17.5mm; 
       height: 23mm; 
@@ -99,7 +99,7 @@
       border-radius: 1.2mm; 
       background: #f1f5f9; 
       object-fit: cover; 
-      object-position: center 18%; /* FOKUS OTOMATIS KE KEPALA & WAJAH */
+      object-position: center 15%; 
       flex-shrink: 0; 
     }
 
@@ -201,9 +201,15 @@
         </div>
       </div>
 
-      <!-- TAHAP 2: EDIT POSISI LIVE CAP & TTD -->
-      <div class="section-title">2. Edit Posisi Live (Cap & TTD)</div>
+      <!-- TAHAP 2: EDIT POSISI LIVE (CAP, TTD, & FOTO) -->
+      <div class="section-title">2. Edit Posisi Live (Cap, TTD & Foto)</div>
       <div class="grid-form">
+        <div class="form-group full-width" style="background:#f0f9ff; padding:8px; border-radius:8px; border:1px solid #bae6fd; margin-bottom:6px;">
+          <label style="color:#0369a1;">Fokus Potongan Foto (Y): <span id="valFotoY">15%</span></label>
+          <input type="range" id="fotoY" min="0" max="60" step="1" value="15" oninput="updatePosisiLive()">
+          <span style="font-size:8px; color:#0369a1; margin-top:2px;">*Geser kiri jika kepala terpotong, geser kanan jika ingin memotong bagian bawah.</span>
+        </div>
+
         <div class="form-group">
           <label>Cap - Posisi X: <span id="valStempelX">-11mm</span></label>
           <input type="range" id="stempelX" min="-30" max="20" step="0.5" value="-11" oninput="updatePosisiLive()">
@@ -315,11 +321,11 @@
 
     const defaultPosisi = {
       stempelX: '-11', stempelY: '1', stempelSize: '14',
-      ttdX: '0.5', ttdY: '2.5', ttdSize: '16'
+      ttdX: '0.5', ttdY: '2.5', ttdSize: '16', fotoY: '15'
     };
 
     let geserBelakangX = parseFloat(localStorage.getItem('geserBelakangX'));
-    if (isNaN(geserBelakangX)) geserBelakangX = 1; // Default offset 1mm ke kanan
+    if (isNaN(geserBelakangX)) geserBelakangX = 1;
 
     window.onload = function() {
       if (localStorage.getItem('namaKepsek')) document.getElementById('inputNamaKepsek').value = localStorage.getItem('namaKepsek');
@@ -339,6 +345,8 @@
       document.getElementById('ttdX').value = localStorage.getItem('ttdX') || defaultPosisi.ttdX;
       document.getElementById('ttdY').value = localStorage.getItem('ttdY') || defaultPosisi.ttdY;
       document.getElementById('ttdSize').value = localStorage.getItem('ttdSize') || defaultPosisi.ttdSize;
+
+      document.getElementById('fotoY').value = localStorage.getItem('fotoY') || defaultPosisi.fotoY;
 
       updateLabelPosisi();
     }
@@ -366,6 +374,8 @@
       document.getElementById('valTtdX').innerText = document.getElementById('ttdX').value + 'mm';
       document.getElementById('valTtdY').innerText = document.getElementById('ttdY').value + 'mm';
       document.getElementById('valTtdSize').innerText = document.getElementById('ttdSize').value + 'mm';
+
+      document.getElementById('valFotoY').innerText = document.getElementById('fotoY').value + '%';
     }
 
     function updatePosisiLive() {
@@ -379,6 +389,8 @@
       const tY = document.getElementById('ttdY').value;
       const tSize = document.getElementById('ttdSize').value;
 
+      const fY = document.getElementById('fotoY').value;
+
       localStorage.setItem('stempelX', sX);
       localStorage.setItem('stempelY', sY);
       localStorage.setItem('stempelSize', sSize);
@@ -386,6 +398,8 @@
       localStorage.setItem('ttdX', tX);
       localStorage.setItem('ttdY', tY);
       localStorage.setItem('ttdSize', tSize);
+
+      localStorage.setItem('fotoY', fY);
 
       document.querySelectorAll('.img-stempel').forEach(img => {
         img.style.left = sX + 'mm';
@@ -398,6 +412,10 @@
         img.style.top = tY + 'mm';
         img.style.width = tSize + 'mm';
       });
+
+      document.querySelectorAll('.foto-box').forEach(img => {
+        img.style.objectPosition = `center ${fY}%`;
+      });
     }
 
     function resetPosisiDefault() {
@@ -408,6 +426,8 @@
       localStorage.setItem('ttdX', defaultPosisi.ttdX);
       localStorage.setItem('ttdY', defaultPosisi.ttdY);
       localStorage.setItem('ttdSize', defaultPosisi.ttdSize);
+
+      localStorage.setItem('fotoY', defaultPosisi.fotoY);
 
       geserBelakangX = 1;
       localStorage.setItem('geserBelakangX', 1);
@@ -490,13 +510,14 @@
       const tY = localStorage.getItem('ttdY') || defaultPosisi.ttdY;
       const tSize = localStorage.getItem('ttdSize') || defaultPosisi.ttdSize;
 
+      const fY = localStorage.getItem('fotoY') || defaultPosisi.fotoY;
+
       const nisn = (s[0] || '').trim();
       const nama = (s[1] || '').trim();
       const tempatLahir = (s[4] || '').trim();
       const tglLahir = (s[5] || '').trim();
       const ttl = (tempatLahir && tglLahir) ? `${tempatLahir}, ${tglLahir}` : (tempatLahir || tglLahir || '-');
 
-      // PEMBENTUKAN ALAMAT LENGKAP AUTOMATIS
       const dsn = (s[7] || '').trim();
       const rt = (s[8] || '').trim();
       const rw = (s[9] || '').trim();
@@ -536,7 +557,7 @@
           </div>
           <div class="judul-kartu">KARTU PELAJAR</div>
           <div class="content-depan">
-            <img src="${fotoUrl}" class="foto-box" onerror="this.src='https://via.placeholder.com/108x138?text=Foto'">
+            <img src="${fotoUrl}" class="foto-box" style="object-position: center ${fY}%;" onerror="this.src='https://via.placeholder.com/108x138?text=Foto'">
             <div class="data-box">
               <div class="data-row"><div class="data-label">Nama</div><div class="data-separator">:</div><div class="data-value" style="font-weight:800;">${nama}</div></div>
               <div class="data-row"><div class="data-label">NISN</div><div class="data-separator">:</div><div class="data-value">${nisn}</div></div>
@@ -606,14 +627,12 @@
         const chunk = siswaKelas.slice(i, i + batchSize);
         const nomorLembar = Math.floor(i / batchSize) + 1;
 
-        // SISI DEPAN (NORMAL MARGIN)
         if (sisiPilihan === "semua" || sisiPilihan === "depan") {
           htmlAll += `<div class="page-sheet" style="padding: 8mm;"><div class="page-title-tag">📄 LEMBAR ${nomorLembar} - SISI DEPAN</div>`;
           chunk.forEach(s => { htmlAll += buatHtmlDepan(s); });
           htmlAll += `</div>`;
         }
 
-        // SISI BELAKANG (DENGAN KOMPENSASI GeserBelakangX MARGIN-LEFT)
         if (sisiPilihan === "semua" || sisiPilihan === "belakang") {
           const calcPaddingLeft = 8 + geserBelakangX;
           htmlAll += `<div class="page-sheet" style="padding: 8mm 8mm 8mm ${calcPaddingLeft}mm;"><div class="page-title-tag">📄 LEMBAR ${nomorLembar} - SISI BELAKANG (MIRRORED - OFFSET ${geserBelakangX}mm)</div>`;
