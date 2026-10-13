@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cetak Kartu Pelajar (Depan / Belakang / Duplex) - SMPN 1 Rancah (v3.5)</title>
+  <title>Cetak Kartu Pelajar (Depan / Belakang / Duplex) - SMPN 1 Rancah (v3.7 Auto AI Crop)</title>
   
   <!-- SKRIP PENGAMAN & AUTO LOGOUT -->
   <script src="auth-guard.js"></script>
@@ -13,6 +13,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <!-- Library Generator QR Code -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- Library AI Smart Crop (Deteksi Otomatis Wajah) -->
+  <script src="https://unpkg.com/smartcrop@2.0.5/smartcrop.js"></script>
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -91,16 +93,25 @@
     
     .content-depan { display: flex; padding: 0 2.8mm; position: relative; z-index: 2; gap: 2mm; align-items: flex-start; }
     
-    /* STYLING FOTO DENGAN FOKUS KONTROL KUSTUM */
+    /* BINGKAI FOTO SISWA */
+    .foto-frame {
+      width: 17.5mm;
+      height: 23mm;
+      border: 0.5mm solid #facc15;
+      border-radius: 1.2mm;
+      background: #e2e8f0;
+      overflow: hidden;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
     .foto-box { 
-      width: 17.5mm; 
-      height: 23mm; 
-      border: 0.5mm solid #facc15; 
-      border-radius: 1.2mm; 
-      background: #f1f5f9; 
+      width: 100%; 
+      height: 100%; 
       object-fit: cover; 
       object-position: center 15%; 
-      flex-shrink: 0; 
+      transition: object-position 0.2s ease;
     }
 
     .data-box { flex-grow: 1; background: rgba(255, 255, 255, 0.96); border: 0.35mm solid #dc2626; border-radius: 1.5mm; padding: 1.2mm 1.8mm; }
@@ -171,7 +182,7 @@
 
       <h2>
         <span>Cetak Kartu Pelajar</span>
-        <span class="badge-v">v3.5</span>
+        <span class="badge-v">v3.7 AI</span>
       </h2>
       
       <div id="statusIndikator" class="status-box loading">Memuat data siswa...</div>
@@ -201,13 +212,25 @@
         </div>
       </div>
 
-      <!-- TAHAP 2: EDIT POSISI LIVE (CAP, TTD, & FOTO) -->
-      <div class="section-title">2. Edit Posisi Live (Cap, TTD & Foto)</div>
+      <!-- TAHAP 2: EDIT POSISI LIVE (CAP, TTD, & AI AUTO CROP V3.7) -->
+      <div class="section-title">2. Edit Posisi Live (Cap, TTD & Foto AI)</div>
       <div class="grid-form">
-        <div class="form-group full-width" style="background:#f0f9ff; padding:8px; border-radius:8px; border:1px solid #bae6fd; margin-bottom:6px;">
-          <label style="color:#0369a1;">Fokus Potongan Foto (Y): <span id="valFotoY">15%</span></label>
-          <input type="range" id="fotoY" min="0" max="60" step="1" value="15" oninput="updatePosisiLive()">
-          <span style="font-size:8px; color:#0369a1; margin-top:2px;">*Geser kiri jika kepala terpotong, geser kanan jika ingin memotong bagian bawah.</span>
+        <div class="form-group full-width" style="background:#f0fdf4; padding:8px; border-radius:8px; border:1px solid #bbf7d0; margin-bottom:6px;">
+          <label style="color:#166534;">Mode Potong Foto: <span id="valFotoMode">AI Smart Crop</span></label>
+          <select id="selectFotoMode" onchange="updatePosisiLive()" style="margin-top:2px;">
+            <option value="ai" selected>🤖 AI Smart Crop (Auto Deteksi Wajah Individual)</option>
+            <option value="manual">⚙️ Manual Offset (Gunakan Slider di Bawah)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Fokus Y Manual: <span id="valFotoY">15%</span></label>
+          <input type="range" id="fotoY" min="0" max="100" step="1" value="15" oninput="updatePosisiLive()">
+        </div>
+
+        <div class="form-group">
+          <label>Fokus X Manual: <span id="valFotoX">50%</span></label>
+          <input type="range" id="fotoX" min="0" max="100" step="1" value="50" oninput="updatePosisiLive()">
         </div>
 
         <div class="form-group">
@@ -305,7 +328,7 @@
       <div class="preview-header">
         <div style="display: flex; align-items: center; gap: 8px;">
           <span>Preview Layout Cetak Kartu</span>
-          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v3.5</span>
+          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v3.7 AI</span>
         </div>
         <span style="font-size: 11px; opacity: 0.7; font-weight: normal;">Presisi Standar KTP (85.6mm x 53.9mm)</span>
       </div>
@@ -321,7 +344,8 @@
 
     const defaultPosisi = {
       stempelX: '-11', stempelY: '1', stempelSize: '14',
-      ttdX: '0.5', ttdY: '2.5', ttdSize: '16', fotoY: '15'
+      ttdX: '0.5', ttdY: '2.5', ttdSize: '16', 
+      fotoY: '15', fotoX: '50', fotoMode: 'ai'
     };
 
     let geserBelakangX = parseFloat(localStorage.getItem('geserBelakangX'));
@@ -347,6 +371,8 @@
       document.getElementById('ttdSize').value = localStorage.getItem('ttdSize') || defaultPosisi.ttdSize;
 
       document.getElementById('fotoY').value = localStorage.getItem('fotoY') || defaultPosisi.fotoY;
+      document.getElementById('fotoX').value = localStorage.getItem('fotoX') || defaultPosisi.fotoX;
+      document.getElementById('selectFotoMode').value = localStorage.getItem('fotoMode') || defaultPosisi.fotoMode;
 
       updateLabelPosisi();
     }
@@ -376,6 +402,10 @@
       document.getElementById('valTtdSize').innerText = document.getElementById('ttdSize').value + 'mm';
 
       document.getElementById('valFotoY').innerText = document.getElementById('fotoY').value + '%';
+      document.getElementById('valFotoX').innerText = document.getElementById('fotoX').value + '%';
+      
+      const selMode = document.getElementById('selectFotoMode').value;
+      document.getElementById('valFotoMode').innerText = selMode === 'ai' ? 'AI Smart Crop' : 'Manual';
     }
 
     function updatePosisiLive() {
@@ -390,6 +420,8 @@
       const tSize = document.getElementById('ttdSize').value;
 
       const fY = document.getElementById('fotoY').value;
+      const fX = document.getElementById('fotoX').value;
+      const fMode = document.getElementById('selectFotoMode').value;
 
       localStorage.setItem('stempelX', sX);
       localStorage.setItem('stempelY', sY);
@@ -400,6 +432,8 @@
       localStorage.setItem('ttdSize', tSize);
 
       localStorage.setItem('fotoY', fY);
+      localStorage.setItem('fotoX', fX);
+      localStorage.setItem('fotoMode', fMode);
 
       document.querySelectorAll('.img-stempel').forEach(img => {
         img.style.left = sX + 'mm';
@@ -413,9 +447,15 @@
         img.style.width = tSize + 'mm';
       });
 
-      document.querySelectorAll('.foto-box').forEach(img => {
-        img.style.objectPosition = `center ${fY}%`;
-      });
+      if (fMode === 'manual') {
+        document.querySelectorAll('.foto-box').forEach(img => {
+          img.style.objectPosition = `${fX}% ${fY}%`;
+        });
+      } else {
+        document.querySelectorAll('.foto-box').forEach(img => {
+          prosesAiAutoCrop(img);
+        });
+      }
     }
 
     function resetPosisiDefault() {
@@ -428,6 +468,8 @@
       localStorage.setItem('ttdSize', defaultPosisi.ttdSize);
 
       localStorage.setItem('fotoY', defaultPosisi.fotoY);
+      localStorage.setItem('fotoX', defaultPosisi.fotoX);
+      localStorage.setItem('fotoMode', defaultPosisi.fotoMode);
 
       geserBelakangX = 1;
       localStorage.setItem('geserBelakangX', 1);
@@ -438,248 +480,13 @@
       renderDuplex();
     }
 
-    function fetchDataSiswa() {
-      const statusBox = document.getElementById('statusIndikator');
-      const urlGviz = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
-      
-      Papa.parse(urlGviz, {
-        download: true, skipEmptyLines: true,
-        complete: function(results) {
-          if (results.data && results.data.length >= 2) prosesDataCsv(results.data);
-        }
-      });
-    }
+    /* FUNGSI UTAMA AI SMART CROP UNTUK FOTO INDIVIDUAL */
+    function prosesAiAutoCrop(imgEl) {
+      const mode = document.getElementById('selectFotoMode') ? document.getElementById('selectFotoMode').value : 'ai';
+      if (mode !== 'ai' || !imgEl) return;
 
-    function prosesDataCsv(rowsAll) {
-      const statusBox = document.getElementById('statusIndikator');
-      const rows = rowsAll.slice(1);
-      dataSiswaGlobal = rows.filter(r => r && r[1] && r[1].trim() !== '');
-
-      daftarKelasGlobal = [...new Set(dataSiswaGlobal.map(s => (s[2] || '').trim()))].filter(Boolean).sort();
-
-      statusBox.className = 'status-box ready';
-      statusBox.innerHTML = `<b>Terbaca:</b> ${dataSiswaGlobal.length} Siswa (${daftarKelasGlobal.length} Kelas)`;
-
-      const selKelas = document.getElementById('selectKelas');
-      selKelas.innerHTML = '<option value="">-- Pilih Kelas --</option>';
-      daftarKelasGlobal.forEach(k => { selKelas.innerHTML += `<option value="${k}">Kelas ${k}</option>`; });
-
-      if (daftarKelasGlobal.length > 0) {
-        selKelas.value = daftarKelasGlobal[0];
-        renderDuplex();
-      }
-    }
-
-    function updateMetadata() {
-      const nama = document.getElementById('inputNamaKepsek').value;
-      const nip = document.getElementById('inputNipKepsek').value;
-      const tgl = document.getElementById('inputTglTtd').value;
-
-      localStorage.setItem('namaKepsek', nama);
-      localStorage.setItem('nipKepsek', nip);
-      localStorage.setItem('tglTtdData', tgl);
-
-      renderDuplex();
-    }
-
-    function uploadGambarLokal(event, storageKey) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        localStorage.setItem(storageKey, e.target.result);
-        renderDuplex();
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function buatHtmlDepan(s) {
-      const namaKepsek = document.getElementById('inputNamaKepsek').value || '-';
-      const nipKepsek = document.getElementById('inputNipKepsek').value || '-';
-      const tglTtd = document.getElementById('inputTglTtd').value || '-';
-
-      const stempelBase64 = localStorage.getItem('stempelData') || '';
-      const ttdBase64 = localStorage.getItem('ttdData') || '';
-
-      const sX = localStorage.getItem('stempelX') || defaultPosisi.stempelX;
-      const sY = localStorage.getItem('stempelY') || defaultPosisi.stempelY;
-      const sSize = localStorage.getItem('stempelSize') || defaultPosisi.stempelSize;
-
-      const tX = localStorage.getItem('ttdX') || defaultPosisi.ttdX;
-      const tY = localStorage.getItem('ttdY') || defaultPosisi.ttdY;
-      const tSize = localStorage.getItem('ttdSize') || defaultPosisi.ttdSize;
-
-      const fY = localStorage.getItem('fotoY') || defaultPosisi.fotoY;
-
-      const nisn = (s[0] || '').trim();
-      const nama = (s[1] || '').trim();
-      const tempatLahir = (s[4] || '').trim();
-      const tglLahir = (s[5] || '').trim();
-      const ttl = (tempatLahir && tglLahir) ? `${tempatLahir}, ${tglLahir}` : (tempatLahir || tglLahir || '-');
-
-      const dsn = (s[7] || '').trim();
-      const rt = (s[8] || '').trim();
-      const rw = (s[9] || '').trim();
-      const desa = (s[10] || '').trim();
-      const kec = (s[11] || '').trim();
-
-      let bagianAlamat = [];
-      if (dsn) {
-        if (/^d(sn|usun)\.?\s+/i.test(dsn)) bagianAlamat.push(dsn);
-        else bagianAlamat.push(`Dsn. ${dsn}`);
-      }
-      if (rt || rw) {
-        bagianAlamat.push(`RT ${rt || '0'}/RW ${rw || '0'}`);
-      }
-      if (desa) {
-        if (/^d(esa|s)\.?\s+/i.test(desa)) bagianAlamat.push(desa);
-        else bagianAlamat.push(`Ds. ${desa}`);
-      }
-      if (kec) {
-        if (/^kec(amatan)?\.?\s+/i.test(kec)) bagianAlamat.push(kec);
-        else bagianAlamat.push(`Kec. ${kec}`);
-      }
-      const alamat = bagianAlamat.join(' ') || '-';
-
-      const fotoRaw = (s[12] || '').trim();
-      const fotoUrl = (fotoRaw.startsWith('http')) ? fotoRaw : `assets/foto_${nisn}.jpg`;
-
-      return `
-        <div class="kartu-container-depan">
-          <div class="header-depan">
-            <img src="assets/logo-ciamis.png" class="logo-left">
-            <img src="assets/logo-smpn1rancah.png" class="logo-right">
-            <div class="pemda">PEMERINTAH KABUPATEN CIAMIS</div>
-            <div class="dinas">DINAS PENDIDIKAN</div>
-            <div class="sekolah">SMP NEGERI 1 RANCAH</div>
-            <div class="alamat">Jalan Cibeureum Rancah, Kecamatan Rancah – Kabupaten Ciamis</div>
-          </div>
-          <div class="judul-kartu">KARTU PELAJAR</div>
-          <div class="content-depan">
-            <img src="${fotoUrl}" class="foto-box" style="object-position: center ${fY}%;" onerror="this.src='https://via.placeholder.com/108x138?text=Foto'">
-            <div class="data-box">
-              <div class="data-row"><div class="data-label">Nama</div><div class="data-separator">:</div><div class="data-value" style="font-weight:800;">${nama}</div></div>
-              <div class="data-row"><div class="data-label">NISN</div><div class="data-separator">:</div><div class="data-value">${nisn}</div></div>
-              <div class="data-row"><div class="data-label">Tempat Tanggal Lahir</div><div class="data-separator">:</div><div class="data-value">${ttl}</div></div>
-              <div class="data-row"><div class="data-label">Alamat</div><div class="data-separator">:</div><div class="data-value">${alamat}</div></div>
-            </div>
-          </div>
-          <div class="ttd-section">
-            <div class="ttd-box">
-              ${stempelBase64 ? `<img src="${stempelBase64}" class="img-stempel" style="left:${sX}mm; top:${sY}mm; width:${sSize}mm;">` : ''}
-              ${ttdBase64 ? `<img src="${ttdBase64}" class="img-ttd" style="left:${tX}mm; top:${tY}mm; width:${tSize}mm;">` : ''}
-              <div>${tglTtd}</div>
-              <div>Kepala Sekolah</div>
-              <div class="ttd-space"></div>
-              <div class="nama-kepsek">${namaKepsek}</div>
-              <div class="nip-kepsek">NIP. ${nipKepsek}</div>
-            </div>
-          </div>
-          <div class="bg-wave-back"></div>
-          <div class="bg-wave-front"></div>
-        </div>
-      `;
-    }
-
-    function buatHtmlBelakang(s) {
-      const nisn = (s[0] || '').trim();
-      const nama = (s[1] || '').trim();
-      const footerText = document.getElementById('inputFooterText').value;
-      const rawRules = document.getElementById('inputRules').value.split('\n');
-      const listRulesHtml = rawRules.filter(r => r.trim() !== '').map(r => `<li>${r.trim()}</li>`).join('');
-
-      return `
-        <div class="kartu-container-belakang">
-          <img src="assets/logo-smpn1rancah.png" class="watermark-logo">
-          <div class="header-belakang">
-            <img src="assets/logo-smpn1rancah.png" class="logo-header-belakang">
-            <div>
-              <div class="title">TATA TERTIB KARTU PELAJAR</div>
-              <div class="sub">SMP NEGERI 1 RANCAH</div>
-            </div>
-          </div>
-          <div class="body-belakang">
-            <ol class="rules-list">${listRulesHtml}</ol>
-            <div class="qr-section">
-              <div class="qr-box" id="qr-duplex-${nisn}"></div>
-              <div class="qr-label">${nama}</div>
-            </div>
-          </div>
-          <div class="footer-belakang">${footerText}</div>
-        </div>
-      `;
-    }
-
-    function renderDuplex() {
-      const kelasPilihan = document.getElementById('selectKelas').value;
-      const sisiPilihan = document.getElementById('selectSisiCetak').value;
-      const ukuranKertas = document.getElementById('selectUkuranKertas').value;
-      const wadah = document.getElementById('wadahCetak');
-      
-      if (!kelasPilihan) { wadah.innerHTML = ''; return; }
-
-      const siswaKelas = dataSiswaGlobal.filter(s => (s[2]||'').trim() === kelasPilihan);
-      const batchSize = (ukuranKertas === "F4") ? 10 : 8;
-      let htmlAll = '';
-
-      for (let i = 0; i < siswaKelas.length; i += batchSize) {
-        const chunk = siswaKelas.slice(i, i + batchSize);
-        const nomorLembar = Math.floor(i / batchSize) + 1;
-
-        if (sisiPilihan === "semua" || sisiPilihan === "depan") {
-          htmlAll += `<div class="page-sheet" style="padding: 8mm;"><div class="page-title-tag">📄 LEMBAR ${nomorLembar} - SISI DEPAN</div>`;
-          chunk.forEach(s => { htmlAll += buatHtmlDepan(s); });
-          htmlAll += `</div>`;
-        }
-
-        if (sisiPilihan === "semua" || sisiPilihan === "belakang") {
-          const calcPaddingLeft = 8 + geserBelakangX;
-          htmlAll += `<div class="page-sheet" style="padding: 8mm 8mm 8mm ${calcPaddingLeft}mm;"><div class="page-title-tag">📄 LEMBAR ${nomorLembar} - SISI BELAKANG (MIRRORED - OFFSET ${geserBelakangX}mm)</div>`;
-          
-          for (let j = 0; j < chunk.length; j += 2) {
-            if (j + 1 < chunk.length) {
-              htmlAll += buatHtmlBelakang(chunk[j + 1]);
-              htmlAll += buatHtmlBelakang(chunk[j]);
-            } else {
-              htmlAll += buatHtmlBelakang(chunk[j]);
-            }
-          }
-          htmlAll += `</div>`;
-        }
-      }
-
-      wadah.innerHTML = htmlAll;
-
-      if (sisiPilihan === "semua" || sisiPilihan === "belakang") {
-        siswaKelas.forEach(s => {
-          const nisn = (s[0] || '').trim();
-          const elBox = document.getElementById(`qr-duplex-${nisn}`);
-          if (elBox) {
-            elBox.innerHTML = '';
-            new QRCode(elBox, { text: nisn, width: 90, height: 90 });
-          }
-        });
-      }
-    }
-
-    function cetakDuplex() {
-      const ukuran = document.getElementById("selectUkuranKertas").value;
-      let styleTag = document.getElementById("dynamicPageStyle");
-      if (!styleTag) {
-        styleTag = document.createElement("style");
-        styleTag.id = "dynamicPageStyle";
-        document.head.appendChild(styleTag);
-      }
-
-      if (ukuran === "F4") {
-        styleTag.innerHTML = `@page { size: 215mm 330mm; margin: 0; }`;
-      } else {
-        styleTag.innerHTML = `@page { size: 210mm 297mm; margin: 0; }`;
-      }
-
-      window.print();
-    }
-  </script>
-</body>
-</html>
+      try {
+        smartcrop.crop(imgEl, { width: 175, height: 230 }).then(function(result) {
+          if (result && result.topCrop) {
+            const crop = result.topCrop;
+            const
