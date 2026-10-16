@@ -20,7 +20,6 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* WADAH TABEL RESPONSIF SCROLL HORIZONTAL */
     #containerTabel {
       overflow-x: auto;
       max-width: 100%;
@@ -33,7 +32,6 @@
       border-spacing: 0;
     }
 
-    /* FORMAT TEKS VERTIKAL KOLOM LIBUR */
     .libur-text-vertical {
       writing-mode: vertical-rl;
       transform: rotate(180deg);
@@ -42,7 +40,6 @@
       letter-spacing: 1px;
     }
 
-    /* BARIS MENYALA / HIGHLIGHT SAAT DIKLIK */
     .row-highlight td {
       background-color: #fef08a !important;
       color: #0f172a !important;
@@ -51,7 +48,6 @@
       border-bottom: 2px solid #eab308 !important;
     }
 
-    /* STICKY COLUMN (NO & NAMA SISWA TERKUNCI SAAT DI-SCROLL) */
     .sticky-col-no {
       position: sticky;
       left: 0;
@@ -65,7 +61,6 @@
       box-shadow: 3px 0 6px -2px rgba(0, 0, 0, 0.12);
     }
 
-    /* Custom Scrollbar */
     ::-webkit-scrollbar {
       height: 6px;
       width: 6px;
@@ -82,42 +77,13 @@
     }
 
     @media (max-width: 640px) {
-      body {
-        padding: 6px !important;
-      }
-
-      #tabelUtama {
-        font-size: 10px !important;
-      }
-
-      #tabelUtama th, #tabelUtama td {
-        padding: 5px 3px !important;
-      }
-
-      .sticky-col-no {
-        left: 0 !important;
-        min-width: 28px !important;
-        max-width: 28px !important;
-        text-align: center;
-      }
-
-      .sticky-col-nama {
-        left: 28px !important;
-        min-width: 110px !important;
-        max-width: 110px !important;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      .col-tanggal {
-        min-width: 25px !important;
-        text-align: center;
-      }
-
-      .libur-text-vertical {
-        font-size: 8px !important;
-      }
+      body { padding: 6px !important; }
+      #tabelUtama { font-size: 10px !important; }
+      #tabelUtama th, #tabelUtama td { padding: 5px 3px !important; }
+      .sticky-col-no { left: 0 !important; min-width: 28px !important; max-width: 28px !important; text-align: center; }
+      .sticky-col-nama { left: 28px !important; min-width: 110px !important; max-width: 110px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .col-tanggal { min-width: 25px !important; text-align: center; }
+      .libur-text-vertical { font-size: 8px !important; }
     }
   </style>
 </head>
@@ -130,11 +96,8 @@
       <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
 
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4 relative z-10">
-        
-        <!-- LOGO & JUDUL -->
         <div class="flex items-center gap-2.5 sm:gap-5">
           <img src="assets/logo-smpn1rancah.png" alt="Logo SMPN 1 Rancah" class="w-12 h-12 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain drop-shadow-xl flex-shrink-0">
-          
           <div>
             <div class="flex items-center gap-1.5 mb-0.5">
               <span class="px-2 py-0.5 bg-white/20 backdrop-blur-md rounded-full text-[9px] sm:text-xs font-semibold uppercase tracking-wider text-blue-100">
@@ -145,13 +108,10 @@
               </span>
             </div>
             <h1 class="text-sm sm:text-2xl md:text-3xl font-extrabold tracking-tight leading-tight">REKAPITULASI PRESENSI SISWA</h1>
-            <p class="text-blue-200 text-[11px] sm:text-base font-bold">
-              SMPN 1 RANCAH
-            </p>
+            <p class="text-blue-200 text-[11px] sm:text-base font-bold">SMPN 1 RANCAH</p>
           </div>
         </div>
 
-        <!-- Live Digital Clock Badge -->
         <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-2.5 sm:p-3 text-left md:text-right self-stretch md:self-auto min-w-[160px] flex md:flex-col justify-between items-center md:items-end">
           <div>
             <div class="text-[9px] sm:text-xs text-blue-200 font-medium flex items-center gap-1 justify-start md:justify-end">
@@ -186,7 +146,6 @@
 
       <!-- MENU TABS & ACTION BUTTONS -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-100 pb-2.5">
-        <!-- Navigation Tabs -->
         <div class="flex bg-slate-100 p-1 rounded-xl w-full sm:w-auto">
           <button id="tabHarian" onclick="switchTab('harian')" class="flex-1 sm:flex-none px-3 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all duration-200 flex items-center justify-center gap-1.5 bg-white text-blue-600 shadow-sm">
             <i class="fa-solid fa-calendar-day"></i> Presensi Harian
@@ -196,14 +155,13 @@
           </button>
         </div>
 
-        <!-- Tombol Aksi -->
         <div class="flex items-center gap-2 w-full sm:w-auto">
-          <button onclick="manualRefresh()" title="Segarkan Data Sekarang" class="flex-1 sm:flex-initial bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold py-2 px-3 rounded-xl transition duration-150 shadow-sm flex items-center justify-center gap-1.5 text-xs sm:text-sm">
+          <button onclick="manualRefresh()" title="Segarkan Data Sekarang" class="flex-1 sm:flex-initial bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-3 rounded-xl transition duration-150 shadow-sm flex items-center justify-center gap-1.5 text-xs sm:text-sm">
             <i id="iconRefresh" class="fa-solid fa-rotate"></i>
             <span>Refresh</span>
           </button>
 
-          <button onclick="downloadExcel()" class="flex-1 sm:flex-initial bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold py-2 px-3 rounded-xl transition duration-150 shadow-sm flex items-center justify-center gap-1.5 text-xs sm:text-sm">
+          <button onclick="downloadExcel()" class="flex-1 sm:flex-initial bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-3 rounded-xl transition duration-150 shadow-sm flex items-center justify-center gap-1.5 text-xs sm:text-sm">
             <i class="fa-solid fa-file-excel text-sm"></i> Export Excel
           </button>
         </div>
@@ -211,7 +169,6 @@
 
       <!-- FILTER CONTROLS -->
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 bg-slate-50 p-2.5 sm:p-4 rounded-xl border border-slate-200/80">
-        <!-- Filter Tanggal Harian -->
         <div id="boxTanggal">
           <label class="block text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-slate-600 mb-1 flex items-center gap-1">
             <i class="fa-regular fa-calendar text-blue-600"></i> Pilih Tanggal:
@@ -219,7 +176,6 @@
           <input type="date" id="filterTanggal" onchange="renderTable()" class="w-full bg-white px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs sm:text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none transition min-h-[38px]">
         </div>
 
-        <!-- Filter Bulan -->
         <div id="boxBulan" class="hidden">
           <label class="block text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-slate-600 mb-1 flex items-center gap-1">
             <i class="fa-regular fa-calendar-check text-blue-600"></i> Pilih Bulan:
@@ -227,7 +183,6 @@
           <input type="month" id="filterBulan" onchange="renderTable()" class="w-full bg-white px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs sm:text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none transition min-h-[38px]">
         </div>
 
-        <!-- Filter Kelas -->
         <div>
           <label class="block text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-slate-600 mb-1 flex items-center gap-1">
             <i class="fa-solid fa-users text-blue-600"></i> Pilih Kelas:
@@ -282,6 +237,44 @@
     
     let currentCategory = "reguler"; // 'reguler' | 'dzuhur'
     let currentMode = "harian";       // 'harian'  | 'bulanan'
+
+    // --- FUNGSI HELPER STANDARISASI FORMAT DATA ---
+    function formatDateStandard(dStr) {
+      if (!dStr) return "";
+      let str = String(dStr).trim();
+      if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
+        return str.substring(0, 10);
+      }
+      let parts = str.split(/[\/\-]/);
+      if (parts.length === 3) {
+        if (parts[2].length === 4) { 
+          return `${parts[2]}-${String(parts[1]).padStart(2, '0')}-${String(parts[0]).padStart(2, '0')}`;
+        } else if (parts[0].length === 4) { 
+          return `${parts[0]}-${String(parts[1]).padStart(2, '0')}-${String(parts[2]).padStart(2, '0')}`;
+        }
+      }
+      return str;
+    }
+
+    function matchStudentLog(l, siswa, tglStr) {
+      const logDate = formatDateStandard(l.tanggal);
+      const targetDate = formatDateStandard(tglStr);
+      if (logDate !== targetDate) return false;
+
+      const logKode = String(l.kode || l.nisn || l.NISN || l.Kode || "").trim().toLowerCase();
+      const sisKode = String(siswa.nisn || siswa.kode || "").trim().toLowerCase();
+      const matchKode = logKode && sisKode && (logKode === sisKode);
+
+      const logNama = String(l.nama || "").toLowerCase().trim();
+      const sisNama = String(siswa.nama || "").toLowerCase().trim();
+      const matchNama = logNama && sisNama && (logNama === sisNama);
+
+      return matchKode || matchNama;
+    }
+
+    function getKet(l) {
+      return String(l.keterangan || "").trim().toLowerCase();
+    }
 
     function sorotBarisSiswa(trElement) {
       document.querySelectorAll("#tabelUtama tr").forEach(tr => tr.classList.remove("row-highlight"));
@@ -417,7 +410,7 @@
     function hitungStatistikHarian(kelasSelected) {
       const tgl = document.getElementById("filterTanggal").value;
       const todayStr = getTodayString();
-      const infoLibur = rawLibur.find(l => l.tanggal === tgl);
+      const infoLibur = rawLibur.find(l => formatDateStandard(l.tanggal) === tgl);
 
       let targetList = rawMaster.filter(m => m.kelas === kelasSelected);
       let totalSiswa = targetList.length;
@@ -429,20 +422,22 @@
 
       if (!isWeekendOrHoliday && !isFuture && !isBeforeStart) {
         targetList.forEach(siswa => {
-          const studentLogs = rawLogs.filter(l => {
-            const sameDate = String(l.tanggal).trim() === String(tgl).trim();
-            const matchKode = l.kode && siswa.nisn && String(l.kode).trim() === String(siswa.nisn).trim();
-            const matchNama = String(l.nama).toLowerCase().trim() === String(siswa.nama).toLowerCase().trim();
-            return sameDate && (matchKode || matchNama);
+          const studentLogs = rawLogs.filter(l => matchStudentLog(l, siswa, tgl));
+
+          const logMasuk = studentLogs.find(l => {
+            const k = getKet(l);
+            return k.includes("masuk") || k.includes("terlambat") || k.includes("hadir");
+          });
+          const logPulang = studentLogs.find(l => getKet(l).includes("pulang"));
+          const logManual = studentLogs.find(l => {
+            const k = getKet(l);
+            return k.includes("izin") || k.includes("sakit") || k.includes("alpa");
           });
 
-          const logMasuk = studentLogs.find(l => l.keterangan === "Masuk" || l.keterangan === "Terlambat Masuk");
-          const logPulang = studentLogs.find(l => l.keterangan === "Pulang");
-          const logManual = studentLogs.find(l => ["Izin", "Sakit", "Alpa"].includes(l.keterangan));
-
           if (logManual) {
-            if (logManual.keterangan === "Izin") countIzin++;
-            else if (logManual.keterangan === "Sakit") countSakit++;
+            const k = getKet(logManual);
+            if (k.includes("izin")) countIzin++;
+            else if (k.includes("sakit")) countSakit++;
             else countAlpa++;
           } else if (logMasuk) {
             if (!logPulang && isSudahLewatBatasPulang(tgl)) {
@@ -538,7 +533,7 @@
     function renderRekapHarian(kelasSelected) {
       const tgl = document.getElementById("filterTanggal").value;
       const todayStr = getTodayString();
-      const infoLibur = rawLibur.find(l => l.tanggal === tgl);
+      const infoLibur = rawLibur.find(l => formatDateStandard(l.tanggal) === tgl);
 
       document.getElementById("judulRekap").textContent = `REKAP HARIAN PRESENSI SISWA (${tgl})`;
       if (infoLibur) {
@@ -563,16 +558,17 @@
       </thead><tbody class="divide-y divide-slate-200">`;
 
       filteredMaster.forEach((siswa, index) => {
-        const studentLogs = rawLogs.filter(l => {
-          const sameDate = String(l.tanggal).trim() === String(tgl).trim();
-          const matchKode = l.kode && siswa.nisn && String(l.kode).trim() === String(siswa.nisn).trim();
-          const matchNama = String(l.nama).toLowerCase().trim() === String(siswa.nama).toLowerCase().trim();
-          return sameDate && (matchKode || matchNama);
-        });
+        const studentLogs = rawLogs.filter(l => matchStudentLog(l, siswa, tgl));
 
-        const logMasuk = studentLogs.find(l => l.keterangan === "Masuk" || l.keterangan === "Terlambat Masuk");
-        const logPulang = studentLogs.find(l => l.keterangan === "Pulang");
-        const logManual = studentLogs.find(l => ["Izin", "Sakit", "Alpa"].includes(l.keterangan));
+        const logMasuk = studentLogs.find(l => {
+          const k = getKet(l);
+          return k.includes("masuk") || k.includes("terlambat") || k.includes("hadir");
+        });
+        const logPulang = studentLogs.find(l => getKet(l).includes("pulang"));
+        const logManual = studentLogs.find(l => {
+          const k = getKet(l);
+          return k.includes("izin") || k.includes("sakit") || k.includes("alpa");
+        });
 
         let jamMasuk = logMasuk ? (logMasuk.timestamp.split(" ")[1] || logMasuk.timestamp) : "-";
         let jamPulang = logPulang ? (logPulang.timestamp.split(" ")[1] || logPulang.timestamp) : "-";
@@ -581,8 +577,9 @@
         let bgRow = (index % 2 === 0) ? "bg-white" : "bg-slate-50";
 
         if (logManual) {
-          if (logManual.keterangan === "Izin") statusBadge = '<span class="inline-block px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded font-bold">Izin</span>';
-          else if (logManual.keterangan === "Sakit") statusBadge = '<span class="inline-block px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded font-bold">Sakit</span>';
+          const k = getKet(logManual);
+          if (k.includes("izin")) statusBadge = '<span class="inline-block px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded font-bold">Izin</span>';
+          else if (k.includes("sakit")) statusBadge = '<span class="inline-block px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded font-bold">Sakit</span>';
           else statusBadge = '<span class="inline-block px-1.5 py-0.5 bg-rose-100 text-rose-700 rounded font-bold">Alpa</span>';
         } else if (logMasuk) {
           if (!logPulang) {
@@ -590,12 +587,12 @@
               statusBadge = '<span class="inline-block px-1.5 py-0.5 bg-rose-100 text-rose-700 rounded font-bold">Alpa (Tidak Pulang)</span>';
               bgRow = "bg-rose-50/50";
             } else {
-              statusBadge = logMasuk.keterangan === "Terlambat Masuk" 
+              statusBadge = getKet(logMasuk).includes("terlambat")
                 ? '<span class="inline-block px-1.5 py-0.5 bg-amber-100 text-amber-800 rounded font-bold">Terlambat</span>'
                 : '<span class="inline-block px-1.5 py-0.5 bg-emerald-100 text-emerald-800 rounded font-bold">Hadir</span>';
               bgRow = "bg-emerald-50/40";
             }
-          } else if (logMasuk.keterangan === "Terlambat Masuk") {
+          } else if (getKet(logMasuk).includes("terlambat")) {
             statusBadge = '<span class="inline-block px-1.5 py-0.5 bg-amber-200 text-amber-900 rounded font-bold">Terlambat</span>';
             bgRow = "bg-amber-50/50";
           } else {
@@ -647,7 +644,7 @@
       for (let d = 1; d <= totalDays; d++) {
         const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
         const dayOfWeek = new Date(year, month - 1, d).getDay();
-        const infoLibur = rawLibur.find(l => l.tanggal === dateStr);
+        const infoLibur = rawLibur.find(l => formatDateStandard(l.tanggal) === dateStr);
         const isToday = (dateStr === todayStr);
 
         let bgHeader = isToday ? "bg-amber-400 text-slate-900 font-black border-x border-x-amber-600 shadow-inner z-10"
@@ -678,7 +675,7 @@
         for (let d = 1; d <= totalDays; d++) {
           const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
           const dayOfWeek = new Date(year, month - 1, d).getDay();
-          const infoLibur = rawLibur.find(l => l.tanggal === dateStr);
+          const infoLibur = rawLibur.find(l => formatDateStandard(l.tanggal) === dateStr);
           const isToday = (dateStr === todayStr);
 
           if (dayOfWeek === 0 || dayOfWeek === 6 || infoLibur) {
@@ -698,23 +695,25 @@
             continue;
           }
 
-          const studentLogs = rawLogs.filter(l => {
-            const sameDate = String(l.tanggal).trim() === String(dateStr).trim();
-            const matchKode = l.kode && siswa.nisn && String(l.kode).trim() === String(siswa.nisn).trim();
-            const matchNama = String(l.nama).toLowerCase().trim() === String(siswa.nama).toLowerCase().trim();
-            return sameDate && (matchKode || matchNama);
-          });
+          const studentLogs = rawLogs.filter(l => matchStudentLog(l, siswa, dateStr));
 
-          const logMasuk = studentLogs.find(l => l.keterangan === "Masuk" || l.keterangan === "Terlambat Masuk");
-          const logPulang = studentLogs.find(l => l.keterangan === "Pulang");
-          const logManual = studentLogs.find(l => ["Izin", "Sakit", "Alpa"].includes(l.keterangan));
+          const logMasuk = studentLogs.find(l => {
+            const k = getKet(l);
+            return k.includes("masuk") || k.includes("terlambat") || k.includes("hadir");
+          });
+          const logPulang = studentLogs.find(l => getKet(l).includes("pulang"));
+          const logManual = studentLogs.find(l => {
+            const k = getKet(l);
+            return k.includes("izin") || k.includes("sakit") || k.includes("alpa");
+          });
 
           let code = "A";
           let bgCell = isToday ? "bg-amber-200 text-slate-900 font-black" : "bg-rose-100 text-rose-800 font-bold";
 
           if (logManual) {
-            if (logManual.keterangan === "Izin") { code = "I"; countI++; bgCell = "bg-blue-100 text-blue-800 font-bold"; }
-            else if (logManual.keterangan === "Sakit") { code = "S"; countS++; bgCell = "bg-amber-100 text-amber-800 font-bold"; }
+            const k = getKet(logManual);
+            if (k.includes("izin")) { code = "I"; countI++; bgCell = "bg-blue-100 text-blue-800 font-bold"; }
+            else if (k.includes("sakit")) { code = "S"; countS++; bgCell = "bg-amber-100 text-amber-800 font-bold"; }
             else { code = "A"; countA++; bgCell = "bg-rose-100 text-rose-800 font-bold"; }
           } else if (logMasuk) {
             if (!logPulang && isSudahLewatBatasPulang(dateStr)) {
@@ -741,6 +740,21 @@
     // --- REKAP HARIAN DZUHUR ---
     function renderRekapDzuhurHarian(kelasSelected) {
       const tgl = document.getElementById("filterTanggal").value;
+      
+      const partsTgl = tgl.split("-");
+      const dObj = new Date(partsTgl[0], partsTgl[1] - 1, partsTgl[2]);
+      if (dObj.getDay() === 5) {
+        document.getElementById("judulRekap").textContent = `REKAP HARIAN SHALAT DZUHUR BERJAMAAH (${tgl})`;
+        document.getElementById("subJudulRekap").textContent = `Kelas: ${kelasSelected}`;
+        document.getElementById("boxStatistik").className = "";
+        document.getElementById("boxStatistik").innerHTML = `
+          <div class="bg-amber-50 border border-amber-300 text-amber-900 p-3 rounded-xl text-center font-bold text-xs sm:text-sm my-2">
+            🕌 Hari Jumat tidak ada presensi Shalat Dzuhur di sekolah (Siswa Kepulangan/Jum'atan).
+          </div>`;
+        document.getElementById("tabelUtama").innerHTML = `<tr><td class="p-6 text-slate-400 font-medium">Tidak ada jadwal presensi Dzuhur pada hari Jumat.</td></tr>`;
+        return;
+      }
+
       document.getElementById("judulRekap").textContent = `REKAP HARIAN SHALAT DZUHUR BERJAMAAH (${tgl})`;
       document.getElementById("subJudulRekap").textContent = `Kelas: ${kelasSelected}`;
 
@@ -756,7 +770,7 @@
       </tr></thead><tbody>`;
 
       filteredMaster.forEach((siswa, index) => {
-        const logDzu = rawDzuhur.find(d => String(d.tanggal).trim() === tgl && String(d.nisn).trim() === String(siswa.nisn).trim());
+        const logDzu = rawDzuhur.find(d => matchStudentLog(d, siswa, tgl));
         let jamScan = logDzu ? (logDzu.jam || logDzu.timestamp.split(" ")[1] || "-") : "-";
         let statusBadge = logDzu 
           ? '<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full font-extrabold">🕌 Hadir Dzuhur</span>' 
@@ -817,12 +831,12 @@
           const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
           const dayOfWeek = new Date(year, month - 1, d).getDay();
 
-          if (dayOfWeek === 0 || dayOfWeek === 6) {
-            html += `<td class="p-1 border col-tanggal bg-slate-100 text-slate-400 font-bold">-</td>`;
+          if (dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6) {
+            html += `<td class="p-1 border col-tanggal bg-slate-100 text-slate-400 font-bold" title="Tidak ada Dzuhur">-</td>`;
             continue;
           }
 
-          const isDzuhur = rawDzuhur.some(dz => dz.tanggal === dateStr && String(dz.nisn).trim() === String(siswa.nisn).trim());
+          const isDzuhur = rawDzuhur.some(dz => matchStudentLog(dz, siswa, dateStr));
           if (isDzuhur) totalDzuhur++;
 
           html += `<td class="p-1 border col-tanggal ${isDzuhur ? 'bg-emerald-200 text-emerald-950 font-black' : 'text-slate-300'}">${isDzuhur ? '🕌' : '-'}</td>`;
