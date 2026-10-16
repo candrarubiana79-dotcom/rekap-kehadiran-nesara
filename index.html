@@ -5,77 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rekap Presensi Siswa v2.8 Terpadu - SMPN 1 RANCAH</title>
   
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts: Plus Jakarta Sans -->
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- XLSX Library untuk Export Excel -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <style>
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    #containerTabel {
-      overflow-x: auto;
-      max-width: 100%;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    #tabelUtama {
-      white-space: nowrap;
-      border-collapse: separate;
-      border-spacing: 0;
-    }
-
-    .libur-text-vertical {
-      writing-mode: vertical-rl;
-      transform: rotate(180deg);
-      white-space: nowrap;
-      display: inline-block;
-      letter-spacing: 1px;
-    }
-
-    .row-highlight td {
-      background-color: #fef08a !important;
-      color: #0f172a !important;
-      font-weight: 800 !important;
-      border-top: 2px solid #eab308 !important;
-      border-bottom: 2px solid #eab308 !important;
-    }
-
-    .sticky-col-no {
-      position: sticky;
-      left: 0;
-      z-index: 20;
-    }
-
-    .sticky-col-nama {
-      position: sticky;
-      left: 36px;
-      z-index: 20;
-      box-shadow: 3px 0 6px -2px rgba(0, 0, 0, 0.12);
-    }
-
-    ::-webkit-scrollbar {
-      height: 6px;
-      width: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #f1f5f9;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 4px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
-    }
-
+    body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+    #containerTabel { overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }
+    #tabelUtama { white-space: nowrap; border-collapse: separate; border-spacing: 0; }
+    .libur-text-vertical { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; display: inline-block; letter-spacing: 1px; }
+    .row-highlight td { background-color: #fef08a !important; color: #0f172a !important; font-weight: 800 !important; border-top: 2px solid #eab308 !important; border-bottom: 2px solid #eab308 !important; }
+    .sticky-col-no { position: sticky; left: 0; z-index: 20; }
+    .sticky-col-nama { position: sticky; left: 36px; z-index: 20; box-shadow: 3px 0 6px -2px rgba(0, 0, 0, 0.12); }
+    ::-webkit-scrollbar { height: 6px; width: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     @media (max-width: 640px) {
       body { padding: 6px !important; }
       #tabelUtama { font-size: 10px !important; }
@@ -91,7 +37,6 @@
 
   <div class="max-w-7xl mx-auto space-y-3 sm:space-y-5">
 
-    <!-- HEADER & JAM REAL-TIME -->
     <header class="bg-gradient-to-r from-blue-700 via-indigo-700 to-indigo-800 text-white rounded-2xl p-3 sm:p-6 md:p-8 shadow-lg relative overflow-hidden">
       <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
 
@@ -129,10 +74,8 @@
       </div>
     </header>
 
-    <!-- MAIN CONTAINER CARD -->
     <main class="bg-white rounded-2xl shadow-sm border border-slate-200 p-2.5 sm:p-5 md:p-6 space-y-3 sm:space-y-6">
 
-      <!-- PILIHAN KATEGORI UTAMA: REGULER / DZUHUR -->
       <div class="flex justify-center border-b border-slate-200 pb-3">
         <div class="inline-flex bg-slate-200 p-1 rounded-xl gap-1 w-full sm:w-auto">
           <button id="btnTypeReguler" onclick="switchCategory('reguler')" class="flex-1 sm:flex-initial px-4 py-2 rounded-lg text-xs sm:text-sm font-black transition-all bg-indigo-600 text-white shadow-md flex items-center justify-center gap-2">
@@ -144,7 +87,6 @@
         </div>
       </div>
 
-      <!-- MENU TABS & ACTION BUTTONS -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-100 pb-2.5">
         <div class="flex bg-slate-100 p-1 rounded-xl w-full sm:w-auto">
           <button id="tabHarian" onclick="switchTab('harian')" class="flex-1 sm:flex-none px-3 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all duration-200 flex items-center justify-center gap-1.5 bg-white text-blue-600 shadow-sm">
@@ -167,7 +109,6 @@
         </div>
       </div>
 
-      <!-- FILTER CONTROLS -->
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 bg-slate-50 p-2.5 sm:p-4 rounded-xl border border-slate-200/80">
         <div id="boxTanggal">
           <label class="block text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-slate-600 mb-1 flex items-center gap-1">
@@ -193,7 +134,6 @@
         </div>
       </div>
 
-      <!-- TITLE INFORMER -->
       <div class="text-center py-1 border-b border-slate-100">
         <h2 id="judulRekap" class="text-sm sm:text-lg md:text-xl font-extrabold text-slate-800">REKAPITULASI PRESENSI SISWA</h2>
         <p id="subJudulRekap" class="text-[11px] sm:text-sm font-medium text-slate-500 mt-0.5"></p>
@@ -207,19 +147,15 @@
         </div>
       </div>
 
-      <!-- WADAH CARD RINGKASAN STATISTIK -->
       <div id="boxStatistik"></div>
 
-      <!-- TABLE AREA RESPONSIF -->
       <div id="containerTabel" class="border border-slate-200 shadow-sm bg-white rounded-xl relative">
         <table id="tabelUtama" class="w-full text-center border-collapse text-xs sm:text-sm">
-          <!-- Digenerate via JS -->
         </table>
       </div>
 
     </main>
 
-    <!-- FOOTER -->
     <footer class="text-center text-[10px] sm:text-xs text-slate-400 py-2">
       &copy; 2026 Presensi Digital v2.8 Terpadu • <span class="font-semibold text-slate-600">SMPN 1 RANCAH</span>
     </footer>
@@ -238,35 +174,36 @@
     let currentCategory = "reguler";
     let currentMode = "harian";
 
-    // --- FUNGSI PARSER TANGGAL TANGGUH ---
+    // --- PARSER TANGGAL PINTAR (MENDUKUNG FORMAT US/IND/ISO) ---
     function formatDateStandard(dStr) {
       if (!dStr) return "";
-      let str = String(dStr).trim();
-      str = str.split(" ")[0].split("T")[0];
+      let str = String(dStr).trim().split(" ")[0].split("T")[0];
       
-      if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
-        return str;
+      // Format YYYY-MM-DD
+      let mIso = str.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+      if (mIso) {
+        return `${mIso[1]}-${mIso[2].padStart(2, '0')}-${mIso[3].padStart(2, '0')}`;
       }
-      if (/^\d{4}\/\d{2}\/\d{2}$/.test(str)) {
-        return str.replace(/\//g, "-");
-      }
-      
-      let parts = str.split(/[\/\-]/);
-      if (parts.length === 3) {
-        let p0 = parts[0].padStart(2, '0');
-        let p1 = parts[1].padStart(2, '0');
-        let p2 = parts[2].trim();
-        
-        if (p2.length === 4) {
-          return `${p2}-${p1}-${p0}`;
-        } else if (p0.length === 4) {
-          return `${p0}-${p1}-${p2.padStart(2, '0')}`;
+
+      // Format DD/MM/YYYY atau MM/DD/YYYY
+      let mOther = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+      if (mOther) {
+        let p1 = parseInt(mOther[1], 10);
+        let p2 = parseInt(mOther[2], 10);
+        let y = mOther[3];
+
+        if (p1 > 12) { // p1 pasti Hari (DD/MM/YYYY)
+          return `${y}-${mOther[2].padStart(2, '0')}-${mOther[1].padStart(2, '0')}`;
+        } else if (p2 > 12) { // p2 pasti Hari (MM/DD/YYYY)
+          return `${y}-${mOther[1].padStart(2, '0')}-${mOther[2].padStart(2, '0')}`;
+        } else { // Default Standar Indonesia (DD/MM/YYYY)
+          return `${y}-${mOther[2].padStart(2, '0')}-${mOther[1].padStart(2, '0')}`;
         }
       }
       return str;
     }
 
-    // --- FUNGSI PENCOCOKAN SISWA FLEKSIBEL ---
+    // --- MATCHING LOG & SISWA KETAT & FLEKSIBEL ---
     function matchStudentLog(l, siswa, tglStr) {
       const logDate = formatDateStandard(l.tanggal || l.timestamp);
       const targetDate = formatDateStandard(tglStr);
@@ -281,17 +218,11 @@
       if (logKode && sisKode && logKode === sisKode) return true;
       if (logNama && sisNama && logNama === sisNama) return true;
 
-      const allValues = Object.values(l).map(v => String(v).trim().toLowerCase());
-      if (sisKode && allValues.includes(sisKode)) return true;
-      if (sisNama && allValues.includes(sisNama)) return true;
-
       return false;
     }
 
     function getKet(l) {
-      let mainKet = String(l.keterangan || l.status || l.ket || "").trim().toLowerCase();
-      if (mainKet) return mainKet;
-      return Object.values(l).map(v => String(v).trim().toLowerCase()).join(" ");
+      return String(l.keterangan || l.status || l.ket || "").trim().toLowerCase();
     }
 
     function sorotBarisSiswa(trElement) {
@@ -424,7 +355,6 @@
       select.value = currentVal;
     }
 
-    // --- HITUNG STATISTIK HARIAN REGULER ---
     function hitungStatistikHarian(kelasSelected) {
       const tgl = document.getElementById("filterTanggal").value;
       const todayStr = getTodayString();
@@ -444,7 +374,7 @@
 
           const logMasuk = studentLogs.find(l => {
             const k = getKet(l);
-            return k.includes("masuk") || k.includes("terlambat") || k.includes("hadir");
+            return k.includes("masuk") || k.includes("terlambat") || k.includes("hadir") || k.includes("susulan");
           });
           const logPulang = studentLogs.find(l => getKet(l).includes("pulang"));
           const logManual = studentLogs.find(l => {
@@ -458,7 +388,8 @@
             else if (k.includes("sakit")) countSakit++;
             else countAlpa++;
           } else if (logMasuk) {
-            if (!logPulang && isSudahLewatBatasPulang(tgl)) {
+            const kMasuk = getKet(logMasuk);
+            if (!logPulang && isSudahLewatBatasPulang(tgl) && !kMasuk.includes("susulan") && !kMasuk.includes("hadir")) {
               countAlpa++;
             } else {
               countHadir++;
@@ -580,7 +511,7 @@
 
         const logMasuk = studentLogs.find(l => {
           const k = getKet(l);
-          return k.includes("masuk") || k.includes("terlambat") || k.includes("hadir");
+          return k.includes("masuk") || k.includes("terlambat") || k.includes("hadir") || k.includes("susulan");
         });
         const logPulang = studentLogs.find(l => getKet(l).includes("pulang"));
         const logManual = studentLogs.find(l => {
@@ -600,17 +531,11 @@
           else if (k.includes("sakit")) statusBadge = '<span class="inline-block px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded font-bold">Sakit</span>';
           else statusBadge = '<span class="inline-block px-1.5 py-0.5 bg-rose-100 text-rose-700 rounded font-bold">Alpa</span>';
         } else if (logMasuk) {
-          if (!logPulang) {
-            if (isSudahLewatBatasPulang(tgl)) {
-              statusBadge = '<span class="inline-block px-1.5 py-0.5 bg-rose-100 text-rose-700 rounded font-bold">Alpa (Tidak Pulang)</span>';
-              bgRow = "bg-rose-50/50";
-            } else {
-              statusBadge = getKet(logMasuk).includes("terlambat")
-                ? '<span class="inline-block px-1.5 py-0.5 bg-amber-100 text-amber-800 rounded font-bold">Terlambat</span>'
-                : '<span class="inline-block px-1.5 py-0.5 bg-emerald-100 text-emerald-800 rounded font-bold">Hadir</span>';
-              bgRow = "bg-emerald-50/40";
-            }
-          } else if (getKet(logMasuk).includes("terlambat")) {
+          const kMasuk = getKet(logMasuk);
+          if (!logPulang && isSudahLewatBatasPulang(tgl) && !kMasuk.includes("susulan") && !kMasuk.includes("hadir")) {
+            statusBadge = '<span class="inline-block px-1.5 py-0.5 bg-rose-100 text-rose-700 rounded font-bold">Alpa (Tidak Pulang)</span>';
+            bgRow = "bg-rose-50/50";
+          } else if (kMasuk.includes("terlambat")) {
             statusBadge = '<span class="inline-block px-1.5 py-0.5 bg-amber-200 text-amber-900 rounded font-bold">Terlambat</span>';
             bgRow = "bg-amber-50/50";
           } else {
@@ -717,7 +642,7 @@
 
           const logMasuk = studentLogs.find(l => {
             const k = getKet(l);
-            return k.includes("masuk") || k.includes("terlambat") || k.includes("hadir");
+            return k.includes("masuk") || k.includes("terlambat") || k.includes("hadir") || k.includes("susulan");
           });
           const logPulang = studentLogs.find(l => getKet(l).includes("pulang"));
           const logManual = studentLogs.find(l => {
@@ -734,7 +659,8 @@
             else if (k.includes("sakit")) { code = "S"; countS++; bgCell = "bg-amber-100 text-amber-800 font-bold"; }
             else { code = "A"; countA++; bgCell = "bg-rose-100 text-rose-800 font-bold"; }
           } else if (logMasuk) {
-            if (!logPulang && isSudahLewatBatasPulang(dateStr)) {
+            const kMasuk = getKet(logMasuk);
+            if (!logPulang && isSudahLewatBatasPulang(dateStr) && !kMasuk.includes("susulan") && !kMasuk.includes("hadir")) {
               code = "A"; countA++; bgCell = "bg-rose-100 text-rose-800 font-bold";
             } else {
               code = "H"; countH++; bgCell = "bg-emerald-100 text-emerald-800 font-bold";
@@ -755,12 +681,11 @@
       tabel.innerHTML = html + `</tbody>`;
     }
 
-    // --- REKAP HARIAN DZUHUR ---
     function renderRekapDzuhurHarian(kelasSelected) {
       const tgl = document.getElementById("filterTanggal").value;
-      
       const partsTgl = tgl.split("-");
       const dObj = new Date(partsTgl[0], partsTgl[1] - 1, partsTgl[2]);
+      
       if (dObj.getDay() === 5) {
         document.getElementById("judulRekap").textContent = `REKAP HARIAN SHALAT DZUHUR BERJAMAAH (${tgl})`;
         document.getElementById("subJudulRekap").textContent = `Kelas: ${kelasSelected}`;
@@ -820,7 +745,6 @@
       document.getElementById("tabelUtama").innerHTML = html + "</tbody>";
     }
 
-    // --- REKAP BULANAN DZUHUR ---
     function renderRekapDzuhurBulanan(kelasSelected) {
       const ym = document.getElementById("filterBulan").value;
       const [year, month] = ym.split("-").map(Number);
