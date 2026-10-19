@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Generator Kartu Pelajar Terpadu - SMPN 1 Rancah (v4.4 Unified)</title>
+  <title>Generator Kartu Pelajar Terpadu - SMPN 1 Rancah (v4.5 Unified)</title>
   
   <!-- SKRIP PENGAMAN & AUTO LOGOUT -->
   <script src="auth-guard.js"></script>
@@ -44,6 +44,18 @@
     .form-group input[type="range"] { accent-color: #0284c7; cursor: pointer; margin-top: 2px; }
     .form-group textarea { height: 60px; resize: vertical; }
 
+    /* WADAH CHECKBOX PILIHAN SISWA MULTI */
+    .checklist-container {
+      max-height: 180px; overflow-y: auto; border: 1px solid #cbd5e1;
+      border-radius: 6px; padding: 8px; background: #f8fafc; margin-top: 4px;
+    }
+    .checklist-item {
+      display: flex; align-items: center; gap: 8px; font-size: 11px;
+      font-weight: 600; padding: 3px 0; border-bottom: 1px dashed #e2e8f0;
+    }
+    .checklist-item:last-child { border-bottom: none; }
+    .checklist-item input[type="checkbox"] { width: 14px; height: 14px; accent-color: #0284c7; cursor: pointer; }
+
     .action-buttons { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
     .btn { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: 800; font-size: 11px; flex: 1; height: 34px; text-align: center; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 4px; }
     .btn-download { background: #0284c7; color: #fff; }
@@ -52,6 +64,7 @@
     .btn-cetak:hover { background: #15803d; }
     .btn-reset { background: #64748b; color: #fff; }
     .btn-reset:hover { background: #475569; }
+    .btn-sm { padding: 4px 8px; height: auto; font-size: 10px; flex: none; }
     .badge-v { background: #0284c7; color: #ffffff; font-size: 10px; padding: 2px 8px; border-radius: 12px; font-weight: 800; }
     .hidden { display: none !important; }
 
@@ -70,20 +83,24 @@
       margin-bottom: 85px;
     }
 
-    /* LEMBAR DUPLEX / BULK SHEET A4 / F4 (AMN MARGIN ATAS 14MM) */
+    /* LEMBAR DUPLEX / BULK SHEET A4 & F4 */
     .page-sheet {
-      background: white; padding: 14mm 8mm 10mm 8mm; margin-bottom: 20px; border-radius: 8px;
+      background: white; padding: 10mm 8mm 8mm 8mm; margin-bottom: 20px; border-radius: 8px;
       box-shadow: 0 10px 20px rgba(0,0,0,0.3); display: grid;
-      grid-template-columns: repeat(2, 85.6mm); gap: 3mm 6mm; justify-content: start; align-content: start;
+      grid-template-columns: repeat(2, 85.6mm); gap: 2mm 5mm; justify-content: start; align-content: start;
+      page-break-after: always; break-after: page; box-sizing: border-box;
     }
+    .page-sheet.size-A4 { height: 297mm; max-height: 297mm; }
+    .page-sheet.size-F4 { height: 330mm; max-height: 330mm; }
+
     .sheet-header {
-      grid-column: span 2; font-size: 10px; font-weight: 800; text-transform: uppercase;
-      color: #0284c7; border-bottom: 1px dashed #cbd5e1; padding-bottom: 2.5mm; margin-bottom: 2mm;
+      grid-column: span 2; font-size: 9px; font-weight: 800; text-transform: uppercase;
+      color: #0284c7; border-bottom: 1px dashed #cbd5e1; padding-bottom: 1.5mm; margin-bottom: 1mm;
       display: flex; justify-content: space-between; align-items: center;
     }
     .sheet-footer {
-      grid-column: span 2; font-size: 9px; font-weight: 700; color: #64748b;
-      border-top: 1px dashed #cbd5e1; padding-top: 2.5mm; margin-top: 2mm;
+      grid-column: span 2; font-size: 8.5px; font-weight: 700; color: #64748b;
+      border-top: 1px dashed #cbd5e1; padding-top: 1.5mm; margin-top: 1mm;
       display: flex; justify-content: space-between; align-items: center;
     }
 
@@ -171,7 +188,7 @@
       display: flex; gap: 15px; align-items: center; justify-content: center; flex-wrap: wrap; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; border: 1px border border-slate-700;
     }
 
-    /* MEDIA PRINT A4 & F4 */
+    /* MEDIA PRINT A4 & F4 PRESISI */
     @media print {
       body { background: #ffffff !important; padding: 0 !important; margin: 0 !important; }
       .panel-control, .preview-header { display: none !important; }
@@ -183,9 +200,11 @@
       }
       .page-sheet {
         box-shadow: none !important; border-radius: 0 !important;
-        page-break-after: always !important; break-after: page; display: grid !important;
-        grid-template-columns: repeat(2, 85.6mm) !important; gap: 3mm 6mm !important; justify-content: start !important;
+        margin: 0 !important; padding: 8mm !important; display: grid !important;
+        grid-template-columns: repeat(2, 85.6mm) !important; gap: 2mm 5mm !important; justify-content: start !important;
       }
+      .page-sheet.size-A4 { height: 297mm !important; max-height: 297mm !important; }
+      .page-sheet.size-F4 { height: 330mm !important; max-height: 330mm !important; }
       .sheet-header, .sheet-footer { display: flex !important; }
       .kartu-container-depan, .kartu-container-belakang { box-shadow: none !important; border-color: #000 !important; page-break-inside: avoid !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
       .single-pair-card, .kartu-lipat-wrapper { background: none !important; border: none !important; padding: 0 !important; gap: 4mm 6mm !important; }
@@ -203,7 +222,7 @@
 
       <h2>
         <span>Kartu Pelajar Terpadu</span>
-        <span class="badge-v">v4.4</span>
+        <span class="badge-v">v4.5</span>
       </h2>
       
       <div id="statusIndikator" class="status-box loading">Memuat data master siswa...</div>
@@ -282,22 +301,12 @@
       <!-- TAHAP 4: OPSI TAMPILAN & CARA PENCETAKAN -->
       <div class="section-title">4. Mode Tampilan & Pilihan Cetak</div>
       <div class="grid-form">
-        <div class="form-group">
-          <label>Mode Tampilan:</label>
+        <div class="form-group full-width">
+          <label>Mode Tampilan Siswa:</label>
           <select id="selectModeView" onchange="modeViewChanged()">
-            <option value="single" selected>Per Siswa (1 Siswa)</option>
-            <option value="kelas">Per Kelas (Massal)</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>Target Sisi & Metode:</label>
-          <select id="selectSisiTarget" onchange="renderUnified()">
-            <option value="keduanya" selected>1. Pratinjau Depan & Belakang</option>
-            <option value="depan">2. Sisi Depan Saja</option>
-            <option value="belakang">3. Sisi Belakang Saja</option>
-            <option value="lipat">4. Mode Cetak Lipat (Berdampingan)</option>
-            <option value="duplex_sheet">5. Layout Lembaran Bolak-Balik (Duplex)</option>
+            <option value="single" selected>1. Per Siswa (1 Siswa)</option>
+            <option value="pilihan">2. Siswa Tertentu (Multi-Select / Kartu Hilang)</option>
+            <option value="kelas">3. Per Kelas (Seluruh Siswa)</option>
           </select>
         </div>
 
@@ -306,9 +315,33 @@
           <select id="selectKelas" onchange="handleKelasChange()"><option value="">-- Pilih Kelas --</option></select>
         </div>
 
+        <!-- DROPDOWN SINGLE SISWA -->
         <div class="form-group full-width" id="grpSelectSiswa">
           <label>Pilih Siswa:</label>
           <select id="selectSiswa" onchange="renderUnified()"><option value="">-- Pilih Kelas Terlebih Dahulu --</option></select>
+        </div>
+
+        <!-- CHECKLIST MULTI SISWA (UNTUK KARTU HILANG) -->
+        <div class="form-group full-width hidden" id="grpSelectMulti">
+          <label>
+            <span>Pilih Siswa yang Dicetak:</span>
+            <span>
+              <button type="button" class="btn btn-reset btn-sm" onclick="toggleSelectAll(true)">Pilih Semua</button>
+              <button type="button" class="btn btn-reset btn-sm" onclick="toggleSelectAll(false)">Batal</button>
+            </span>
+          </label>
+          <div class="checklist-container" id="containerMultiSiswa"></div>
+        </div>
+
+        <div class="form-group full-width">
+          <label>Target Sisi & Metode Cetak:</label>
+          <select id="selectSisiTarget" onchange="renderUnified()">
+            <option value="keduanya" selected>1. Pratinjau Depan & Belakang</option>
+            <option value="depan">2. Sisi Depan Saja</option>
+            <option value="belakang">3. Sisi Belakang Saja</option>
+            <option value="lipat">4. Mode Cetak Lipat (Berdampingan)</option>
+            <option value="duplex_sheet">5. Layout Lembaran Bolak-Balik (Duplex)</option>
+          </select>
         </div>
 
         <div class="form-group">
@@ -348,7 +381,7 @@
       <div class="preview-header">
         <div style="display: flex; align-items: center; gap: 8px;">
           <span>Live Preview Kartu Pelajar Terpadu</span>
-          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v4.4 Unified</span>
+          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v4.5 Unified</span>
         </div>
         <span style="font-size: 11px; opacity: 0.7; font-weight: normal;">Presisi Standar KTP (85.6mm x 53.9mm)</span>
       </div>
@@ -492,6 +525,7 @@
     function handleKelasChange() {
       const view = document.getElementById('selectModeView').value;
       if (view === 'single') updateDropdownSiswaPerKelas();
+      else if (view === 'pilihan') updateChecklistMultiSiswa();
       else renderUnified();
     }
 
@@ -511,19 +545,55 @@
       renderUnified();
     }
 
+    function updateChecklistMultiSiswa() {
+      const kelasPilihan = document.getElementById('selectKelas').value;
+      const container = document.getElementById('containerMultiSiswa');
+      container.innerHTML = '';
+
+      if (!kelasPilihan) return;
+
+      dataSiswaGlobal.forEach((s, idx) => {
+        if ((s[2] || '').trim() === kelasPilihan) {
+          const nisn = (s[0] || '').trim();
+          const nama = (s[1] || '').trim();
+          container.innerHTML += `
+            <div class="checklist-item">
+              <input type="checkbox" class="chk-siswa" value="${idx}" id="chk_${idx}" onchange="renderUnified()">
+              <label for="chk_${idx}">${nama} (${nisn})</label>
+            </div>
+          `;
+        }
+      });
+      renderUnified();
+    }
+
+    function toggleSelectAll(status) {
+      document.querySelectorAll('.chk-siswa').forEach(chk => { chk.checked = status; });
+      renderUnified();
+    }
+
     function modeViewChanged() {
       const view = document.getElementById('selectModeView').value;
       const grpSiswa = document.getElementById('grpSelectSiswa');
+      const grpMulti = document.getElementById('grpSelectMulti');
       const btnSingle = document.getElementById('btnDownloadSingle');
       const btnKelas = document.getElementById('btnDownloadKelas');
 
       if (view === 'single') {
         grpSiswa.classList.remove('hidden');
+        grpMulti.classList.add('hidden');
         btnSingle.classList.remove('hidden');
         btnKelas.classList.add('hidden');
         updateDropdownSiswaPerKelas();
+      } else if (view === 'pilihan') {
+        grpSiswa.classList.add('hidden');
+        grpMulti.classList.remove('hidden');
+        btnSingle.classList.add('hidden');
+        btnKelas.classList.remove('hidden');
+        updateChecklistMultiSiswa();
       } else {
         grpSiswa.classList.add('hidden');
+        grpMulti.classList.add('hidden');
         btnSingle.classList.add('hidden');
         btnKelas.classList.remove('hidden');
         renderUnified();
@@ -685,6 +755,12 @@
       let listTargetSiswa = [];
       if (viewMode === 'single') {
         if (dataSiswaGlobal[idxSiswa]) listTargetSiswa = [dataSiswaGlobal[idxSiswa]];
+      } else if (viewMode === 'pilihan') {
+        const checkedBoxes = document.querySelectorAll('.chk-siswa:checked');
+        checkedBoxes.forEach(chk => {
+          const idx = parseInt(chk.value);
+          if (dataSiswaGlobal[idx]) listTargetSiswa.push(dataSiswaGlobal[idx]);
+        });
       } else {
         listTargetSiswa = dataSiswaGlobal.filter(s => (s[2]||'').trim() === kelasPilihan);
       }
@@ -693,16 +769,16 @@
 
       if (sisiTarget === 'duplex_sheet') {
         const batchSize = (ukuranKertas === "F4") ? 10 : 8;
-        const siswaKelas = dataSiswaGlobal.filter(s => (s[2]||'').trim() === kelasPilihan);
-        const totalLembar = Math.ceil(siswaKelas.length / batchSize);
+        const totalLembar = Math.ceil(listTargetSiswa.length / batchSize) || 1;
 
-        for (let i = 0; i < siswaKelas.length; i += batchSize) {
-          const chunk = siswaKelas.slice(i, i + batchSize);
+        for (let i = 0; i < listTargetSiswa.length; i += batchSize) {
+          const chunk = listTargetSiswa.slice(i, i + batchSize);
           const nomorLembar = Math.floor(i / batchSize) + 1;
+          const classSize = (ukuranKertas === "F4") ? 'size-F4' : 'size-A4';
 
           // DEPAN PER LEMBAR
           htmlAll += `
-            <div class="page-sheet" style="padding: 14mm 8mm 10mm 8mm;">
+            <div class="page-sheet ${classSize}">
               <div class="sheet-header">
                 <span>KARTU PELAJAR SMPN 1 RANCAH</span>
                 <span>KELAS: ${kelasPilihan}</span>
@@ -718,7 +794,7 @@
           // BELAKANG PER LEMBAR (MIRRORED)
           const calcPaddingLeft = 8 + geserBelakangX;
           htmlAll += `
-            <div class="page-sheet" style="padding: 14mm 8mm 10mm ${calcPaddingLeft}mm;">
+            <div class="page-sheet ${classSize}" style="padding-left: ${calcPaddingLeft}mm;">
               <div class="sheet-header">
                 <span>KARTU PELAJAR SMPN 1 RANCAH</span>
                 <span>KELAS: ${kelasPilihan}</span>
@@ -759,11 +835,7 @@
       wadah.innerHTML = htmlAll;
 
       if (sisiTarget === 'keduanya' || sisiTarget === 'belakang' || sisiTarget === 'lipat' || sisiTarget === 'duplex_sheet') {
-        let qrSiswaList = (sisiTarget === 'duplex_sheet') 
-          ? dataSiswaGlobal.filter(s => (s[2]||'').trim() === kelasPilihan)
-          : listTargetSiswa;
-
-        qrSiswaList.forEach(s => {
+        listTargetSiswa.forEach(s => {
           const nisn = (s[0] || '').trim();
           const elBox = document.getElementById(`qr-uni-${nisn}`);
           if (elBox) {
@@ -848,7 +920,7 @@
 
       if (elemenDepan.length === 0 && elemenBelakang.length === 0) return;
 
-      if (!confirm(`Sistem akan mengunduh gambar kartu kelas secara berurutan. Lanjutkan?`)) return;
+      if (!confirm(`Sistem akan mengunduh gambar kartu terpilih secara berurutan. Lanjutkan?`)) return;
 
       let idx = 0;
       elemenDepan.forEach((elem) => {
