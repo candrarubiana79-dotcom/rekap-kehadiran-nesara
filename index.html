@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rekap Presensi Siswa v3.3 Smooth - SMPN 1 RANCAH</title>
+  <title>Rekap Presensi Siswa v3.3 - SMPN 1 RANCAH</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -78,7 +78,7 @@
                 Sistem Presensi Digital
               </span>
               <span class="px-1.5 py-0.5 bg-amber-400 text-slate-900 font-black text-[9px] sm:text-[11px] rounded-full shadow-sm">
-                v3.3 Smooth
+                v3.3
               </span>
             </div>
             <h1 class="text-sm sm:text-2xl md:text-3xl font-extrabold tracking-tight leading-tight">REKAPITULASI PRESENSI SISWA</h1>
@@ -186,7 +186,7 @@
     </main>
 
     <footer class="text-center text-[10px] sm:text-xs text-slate-400 py-2">
-      &copy; 2026 Presensi Digital v3.3 Smooth • <span class="font-semibold text-slate-600">SMPN 1 RANCAH</span>
+      &copy; 2026 Presensi Digital v3.3 • <span class="font-semibold text-slate-600">SMPN 1 RANCAH</span>
     </footer>
 
   </div>
@@ -298,7 +298,6 @@
       document.getElementById("filterBulan").value = todayStr.substring(0, 7);
 
       loadData(false);
-      // AUTO SYNC BACKGROUND SETIAP 15 DETIK TANPA REFRESH HALAMAN
       setInterval(() => loadData(true), 15000);
     });
 
@@ -366,7 +365,6 @@
 
           initKelasDropdown();
           
-          // SMART RENDER: MENJAGA POSISI SCROLL TABEL SAAT AUTO-SYNC LATAR BELAKANG
           const containerTabel = document.getElementById("containerTabel");
           const oldScrollLeft = containerTabel ? containerTabel.scrollLeft : 0;
           const oldScrollTop = containerTabel ? containerTabel.scrollTop : 0;
@@ -383,7 +381,6 @@
           const lastSyncEl = document.getElementById("lastSync");
           if (lastSyncEl) lastSyncEl.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> ${timeStr}`;
 
-          // FADE OUT OVERLAY LOADING SAAT PERTAMA KALI SELESAI MUAT
           if (isInitialLoad) {
             isInitialLoad = false;
             const overlay = document.getElementById("loadingOverlay");
