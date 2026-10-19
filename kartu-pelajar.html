@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Generator Kartu Pelajar Terpadu - SMPN 1 Rancah (v4.9 Unified)</title>
+  <title>Generator Kartu Pelajar Terpadu - SMPN 1 Rancah (v5.0 Crop Lines)</title>
   
   <!-- SKRIP PENGAMAN & AUTO LOGOUT -->
   <script src="auth-guard.js"></script>
@@ -104,11 +104,11 @@
       display: flex; justify-content: space-between; align-items: center;
     }
 
-    /* DESAIN DEPAN KARTU (85.6mm x 53.9mm) */
+    /* DESAIN DEPAN KARTU (85.6mm x 53.9mm) + GARIS POTONG DASMED */
     .kartu-container-depan {
       width: 85.6mm; height: 53.9mm;
       background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
-      border: 1px solid #0080d6; border-radius: 3.2mm; position: relative;
+      border: 0.3mm dashed #64748b; border-radius: 3.2mm; position: relative;
       overflow: hidden; flex-shrink: 0; page-break-inside: avoid; box-sizing: border-box;
       box-shadow: 0 4px 12px rgba(0,0,0,0.25);
     }
@@ -126,7 +126,7 @@
     
     .content-depan { display: flex; padding: 0 2.8mm; position: relative; z-index: 2; gap: 2mm; align-items: flex-start; }
     
-    /* BINGKAI & WADAH FOTO SISWA (SUPPORT DRAG MOUSE INDIVIDUAL) */
+    /* BINGKAI & WADAH FOTO SISWA */
     .foto-wrapper {
       width: 17.5mm; height: 23mm;
       border: 0.5mm solid #facc15; border-radius: 1.2mm;
@@ -159,11 +159,11 @@
     .bg-wave-back { position: absolute; bottom: 0; right: 0; width: 100%; height: 48%; background: #facc15; clip-path: polygon(0 75%, 100% 15%, 100% 100%, 0% 100%); z-index: 1; }
     .bg-wave-front { position: absolute; bottom: 0; right: 0; width: 100%; height: 38%; background: #0091ea; clip-path: polygon(0 85%, 100% 30%, 100% 100%, 0% 100%); z-index: 1; }
 
-    /* DESAIN BELAKANG KARTU (85.6mm x 53.9mm) */
+    /* DESAIN BELAKANG KARTU (85.6mm x 53.9mm) + GARIS POTONG DASHED */
     .kartu-container-belakang {
       width: 85.6mm; height: 53.9mm;
       background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
-      border: 1px solid #0284c7; border-radius: 3.2mm; position: relative;
+      border: 0.3mm dashed #64748b; border-radius: 3.2mm; position: relative;
       overflow: hidden; flex-shrink: 0; page-break-inside: avoid; box-sizing: border-box;
       padding: 2.2mm 2.8mm; display: flex; flex-direction: column; justify-content: space-between;
       box-shadow: 0 4px 12px rgba(0,0,0,0.25);
@@ -188,7 +188,7 @@
     /* MODE CETAK LIPAT (RAPAT TANPA SELA) */
     .kartu-lipat-wrapper {
       display: inline-flex; flex-direction: row; align-items: center; justify-content: center;
-      gap: 0 !important; padding: 0 !important; border: 1px dashed #64748b; border-radius: 3.2mm;
+      gap: 0 !important; padding: 0 !important; border: 0.3mm dashed #475569; border-radius: 3.2mm;
       overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.25); background: white; page-break-inside: avoid;
     }
     .kartu-lipat-wrapper .kartu-container-depan,
@@ -196,7 +196,7 @@
       box-shadow: none !important; border: none !important; border-radius: 0 !important; margin: 0 !important; flex-shrink: 0;
     }
     .fold-line-divider {
-      width: 0px; height: 53.9mm; border-left: 1px dashed #94a3b8; z-index: 10; flex-shrink: 0;
+      width: 0px; height: 53.9mm; border-left: 1px dashed #475569; z-index: 10; flex-shrink: 0;
     }
 
     /* WADAH PAIR SINGLE (DEPAN & BELAKANG BERSAMAAN) */
@@ -204,7 +204,7 @@
       display: flex; gap: 15px; align-items: center; justify-content: center; flex-wrap: wrap; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; border: 1px border border-slate-700;
     }
 
-    /* MEDIA PRINT A4 & F4 PRESISI */
+    /* MEDIA PRINT A4 & F4 PRESISI DENGAN GARIS POTONG HITAM */
     @media print {
       body { background: #ffffff !important; padding: 0 !important; margin: 0 !important; }
       .panel-control, .preview-header { display: none !important; }
@@ -222,9 +222,19 @@
       .page-sheet.size-A4 { height: 297mm !important; max-height: 297mm !important; }
       .page-sheet.size-F4 { height: 330mm !important; max-height: 330mm !important; }
       .sheet-header, .sheet-footer { display: flex !important; }
-      .kartu-container-depan, .kartu-container-belakang { box-shadow: none !important; border-color: #000 !important; page-break-inside: avoid !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-      .single-pair-card, .kartu-lipat-wrapper { background: none !important; border: none !important; padding: 0 !important; }
-      .kartu-lipat-wrapper { border-color: #000 !important; }
+      
+      /* GARIS POTONG TIPIS PUTUS-PUTUS HITAM SAAT CETAK */
+      .kartu-container-depan, .kartu-container-belakang {
+        box-shadow: none !important;
+        border: 0.3mm dashed #000000 !important;
+        page-break-inside: avoid !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      
+      .single-pair-card, .kartu-lipat-wrapper { background: none !important; padding: 0 !important; }
+      .kartu-lipat-wrapper { border: 0.3mm dashed #000000 !important; }
+      .fold-line-divider { border-left: 0.3mm dashed #000000 !important; }
     }
   </style>
 </head>
@@ -239,7 +249,7 @@
 
       <h2>
         <span>Kartu Pelajar Terpadu</span>
-        <span class="badge-v">v4.9</span>
+        <span class="badge-v">v5.0</span>
       </h2>
       
       <div id="statusIndikator" class="status-box loading">Memuat data master siswa...</div>
@@ -414,9 +424,9 @@
       <div class="preview-header">
         <div style="display: flex; align-items: center; gap: 8px;">
           <span>Live Preview Kartu Pelajar Terpadu</span>
-          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v4.9 Individual Drag</span>
+          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v5.0 Crop Lines</span>
         </div>
-        <span style="font-size: 11px; opacity: 0.7; font-weight: normal;">Drag/Scroll Foto Siswa untuk Edit Spesifik Per Siswa</span>
+        <span style="font-size: 11px; opacity: 0.7; font-weight: normal;">Garis putus-putus otomatis muncul saat cetak untuk memudahkan pemotongan</span>
       </div>
       <div id="wadahCetak" class="grid-cetak-container"></div>
     </div>
@@ -537,7 +547,6 @@
       localStorage.setItem('ttdY', tY);
       localStorage.setItem('ttdSize', tSize);
 
-      // SIMPAN POSISI FOTO SISWA YANG SEDANG AKTIF DITERAPKAN SLIDER
       const currentNisn = getSelectedNisn();
       if (currentNisn) {
         saveFotoPosisiSiswa(currentNisn, fX, fY, fZoom);
@@ -583,7 +592,7 @@
 
         window.addEventListener('mousemove', (e) => {
           if (!isDragging) return;
-          const deltaX = (e.clientX - startX) / 3.78; // 3.78px ~ 1mm
+          const deltaX = (e.clientX - startX) / 3.78;
           const deltaY = (e.clientY - startY) / 3.78;
 
           let newX = Math.min(Math.max(initX + deltaX, -15), 15);
@@ -608,7 +617,6 @@
           isDragging = false;
         });
 
-        /* SCROLL MOUSE UNTUK ZOOM FOTO INDIVIDUAL */
         wrapper.addEventListener('wheel', (e) => {
           e.preventDefault();
           const pos = getFotoPosisiSiswa(nisn);
@@ -649,7 +657,6 @@
       localStorage.setItem('ttdY', defaultPosisi.ttdY);
       localStorage.setItem('ttdSize', defaultPosisi.ttdSize);
 
-      // RESET HANYA FOTO SISWA AKTIF
       const nisn = getSelectedNisn();
       if (nisn) {
         saveFotoPosisiSiswa(nisn, defaultPosisi.fotoX, defaultPosisi.fotoY, defaultPosisi.fotoZoom);
@@ -832,7 +839,6 @@
       const fotoRaw = (s[12] || '').trim();
       const fotoUrl = (fotoRaw.startsWith('http')) ? fotoRaw : `assets/foto_${nisn}.jpg`;
 
-      // AMBIL POSISI FOTO KHUSUS UNTUK SISWA INI (BERDASARKAN NISN)
       const posFoto = getFotoPosisiSiswa(nisn);
 
       return `
@@ -925,7 +931,6 @@
 
       if (!kelasPilihan) { wadah.innerHTML = ''; return; }
 
-      // SYNC SLIDER DENGAN SISWA PILIHAN
       syncFotoSlidersWithActiveSiswa();
       updateLabelPosisi();
 
@@ -1017,7 +1022,6 @@
 
       wadah.innerHTML = htmlAll;
 
-      // PASANG EVENT DRAG MOUSE UNTUK FOTO INDIVIDUAL
       attachFotoDragEvents();
 
       if (sisiTarget === 'keduanya' || sisiTarget === 'belakang' || sisiTarget === 'lipat' || sisiTarget === 'duplex_sheet') {
