@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Presensi Kolektif Masal - SMPN 1 RANCAH</title>
+  
+  <!-- SKRIP PENGAMAN & AUTO LOGOUT -->
+  <script src="auth-guard.js"></script>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-800 min-h-screen flex flex-col justify-between p-2.5 sm:p-4 md:p-6 relative selection:bg-indigo-500 selection:text-white">
+
+  <!-- Background Decorative Orbs -->
+  <div class="fixed -top-20 -left-20 w-64 h-64 bg-indigo-600/20 rounded-full blur-2xl pointer-events-none"></div>
+  <div class="fixed -bottom-20 -right-20 w-64 h-64 bg-emerald-600/20 rounded-full blur-2xl pointer-events-none"></div>
+
+  <!-- CONTAINER UTAMA -->
+  <div class="w-full max-w-4xl mx-auto my-auto bg-white/95 backdrop-blur-xl p-4 sm:p-6 rounded-3xl shadow-2xl border border-white/20 space-y-4 relative z-10">
+    
+    <!-- Header -->
+    <div class="flex items-center justify-between border-b pb-3 border-slate-100">
+      <div class="flex items-center gap-2.5">
+        <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center text-lg font-bold shadow-sm">
+          <i class="fa-solid fa-users-gear"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 class="text-sm sm:text-base font-extrabold text-slate-900 leading-tight">Presensi Kolektif Masal</h2>
+            <span class="text-[9px] font-extrabold bg-indigo-500/10 text-indigo-600 border border-indigo-500/20 px-2 py-0.5 rounded-full">v3.1</span>
+          </div>
+          <p class="text-[10px] font-bold text-indigo-600 uppercase tracking-wider">Jam Variatif Otomatis • SMPN 1 RANCAH</p>
+        </div>
+      </div>
+      <a href="tools.html" class="text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-2 rounded-xl transition flex items-center gap-1.5 active:scale-95">
+        <i class="fa-solid fa-arrow-left text-[10px]"></i> Kembali
+      </a>
+    </div>
+
+    <!-- NOTIFIKASI TOAST -->
+    <div id="notif" class="hidden p-3 rounded-xl text-xs font-bold text-center border transition-all duration-300"></div>
+
+    <!-- PANEL PENGATURAN ABSEN MASAL -->
+    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-3">
+      <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+        <i class="fa-solid fa-sliders text-indigo-600"></i> Pengaturan Sesi Kolektif
+      </h3>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5">
+        
+        <!-- PILIH KELAS -->
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Filter Kelas</label>
+          <select id="selectKelas" onchange="filterSiswaTampil()" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            <option value="SEMUA">-- Semua Kelas --</option>
+          </select>
+        </div>
+
+        <!-- TANGGAL PRESENSI -->
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Tanggal Presensi</label>
+          <input type="date" id="inputTanggal" onchange="muatLogsTanggal()" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        </div>
+
+        <!-- JAM AWAL (RENTANG) -->
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Jam Mulai Acak</label>
+          <input type="time" id="jamMulai" value="06:15" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        </div>
+
+        <!-- JAM AKHIR (RENTANG) -->
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Jam Selesai Acak</label>
+          <input type="time" id="jamSelesai" value="06:52" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        </div>
+
+      </div>
+
+      <div class="p-2.5 bg-amber-50 rounded-xl border border-amber-200 text-[10px] text-amber-900 flex items-start gap-2">
+        <i class="fa-solid fa-lightbulb text-amber-600 text-xs shrink-0 mt-0.5"></i>
+        <span>
+          <strong>Jam Variatif:</strong> Sistem akan membagikan jam hadir secara acak di antara rentang waktu yang diatur (contoh: 06:17:12, 06:19:40, 06:23:05, dst.). Siswa yang <strong>sudah absen</strong> pada tanggal tersebut akan otomatis diabaikan.
+        </span>
+      </div>
+    </div>
+
+    <!-- AREA DAFTAR SISWA TARGET -->
+    <div class="space-y-2">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-700">
+            Daftar Siswa Belum Absen
+          </h3>
+          <span id="badgeHitungSiswa" class="text-[10px] font-extrabold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">
+            0 Terpilih
+          </span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="pilihSemuaSiswa(true)" class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition">
+            <i class="fa-solid fa-check-double mr-1"></i> Pilih Semua
+          </button>
+          <button type="button" onclick="pilihSemuaSiswa(false)" class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition">
+            <i class="fa-solid fa-xmark mr-1"></i> Batal Semua
+          </button>
+        </div>
+      </div>
+
+      <!-- TABEL LIST SISWA -->
+      <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm max-h-72 overflow-y-auto">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead class="sticky top-0 bg-slate-100 shadow-sm z-10 text-slate-600 font-bold uppercase text-[9px] tracking-wider border-b border-slate-200">
+            <tr>
+              <th class="p-2.5 w-10 text-center">
+                <input type="checkbox" id="checkMaster" onchange="toggleCheckMaster(this)" class="accent-indigo-600 rounded cursor-pointer">
+              </th>
+              <th class="p-2.5 w-10 text-center">No</th>
+              <th class="p-2.5 w-28">NISN</th>
+              <th class="p-2.5">Nama Siswa</th>
+              <th class="p-2.5 w-24 text-center">Kelas</th>
+              <th class="p-2.5 w-32 text-center">Status Saat Ini</th>
+            </tr>
+          </thead>
+          <tbody id="tabelBodySiswa" class="divide-y divide-slate-100">
+            <tr>
+              <td colspan="6" class="p-6 text-center text-slate-400 font-medium">
+                <i class="fa-solid fa-spinner fa-spin text-indigo-600 mr-2"></i> Memuat data dari server...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PROGRESS BAR SINKRONISASI -->
+    <div id="progressBox" class="hidden space-y-1 bg-indigo-50 p-3 rounded-2xl border border-indigo-100">
+      <div class="flex justify-between text-[10px] font-extrabold text-indigo-900">
+        <span id="progressText"><i class="fa-solid fa-paper-plane mr-1 animate-bounce"></i> Memproses presensi...</span>
+        <span id="progressPercent">0%</span>
+      </div>
+      <div class="w-full bg-indigo-200 h-2 rounded-full overflow-hidden">
+        <div id="progressBar" class="bg-indigo-600 h-full w-0 transition-all duration-300"></div>
+      </div>
+    </div>
+
+    <!-- TOMBOL EKSEKUSI -->
+    <div class="pt-2 flex justify-end">
+      <button type="button" id="btnEksekusi" onclick="eksekusiPresensiMasal()" disabled
+        class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white font-extrabold py-2.5 px-6 rounded-2xl transition shadow-lg shadow-emerald-600/20 active:scale-95 flex items-center justify-center gap-2">
+        <i class="fa-solid fa-circle-check text-sm"></i> Simpan Presensi Kolektif
+      </button>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="text-center text-[10px] text-slate-400 py-1.5 relative z-10">
+    Presensi Digital • SMPN 1 Rancah <span class="font-bold text-slate-300">v3.1 Kolektif</span>
+  </footer>
+
+  <script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzq05A9BpVJFjNkHn7p2QDjbaY2ajsWjVXk5sVDkH3rStFaAC5XgEkndZSg39zOLX_2/exec";
+    const TOKEN_BENAR = "GURU2026";
+
+    let masterSiswa = [];
+    let logPresensi = [];
+    let listSiswaFiltered = [];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      // Set default tanggal ke hari ini
+      const today = new Date().toISOString().split("T")[0];
+      document.getElementById("inputTanggal").value = today;
+      
+      loadDataMaster();
+    });
+
+    function showNotif(pesan, status = "success") {
+      const notif = document.getElementById("notif");
+      notif.classList.remove("hidden");
+      if (status === "success") {
+        notif.className = "p-2.5 rounded-xl text-xs font-bold text-center bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-sm";
+        notif.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i> ${pesan}`;
+      } else {
+        notif.className = "p-2.5 rounded-xl text-xs font-bold text-center bg-rose-50 text-rose-800 border border-rose-200 shadow-sm";
+        notif.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-rose-600 mr-1"></i> ${pesan}`;
+      }
+      setTimeout(() => notif.classList.add("hidden"), 4000);
+    }
+
+    function loadDataMaster() {
+      const tbody = document.getElementById("tabelBodySiswa");
+      const tgl = document.getElementById("inputTanggal").value;
+
+      fetch(`${WEB_APP_URL}?bulan=${tgl.substring(0, 7)}`)
+        .then(res => res.json())
+        .then(data => {
+          masterSiswa = data.master || [];
+          logPresensi = data.logs || [];
+
+          populateSelectKelas();
+          filterSiswaTampil();
+        })
+        .catch(err => {
+          tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-rose-500 font-bold">Gagal terhubung ke server Google Sheets!</td></tr>`;
+        });
+    }
+
+    function muatLogsTanggal() {
+      loadDataMaster();
+    }
+
+    function populateSelectKelas() {
+      const select = document.getElementById("selectKelas");
+      const currentVal = select.value;
+
+      const setKelas = new Set();
+      masterSiswa.forEach(s => { if(s.kelas) setKelas.add(s.kelas); });
+
+      const sortedKelas = Array.from(setKelas).sort();
+      
+      let html = '<option value="SEMUA">-- Semua Kelas --</option>';
+      sortedKelas.forEach(k => {
+        html += `<option value="${k}">${k}</option>`;
+      });
+
+      select.innerHTML = html;
+      select.value = currentVal || "SEMUA";
+    }
+
+    function filterSiswaTampil() {
+      const kelasSelected = document.getElementById("selectKelas").value;
+      const tglSelected = document.getElementById("inputTanggal").value;
+      const tbody = document.getElementById("tabelBodySiswa");
+
+      // Cari siswa yang SUDAH absen di tanggal ini
+      const nisnSudahAbsen = new Set();
+      logPresensi.forEach(l => {
+        if (l.tanggal === tglSelected) {
+          const cleanNisn = String(l.kode || l.nisn || "").trim().replace(/^0+/, '');
+          if (cleanNisn) nisnSudahAbsen.add(cleanNisn);
+        }
+      });
+
+      // Filter siswa per kelas
+      listSiswaFiltered = masterSiswa.filter(s => {
+        if (kelasSelected !== "SEMUA" && s.kelas !== kelasSelected) return false;
+        return true;
+      });
+
+      if (listSiswaFiltered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-5 text-center text-slate-400 font-medium italic">Tidak ada data siswa untuk kelas ini.</td></tr>`;
+        updateHitungPilihan();
+        return;
+      }
+
+      let html = "";
+      listSiswaFiltered.forEach((s, idx) => {
+        const cleanNisnSiswa = String(s.nisn || "").trim().replace(/^0+/, '');
+        const isSudahAbsen = nisnSudahAbsen.has(cleanNisnSiswa);
+
+        html += `
+          <tr class="hover:bg-slate-50 transition ${isSudahAbsen ? 'bg-slate-50/70' : ''}">
+            <td class="p-2.5 text-center">
+              <input type="checkbox" class="checkSiswa accent-indigo-600 rounded cursor-pointer"
+                data-nisn="${s.nisn}" data-nama="${s.nama}" data-kelas="${s.kelas}"
+                ${isSudahAbsen ? 'disabled' : 'checked'} onchange="updateHitungPilihan()">
+            </td>
+            <td class="p-2.5 text-center text-slate-400 font-medium">${idx + 1}</td>
+            <td class="p-2.5 font-mono text-slate-600 font-bold">${s.nisn}</td>
+            <td class="p-2.5 font-bold text-slate-800">${s.nama}</td>
+            <td class="p-2.5 text-center"><span class="px-2 py-0.5 rounded-full bg-slate-100 font-bold text-slate-700 text-[10px]">${s.kelas}</span></td>
+            <td class="p-2.5 text-center">
+              ${isSudahAbsen 
+                ? '<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-extrabold text-[9px]"><i class="fa-solid fa-check mr-1"></i>Sudah Absen</span>'
+                : '<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-extrabold text-[9px]"><i class="fa-solid fa-clock mr-1"></i>Belum Absen</span>'
+              }
+            </td>
+          </tr>`;
+      });
+
+      tbody.innerHTML = html;
+      updateHitungPilihan();
+    }
+
+    function toggleCheckMaster(master) {
+      const checkboxes = document.querySelectorAll('.checkSiswa:not(:disabled)');
+      checkboxes.forEach(cb => cb.checked = master.checked);
+      updateHitungPilihan();
+    }
+
+    function pilihSemuaSiswa(status) {
+      const checkboxes = document.querySelectorAll('.checkSiswa:not(:disabled)');
+      checkboxes.forEach(cb => cb.checked = status);
+      document.getElementById("checkMaster").checked = status;
+      updateHitungPilihan();
+    }
+
+    function updateHitungPilihan() {
+      const checkedBoxes = document.querySelectorAll('.checkSiswa:checked');
+      const badgeHitung = document.getElementById("badgeHitungSiswa");
+      const btnEksekusi = document.getElementById("btnEksekusi");
+
+      const count = checkedBoxes.length;
+      badgeHitung.textContent = `${count} Terpilih`;
+
+      if (count > 0) {
+        btnEksekusi.disabled = false;
+      } else {
+        btnEksekusi.disabled = true;
+      }
+    }
+
+    // APLIKASI GENERATOR JAM RANDOM ALAMI (VARIATIF)
+    function generateRandomTimestamps(dateStr, jamAwalStr, jamAkhirStr, count) {
+      const startMs = new Date(`${dateStr}T${jamAwalStr}:00+07:00`).getTime();
+      const endMs = new Date(`${dateStr}T${jamAkhirStr}:00+07:00`).getTime();
+      
+      let listMs = [];
+      for (let i = 0; i < count; i++) {
+        const randMs = Math.floor(Math.random() * (endMs - startMs + 1)) + startMs;
+        listMs.push(randMs);
+      }
+
+      // Urutkan dari jam paling pagi ke paling akhir agar alur waktu log masuk secara logis
+      listMs.sort((a, b) => a - b);
+
+      return listMs.map(ms => {
+        const d = new Date(ms);
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        const hh = String(d.getHours()).padStart(2, '0');
+        const mi = String(d.getMinutes()).padStart(2, '0');
+        const ss = String(d.getSeconds()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}T${hh}:${mi}:${ss}+07:00`;
+      });
+    }
+
+    async function eksekusiPresensiMasal() {
+      const checkedBoxes = document.querySelectorAll('.checkSiswa:checked');
+      if (checkedBoxes.length === 0) return;
+
+      const tglStr = document.getElementById("inputTanggal").value;
+      const jamAwal = document.getElementById("jamMulai").value;
+      const jamAkhir = document.getElementById("jamSelesai").value;
+
+      if (!tglStr || !jamAwal || !jamAkhir) {
+        alert("Lengkapi tanggal dan rentang jam acak!");
+        return;
+      }
+
+      if (jamAwal >= jamAkhir) {
+        alert("Jam mulai harus lebih awal dari jam selesai!");
+        return;
+      }
+
+      if (!confirm(`Yakin ingin memproses presensi kolektif untuk ${checkedBoxes.length} siswa pada tanggal ${tglStr} (Jam ${jamAwal} s.d. ${jamAkhir} WIB)?`)) return;
+
+      const btn = document.getElementById("btnEksekusi");
+      const progressBox = document.getElementById("progressBox");
+      const progressBar = document.getElementById("progressBar");
+      const progressText = document.getElementById("progressText");
+      const progressPercent = document.getElementById("progressPercent");
+
+      btn.disabled = true;
+      progressBox.classList.remove("hidden");
+
+      // Generate timestamps acak variatif
+      const listTimestamps = generateRandomTimestamps(tglStr, jamAwal, jamAkhir, checkedBoxes.length);
+
+      let batchItems = [];
+      checkedBoxes.forEach((cb, idx) => {
+        batchItems.push({
+          code: cb.getAttribute("data-nisn"),
+          scanTime: listTimestamps[idx]
+        });
+      });
+
+      // Kirim data dalam paket batch (maksimal 20 item per request agar koneksi stabil)
+      const BATCH_SIZE = 20;
+      const totalBatch = Math.ceil(batchItems.length / BATCH_SIZE);
+      let totalSukses = 0;
+
+      for (let i = 0; i < totalBatch; i++) {
+        const chunk = batchItems.slice(i * BATCH_SIZE, (i + 1) * BATCH_SIZE);
+        const percent = Math.round(((i + 1) / totalBatch) * 100);
+
+        progressBar.style.width = percent + "%";
+        progressPercent.textContent = percent + "%";
+        progressText.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Mengirim Paket ${i + 1} dari ${totalBatch}...`;
+
+        try {
+          const res = await fetch(WEB_APP_URL, {
+            method: "POST",
+            body: JSON.stringify({
+              tipe: "batch_offline",
+              token: TOKEN_BENAR,
+              batch: chunk
+            })
+          }).then(r => r.json());
+
+          if (res.status === "success") {
+            totalSukses += (res.successCount || chunk.length);
+          }
+        } catch (err) {
+          console.error("Gagal mengirim chunk batch:", err);
+        }
+      }
+
+      progressText.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i> Selesai!`;
+      showNotif(`Berhasil mencatat presensi kolektif untuk ${totalSukses} siswa!`, "success");
+
+      setTimeout(() => {
+        progressBox.classList.add("hidden");
+        btn.disabled = false;
+        loadDataMaster(); // Reload data
+      }, 2000);
+    }
+  </script>
+</body>
+</html>
