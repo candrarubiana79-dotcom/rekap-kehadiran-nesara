@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Generator Kartu Pelajar Terpadu - SMPN 1 Rancah (v4.8 Unified)</title>
+  <title>Generator Kartu Pelajar Terpadu - SMPN 1 Rancah (v4.9 Unified)</title>
   
   <!-- SKRIP PENGAMAN & AUTO LOGOUT -->
   <script src="auth-guard.js"></script>
@@ -126,7 +126,7 @@
     
     .content-depan { display: flex; padding: 0 2.8mm; position: relative; z-index: 2; gap: 2mm; align-items: flex-start; }
     
-    /* BINGKAI & WADAH FOTO SISWA (SUPPORT INTERAKTIF MOUSE DRAG) */
+    /* BINGKAI & WADAH FOTO SISWA (SUPPORT DRAG MOUSE INDIVIDUAL) */
     .foto-wrapper {
       width: 17.5mm; height: 23mm;
       border: 0.5mm solid #facc15; border-radius: 1.2mm;
@@ -239,7 +239,7 @@
 
       <h2>
         <span>Kartu Pelajar Terpadu</span>
-        <span class="badge-v">v4.8</span>
+        <span class="badge-v">v4.9</span>
       </h2>
       
       <div id="statusIndikator" class="status-box loading">Memuat data master siswa...</div>
@@ -272,7 +272,7 @@
       <!-- TAHAP 2: EDIT POSISI LIVE CAP, TTD & FOTO -->
       <div class="section-title">2. Edit Posisi Live (Cap, TTD & Foto)</div>
       <div class="grid-form">
-        <!-- SLIDER FOTO SISWA (BISA JUGA DIGESER PAKAI MOUSE LANGSUNG DI PREVIEW) -->
+        <!-- SLIDER FOTO SISWA ACTIVE -->
         <div class="form-group">
           <label>Foto - Posisi X: <span id="valFotoX">0mm</span></label>
           <input type="range" id="fotoX" min="-15" max="15" step="0.5" value="0" oninput="updatePosisiLive()">
@@ -414,9 +414,9 @@
       <div class="preview-header">
         <div style="display: flex; align-items: center; gap: 8px;">
           <span>Live Preview Kartu Pelajar Terpadu</span>
-          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v4.8 Unified</span>
+          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v4.9 Individual Drag</span>
         </div>
-        <span style="font-size: 11px; opacity: 0.7; font-weight: normal;">Klik & Drag foto untuk menggeser | Scroll untuk Zoom</span>
+        <span style="font-size: 11px; opacity: 0.7; font-weight: normal;">Drag/Scroll Foto Siswa untuk Edit Spesifik Per Siswa</span>
       </div>
       <div id="wadahCetak" class="grid-cetak-container"></div>
     </div>
@@ -446,6 +446,33 @@
       fetchDataSiswa();
     };
 
+    /* PENYIMPANAN FOTO SPESIFIK INDIVIDUAL PER NISN */
+    function getFotoPosisiMap() {
+      try {
+        return JSON.parse(localStorage.getItem('fotoPosisiMap')) || {};
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function getFotoPosisiSiswa(nisn) {
+      const map = getFotoPosisiMap();
+      return map[nisn] || { x: 0, y: 0, zoom: 100 };
+    }
+
+    function saveFotoPosisiSiswa(nisn, x, y, zoom) {
+      if (!nisn) return;
+      const map = getFotoPosisiMap();
+      map[nisn] = { x: parseFloat(x), y: parseFloat(y), zoom: parseInt(zoom) };
+      localStorage.setItem('fotoPosisiMap', JSON.stringify(map));
+    }
+
+    function getSelectedNisn() {
+      const idx = document.getElementById('selectSiswa').value;
+      const s = dataSiswaGlobal[idx];
+      return s ? (s[0] || '').trim() : null;
+    }
+
     function initSliders() {
       document.getElementById('stempelX').value = localStorage.getItem('stempelX') || defaultPosisi.stempelX;
       document.getElementById('stempelY').value = localStorage.getItem('stempelY') || defaultPosisi.stempelY;
@@ -455,11 +482,22 @@
       document.getElementById('ttdY').value = localStorage.getItem('ttdY') || defaultPosisi.ttdY;
       document.getElementById('ttdSize').value = localStorage.getItem('ttdSize') || defaultPosisi.ttdSize;
 
-      document.getElementById('fotoX').value = localStorage.getItem('fotoX') || defaultPosisi.fotoX;
-      document.getElementById('fotoY').value = localStorage.getItem('fotoY') || defaultPosisi.fotoY;
-      document.getElementById('fotoZoom').value = localStorage.getItem('fotoZoom') || defaultPosisi.fotoZoom;
-
+      syncFotoSlidersWithActiveSiswa();
       updateLabelPosisi();
+    }
+
+    function syncFotoSlidersWithActiveSiswa() {
+      const nisn = getSelectedNisn();
+      if (nisn) {
+        const p = getFotoPosisiSiswa(nisn);
+        document.getElementById('fotoX').value = p.x;
+        document.getElementById('fotoY').value = p.y;
+        document.getElementById('fotoZoom').value = p.zoom;
+      } else {
+        document.getElementById('fotoX').value = defaultPosisi.fotoX;
+        document.getElementById('fotoY').value = defaultPosisi.fotoY;
+        document.getElementById('fotoZoom').value = defaultPosisi.fotoZoom;
+      }
     }
 
     function updateLabelPosisi() {
@@ -499,9 +537,15 @@
       localStorage.setItem('ttdY', tY);
       localStorage.setItem('ttdSize', tSize);
 
-      localStorage.setItem('fotoX', fX);
-      localStorage.setItem('fotoY', fY);
-      localStorage.setItem('fotoZoom', fZoom);
+      // SIMPAN POSISI FOTO SISWA YANG SEDANG AKTIF DITERAPKAN SLIDER
+      const currentNisn = getSelectedNisn();
+      if (currentNisn) {
+        saveFotoPosisiSiswa(currentNisn, fX, fY, fZoom);
+        const imgActive = document.getElementById(`foto-img-${currentNisn}`);
+        if (imgActive) {
+          imgActive.style.transform = `translate(${fX}mm, ${fY}mm) scale(${fZoom / 100})`;
+        }
+      }
 
       document.querySelectorAll('.img-stempel').forEach(img => {
         img.style.left = sX + 'mm';
@@ -514,16 +558,15 @@
         img.style.top = tY + 'mm';
         img.style.width = tSize + 'mm';
       });
-
-      document.querySelectorAll('.foto-box').forEach(img => {
-        img.style.transform = `translate(${fX}mm, ${fY}mm) scale(${fZoom / 100})`;
-      });
     }
 
-    /* FITUR EVENT DRAG & DROP FOTO PAKAI MOUSE */
+    /* FITUR EVENT DRAG & DROP FOTO INDIVIDUAL DENGAN MOUSE */
     function attachFotoDragEvents() {
       const wrappers = document.querySelectorAll('.foto-wrapper');
       wrappers.forEach(wrapper => {
+        const nisn = wrapper.getAttribute('data-nisn');
+        if (!nisn) return;
+
         let isDragging = false;
         let startX = 0, startY = 0;
         let initX = 0, initY = 0;
@@ -532,39 +575,61 @@
           isDragging = true;
           startX = e.clientX;
           startY = e.clientY;
-          initX = parseFloat(document.getElementById('fotoX').value) || 0;
-          initY = parseFloat(document.getElementById('fotoY').value) || 0;
+          const pos = getFotoPosisiSiswa(nisn);
+          initX = pos.x;
+          initY = pos.y;
           e.preventDefault();
         });
 
         window.addEventListener('mousemove', (e) => {
           if (!isDragging) return;
-          const deltaX = (e.clientX - startX) / 3.78; // Konversi Pixel ke MM (~3.78px = 1mm)
+          const deltaX = (e.clientX - startX) / 3.78; // 3.78px ~ 1mm
           const deltaY = (e.clientY - startY) / 3.78;
 
           let newX = Math.min(Math.max(initX + deltaX, -15), 15);
           let newY = Math.min(Math.max(initY + deltaY, -15), 15);
 
-          document.getElementById('fotoX').value = newX.toFixed(1);
-          document.getElementById('fotoY').value = newY.toFixed(1);
-          updatePosisiLive();
+          const pos = getFotoPosisiSiswa(nisn);
+          saveFotoPosisiSiswa(nisn, newX.toFixed(1), newY.toFixed(1), pos.zoom);
+
+          const img = document.getElementById(`foto-img-${nisn}`);
+          if (img) {
+            img.style.transform = `translate(${newX.toFixed(1)}mm, ${newY.toFixed(1)}mm) scale(${pos.zoom / 100})`;
+          }
+
+          if (getSelectedNisn() === nisn) {
+            document.getElementById('fotoX').value = newX.toFixed(1);
+            document.getElementById('fotoY').value = newY.toFixed(1);
+            updateLabelPosisi();
+          }
         });
 
         window.addEventListener('mouseup', () => {
           isDragging = false;
         });
 
-        /* SCROLL MOUSE UNTUK ZOOM FOTO */
+        /* SCROLL MOUSE UNTUK ZOOM FOTO INDIVIDUAL */
         wrapper.addEventListener('wheel', (e) => {
           e.preventDefault();
-          let currentZoom = parseInt(document.getElementById('fotoZoom').value) || 100;
+          const pos = getFotoPosisiSiswa(nisn);
+          let currentZoom = pos.zoom;
           if (e.deltaY < 0) {
             currentZoom = Math.min(currentZoom + 4, 200);
           } else {
             currentZoom = Math.max(currentZoom - 4, 80);
           }
-          document.getElementById('fotoZoom').value = currentZoom;
-          updatePosisiLive();
+
+          saveFotoPosisiSiswa(nisn, pos.x, pos.y, currentZoom);
+
+          const img = document.getElementById(`foto-img-${nisn}`);
+          if (img) {
+            img.style.transform = `translate(${pos.x}mm, ${pos.y}mm) scale(${currentZoom / 100})`;
+          }
+
+          if (getSelectedNisn() === nisn) {
+            document.getElementById('fotoZoom').value = currentZoom;
+            updateLabelPosisi();
+          }
         }, { passive: false });
       });
     }
@@ -584,9 +649,11 @@
       localStorage.setItem('ttdY', defaultPosisi.ttdY);
       localStorage.setItem('ttdSize', defaultPosisi.ttdSize);
 
-      localStorage.setItem('fotoX', defaultPosisi.fotoX);
-      localStorage.setItem('fotoY', defaultPosisi.fotoY);
-      localStorage.setItem('fotoZoom', defaultPosisi.fotoZoom);
+      // RESET HANYA FOTO SISWA AKTIF
+      const nisn = getSelectedNisn();
+      if (nisn) {
+        saveFotoPosisiSiswa(nisn, defaultPosisi.fotoX, defaultPosisi.fotoY, defaultPosisi.fotoZoom);
+      }
 
       geserBelakangX = 1;
       localStorage.setItem('geserBelakangX', 1);
@@ -742,10 +809,6 @@
       const tY = localStorage.getItem('ttdY') || defaultPosisi.ttdY;
       const tSize = localStorage.getItem('ttdSize') || defaultPosisi.ttdSize;
 
-      const fX = localStorage.getItem('fotoX') || defaultPosisi.fotoX;
-      const fY = localStorage.getItem('fotoY') || defaultPosisi.fotoY;
-      const fZoom = localStorage.getItem('fotoZoom') || defaultPosisi.fotoZoom;
-
       const nisn = (s[0] || '').trim();
       const nama = (s[1] || '').trim();
       const tempatLahir = (s[4] || '').trim();
@@ -769,6 +832,9 @@
       const fotoRaw = (s[12] || '').trim();
       const fotoUrl = (fotoRaw.startsWith('http')) ? fotoRaw : `assets/foto_${nisn}.jpg`;
 
+      // AMBIL POSISI FOTO KHUSUS UNTUK SISWA INI (BERDASARKAN NISN)
+      const posFoto = getFotoPosisiSiswa(nisn);
+
       return `
         <div class="kartu-container-depan" id="kartu-depan-${nisn}">
           <div class="header-depan">
@@ -781,8 +847,8 @@
           </div>
           <div class="judul-kartu">KARTU PELAJAR</div>
           <div class="content-depan">
-            <div class="foto-wrapper">
-              <img src="${fotoUrl}" class="foto-box" style="transform: translate(${fX}mm, ${fY}mm) scale(${fZoom / 100});" onerror="this.src='https://via.placeholder.com/108x138?text=Foto'">
+            <div class="foto-wrapper" data-nisn="${nisn}">
+              <img src="${fotoUrl}" class="foto-box" id="foto-img-${nisn}" style="transform: translate(${posFoto.x}mm, ${posFoto.y}mm) scale(${posFoto.zoom / 100});" onerror="this.src='https://via.placeholder.com/108x138?text=Foto'">
             </div>
             <div class="data-box">
               <div class="data-row"><div class="data-label">Nama</div><div class="data-separator">:</div><div class="data-value" style="font-weight:800;">${nama}</div></div>
@@ -858,6 +924,10 @@
       const wadah = document.getElementById('wadahCetak');
 
       if (!kelasPilihan) { wadah.innerHTML = ''; return; }
+
+      // SYNC SLIDER DENGAN SISWA PILIHAN
+      syncFotoSlidersWithActiveSiswa();
+      updateLabelPosisi();
 
       if (viewMode === 'single' && (sisiTarget === 'depan' || sisiTarget === 'belakang')) {
         wadah.classList.add('zoom-single');
@@ -947,7 +1017,7 @@
 
       wadah.innerHTML = htmlAll;
 
-      // ATTACH DRAG & DROP FOTO SETELAH RENDER HTML
+      // PASANG EVENT DRAG MOUSE UNTUK FOTO INDIVIDUAL
       attachFotoDragEvents();
 
       if (sisiTarget === 'keduanya' || sisiTarget === 'belakang' || sisiTarget === 'lipat' || sisiTarget === 'duplex_sheet') {
