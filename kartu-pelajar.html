@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Generator Kartu Pelajar Terpadu - SMPN 1 Rancah (v4.7 Unified)</title>
+  <title>Generator Kartu Pelajar Terpadu - SMPN 1 Rancah (v4.8 Unified)</title>
   
   <!-- SKRIP PENGAMAN & AUTO LOGOUT -->
   <script src="auth-guard.js"></script>
@@ -126,17 +126,19 @@
     
     .content-depan { display: flex; padding: 0 2.8mm; position: relative; z-index: 2; gap: 2mm; align-items: flex-start; }
     
-    /* BINGKAI & WADAH FOTO SISWA */
+    /* BINGKAI & WADAH FOTO SISWA (SUPPORT INTERAKTIF MOUSE DRAG) */
     .foto-wrapper {
       width: 17.5mm; height: 23mm;
       border: 0.5mm solid #facc15; border-radius: 1.2mm;
       background: #f1f5f9; position: relative; overflow: hidden;
-      flex-shrink: 0;
+      flex-shrink: 0; cursor: grab; user-select: none;
     }
+    .foto-wrapper:active { cursor: grabbing; }
     .foto-box {
       width: 100%; height: 100%; object-fit: cover;
       position: absolute; left: 0; top: 0;
-      transition: all 0.05s ease; transform-origin: center center;
+      pointer-events: none;
+      transition: transform 0.05s ease; transform-origin: center center;
     }
 
     .data-box { flex-grow: 1; background: rgba(255, 255, 255, 0.96); border: 0.35mm solid #dc2626; border-radius: 1.5mm; padding: 1.2mm 1.8mm; }
@@ -237,7 +239,7 @@
 
       <h2>
         <span>Kartu Pelajar Terpadu</span>
-        <span class="badge-v">v4.7</span>
+        <span class="badge-v">v4.8</span>
       </h2>
       
       <div id="statusIndikator" class="status-box loading">Memuat data master siswa...</div>
@@ -270,7 +272,7 @@
       <!-- TAHAP 2: EDIT POSISI LIVE CAP, TTD & FOTO -->
       <div class="section-title">2. Edit Posisi Live (Cap, TTD & Foto)</div>
       <div class="grid-form">
-        <!-- SLIDER FOTO SISWA -->
+        <!-- SLIDER FOTO SISWA (BISA JUGA DIGESER PAKAI MOUSE LANGSUNG DI PREVIEW) -->
         <div class="form-group">
           <label>Foto - Posisi X: <span id="valFotoX">0mm</span></label>
           <input type="range" id="fotoX" min="-15" max="15" step="0.5" value="0" oninput="updatePosisiLive()">
@@ -280,7 +282,7 @@
           <input type="range" id="fotoY" min="-15" max="15" step="0.5" value="0" oninput="updatePosisiLive()">
         </div>
         <div class="form-group full-width">
-          <label>Foto - Zoom / Scale: <span id="valFotoZoom">100%</span></label>
+          <label>Foto - Zoom / Scale (Scroll Mouse): <span id="valFotoZoom">100%</span></label>
           <input type="range" id="fotoZoom" min="80" max="200" step="2" value="100" oninput="updatePosisiLive()">
         </div>
 
@@ -412,9 +414,9 @@
       <div class="preview-header">
         <div style="display: flex; align-items: center; gap: 8px;">
           <span>Live Preview Kartu Pelajar Terpadu</span>
-          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v4.7 Unified</span>
+          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v4.8 Unified</span>
         </div>
-        <span style="font-size: 11px; opacity: 0.7; font-weight: normal;">Presisi Standar KTP (85.6mm x 53.9mm)</span>
+        <span style="font-size: 11px; opacity: 0.7; font-weight: normal;">Klik & Drag foto untuk menggeser | Scroll untuk Zoom</span>
       </div>
       <div id="wadahCetak" class="grid-cetak-container"></div>
     </div>
@@ -515,6 +517,55 @@
 
       document.querySelectorAll('.foto-box').forEach(img => {
         img.style.transform = `translate(${fX}mm, ${fY}mm) scale(${fZoom / 100})`;
+      });
+    }
+
+    /* FITUR EVENT DRAG & DROP FOTO PAKAI MOUSE */
+    function attachFotoDragEvents() {
+      const wrappers = document.querySelectorAll('.foto-wrapper');
+      wrappers.forEach(wrapper => {
+        let isDragging = false;
+        let startX = 0, startY = 0;
+        let initX = 0, initY = 0;
+
+        wrapper.addEventListener('mousedown', (e) => {
+          isDragging = true;
+          startX = e.clientX;
+          startY = e.clientY;
+          initX = parseFloat(document.getElementById('fotoX').value) || 0;
+          initY = parseFloat(document.getElementById('fotoY').value) || 0;
+          e.preventDefault();
+        });
+
+        window.addEventListener('mousemove', (e) => {
+          if (!isDragging) return;
+          const deltaX = (e.clientX - startX) / 3.78; // Konversi Pixel ke MM (~3.78px = 1mm)
+          const deltaY = (e.clientY - startY) / 3.78;
+
+          let newX = Math.min(Math.max(initX + deltaX, -15), 15);
+          let newY = Math.min(Math.max(initY + deltaY, -15), 15);
+
+          document.getElementById('fotoX').value = newX.toFixed(1);
+          document.getElementById('fotoY').value = newY.toFixed(1);
+          updatePosisiLive();
+        });
+
+        window.addEventListener('mouseup', () => {
+          isDragging = false;
+        });
+
+        /* SCROLL MOUSE UNTUK ZOOM FOTO */
+        wrapper.addEventListener('wheel', (e) => {
+          e.preventDefault();
+          let currentZoom = parseInt(document.getElementById('fotoZoom').value) || 100;
+          if (e.deltaY < 0) {
+            currentZoom = Math.min(currentZoom + 4, 200);
+          } else {
+            currentZoom = Math.max(currentZoom - 4, 80);
+          }
+          document.getElementById('fotoZoom').value = currentZoom;
+          updatePosisiLive();
+        }, { passive: false });
       });
     }
 
@@ -895,6 +946,9 @@
       }
 
       wadah.innerHTML = htmlAll;
+
+      // ATTACH DRAG & DROP FOTO SETELAH RENDER HTML
+      attachFotoDragEvents();
 
       if (sisiTarget === 'keduanya' || sisiTarget === 'belakang' || sisiTarget === 'lipat' || sisiTarget === 'duplex_sheet') {
         listTargetSiswa.forEach(s => {
