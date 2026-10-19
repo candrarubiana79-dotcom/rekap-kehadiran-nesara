@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rekap Presensi Siswa v3.2 Adjusted - SMPN 1 RANCAH</title>
+  <title>Rekap Presensi Siswa v3.3 Smooth - SMPN 1 RANCAH</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -18,10 +18,21 @@
     .row-highlight td { background-color: #fef08a !important; color: #0f172a !important; font-weight: 800 !important; border-top: 2px solid #eab308 !important; border-bottom: 2px solid #eab308 !important; }
     .sticky-col-no { position: sticky; left: 0; z-index: 20; }
     .sticky-col-nama { position: sticky; left: 36px; z-index: 20; box-shadow: 3px 0 6px -2px rgba(0, 0, 0, 0.12); }
+    
+    /* ANIMASI TRANSISI LOADING OVERLAY */
+    #loadingOverlay {
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+    }
+    #loadingOverlay.fade-out {
+      opacity: 0;
+      visibility: hidden;
+    }
+
     ::-webkit-scrollbar { height: 6px; width: 6px; }
     ::-webkit-scrollbar-track { background: #f1f5f9; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
     @media (max-width: 640px) {
       body { padding: 6px !important; }
       #tabelUtama { font-size: 10px !important; }
@@ -34,6 +45,24 @@
   </style>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen p-2 sm:p-4 md:p-6">
+
+  <!-- OVERLAY LOADING SAAT AWAL BUKA HALAMAN -->
+  <div id="loadingOverlay" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex flex-col items-center justify-center p-4">
+    <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl text-center space-y-4 max-w-xs sm:max-w-sm w-full border border-slate-100">
+      <div class="relative w-16 h-16 mx-auto">
+        <div class="absolute inset-0 rounded-full border-4 border-indigo-100"></div>
+        <div class="absolute inset-0 rounded-full border-4 border-indigo-600 border-t-transparent animate-spin"></div>
+        <i class="fa-solid fa-school text-indigo-600 absolute inset-0 flex items-center justify-center text-xl"></i>
+      </div>
+      <div>
+        <h3 class="text-base font-extrabold text-slate-900">Memuat Data Presensi</h3>
+        <p id="loadingStatusText" class="text-xs font-semibold text-slate-500 mt-1">Menghubungkan ke server...</p>
+      </div>
+      <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+        <div class="bg-indigo-600 h-full w-2/3 animate-pulse rounded-full"></div>
+      </div>
+    </div>
+  </div>
 
   <div class="max-w-7xl mx-auto space-y-3 sm:space-y-5">
 
@@ -49,7 +78,7 @@
                 Sistem Presensi Digital
               </span>
               <span class="px-1.5 py-0.5 bg-amber-400 text-slate-900 font-black text-[9px] sm:text-[11px] rounded-full shadow-sm">
-                v3.2 Adjusted
+                v3.3 Smooth
               </span>
             </div>
             <h1 class="text-sm sm:text-2xl md:text-3xl font-extrabold tracking-tight leading-tight">REKAPITULASI PRESENSI SISWA</h1>
@@ -121,7 +150,7 @@
           <label class="block text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-slate-600 mb-1 flex items-center gap-1">
             <i class="fa-regular fa-calendar-check text-blue-600"></i> Pilih Bulan:
           </label>
-          <input type="month" id="filterBulan" onchange="renderTable()" class="w-full bg-white px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs sm:text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none transition min-h-[38px]">
+          <input type="month" id="filterBulan" onchange="handleBulanChange()" class="w-full bg-white px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs sm:text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none transition min-h-[38px]">
         </div>
 
         <div>
@@ -149,7 +178,7 @@
 
       <div id="boxStatistik"></div>
 
-      <div id="containerTabel" class="border border-slate-200 shadow-sm bg-white rounded-xl relative">
+      <div id="containerTabel" class="border border-slate-200 shadow-sm bg-white rounded-xl relative min-h-[180px]">
         <table id="tabelUtama" class="w-full text-center border-collapse text-xs sm:text-sm">
         </table>
       </div>
@@ -157,7 +186,7 @@
     </main>
 
     <footer class="text-center text-[10px] sm:text-xs text-slate-400 py-2">
-      &copy; 2026 Presensi Digital v3.2 Adjusted • <span class="font-semibold text-slate-600">SMPN 1 RANCAH</span>
+      &copy; 2026 Presensi Digital v3.3 Smooth • <span class="font-semibold text-slate-600">SMPN 1 RANCAH</span>
     </footer>
 
   </div>
@@ -173,6 +202,7 @@
     
     let currentCategory = "reguler";
     let currentMode = "harian";
+    let isInitialLoad = true;
 
     // --- PARSER TANGGAL PINTAR ---
     function formatDateStandard(dStr) {
@@ -266,8 +296,10 @@
       const todayStr = getTodayString();
       document.getElementById("filterTanggal").value = todayStr;
       document.getElementById("filterBulan").value = todayStr.substring(0, 7);
+
       loadData(false);
-      setInterval(() => loadData(true), 60000);
+      // AUTO SYNC BACKGROUND SETIAP 15 DETIK TANPA REFRESH HALAMAN
+      setInterval(() => loadData(true), 15000);
     });
 
     function switchCategory(cat) {
@@ -306,11 +338,20 @@
       renderTable();
     }
 
+    function handleBulanChange() {
+      loadData(false);
+    }
+
     function manualRefresh() { loadData(false); }
 
     function loadData(isSilent = false) {
       const iconRefresh = document.getElementById("iconRefresh");
-      if (iconRefresh) iconRefresh.classList.add("fa-spin");
+      const statusText = document.getElementById("loadingStatusText");
+
+      if (!isSilent) {
+        if (iconRefresh) iconRefresh.classList.add("fa-spin");
+        if (statusText) statusText.textContent = "Mengunduh log presensi terbaru...";
+      }
 
       const filterBulanVal = document.getElementById("filterBulan").value;
 
@@ -324,12 +365,34 @@
           tanggalMulaiSistem = data.tanggal_mulai || "";
 
           initKelasDropdown();
+          
+          // SMART RENDER: MENJAGA POSISI SCROLL TABEL SAAT AUTO-SYNC LATAR BELAKANG
+          const containerTabel = document.getElementById("containerTabel");
+          const oldScrollLeft = containerTabel ? containerTabel.scrollLeft : 0;
+          const oldScrollTop = containerTabel ? containerTabel.scrollTop : 0;
+
           renderTable();
+
+          if (containerTabel && isSilent) {
+            containerTabel.scrollLeft = oldScrollLeft;
+            containerTabel.scrollTop = oldScrollTop;
+          }
 
           const now = new Date();
           const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: 'Asia/Jakarta' });
           const lastSyncEl = document.getElementById("lastSync");
           if (lastSyncEl) lastSyncEl.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> ${timeStr}`;
+
+          // FADE OUT OVERLAY LOADING SAAT PERTAMA KALI SELESAI MUAT
+          if (isInitialLoad) {
+            isInitialLoad = false;
+            const overlay = document.getElementById("loadingOverlay");
+            if (overlay) overlay.classList.add("fade-out");
+          }
+        })
+        .catch(err => {
+          console.error("Gagal sinkronisasi data:", err);
+          if (statusText) statusText.textContent = "Koneksi terganggu, mencoba kembali...";
         })
         .finally(() => {
           if (iconRefresh) iconRefresh.classList.remove("fa-spin");
