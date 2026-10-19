@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Generator Kartu Pelajar Terpadu - SMPN 1 Rancah (v4.5 Unified)</title>
+  <title>Generator Kartu Pelajar Terpadu - SMPN 1 Rancah (v4.7 Unified)</title>
   
   <!-- SKRIP PENGAMAN & AUTO LOGOUT -->
   <script src="auth-guard.js"></script>
@@ -125,7 +125,20 @@
     .judul-kartu { text-align: center; font-size: 9.5px; font-weight: 900; letter-spacing: 1.5px; margin: 0.8mm 0; color: #0f172a; text-transform: uppercase; }
     
     .content-depan { display: flex; padding: 0 2.8mm; position: relative; z-index: 2; gap: 2mm; align-items: flex-start; }
-    .foto-box { width: 17.5mm; height: 23mm; border: 0.5mm solid #facc15; border-radius: 1.2mm; background: #f1f5f9; object-fit: cover; flex-shrink: 0; }
+    
+    /* BINGKAI & WADAH FOTO SISWA */
+    .foto-wrapper {
+      width: 17.5mm; height: 23mm;
+      border: 0.5mm solid #facc15; border-radius: 1.2mm;
+      background: #f1f5f9; position: relative; overflow: hidden;
+      flex-shrink: 0;
+    }
+    .foto-box {
+      width: 100%; height: 100%; object-fit: cover;
+      position: absolute; left: 0; top: 0;
+      transition: all 0.05s ease; transform-origin: center center;
+    }
+
     .data-box { flex-grow: 1; background: rgba(255, 255, 255, 0.96); border: 0.35mm solid #dc2626; border-radius: 1.5mm; padding: 1.2mm 1.8mm; }
     .data-row { display: flex; margin-bottom: 0.3mm; font-size: 5pt; line-height: 1.2; }
     .data-row:last-child { margin-bottom: 0; }
@@ -170,17 +183,18 @@
     .qr-label { font-size: 3.4pt; font-weight: 800; color: #0f172a; margin-top: 0.6mm; text-align: center; text-transform: uppercase; }
     .footer-belakang { background: #0f172a; color: #ffffff; text-align: center; font-size: 3.8pt; font-weight: 600; padding: 0.7mm; border-radius: 0.8mm; position: relative; z-index: 2; }
 
-    /* MODE CETAK LIPAT (FOLDABLE CARD) */
+    /* MODE CETAK LIPAT (RAPAT TANPA SELA) */
     .kartu-lipat-wrapper {
-      display: flex; border: 1px dashed #64748b; border-radius: 3.2mm; overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.25); background: white; page-break-inside: avoid;
+      display: inline-flex; flex-direction: row; align-items: center; justify-content: center;
+      gap: 0 !important; padding: 0 !important; border: 1px dashed #64748b; border-radius: 3.2mm;
+      overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.25); background: white; page-break-inside: avoid;
     }
     .kartu-lipat-wrapper .kartu-container-depan,
     .kartu-lipat-wrapper .kartu-container-belakang {
-      box-shadow: none !important; border: none !important; border-radius: 0 !important;
+      box-shadow: none !important; border: none !important; border-radius: 0 !important; margin: 0 !important; flex-shrink: 0;
     }
     .fold-line-divider {
-      border-r: 1px dashed #94a3b8; height: 53.9mm; width: 0px; z-index: 10;
+      width: 0px; height: 53.9mm; border-left: 1px dashed #94a3b8; z-index: 10; flex-shrink: 0;
     }
 
     /* WADAH PAIR SINGLE (DEPAN & BELAKANG BERSAMAAN) */
@@ -207,7 +221,8 @@
       .page-sheet.size-F4 { height: 330mm !important; max-height: 330mm !important; }
       .sheet-header, .sheet-footer { display: flex !important; }
       .kartu-container-depan, .kartu-container-belakang { box-shadow: none !important; border-color: #000 !important; page-break-inside: avoid !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-      .single-pair-card, .kartu-lipat-wrapper { background: none !important; border: none !important; padding: 0 !important; gap: 4mm 6mm !important; }
+      .single-pair-card, .kartu-lipat-wrapper { background: none !important; border: none !important; padding: 0 !important; }
+      .kartu-lipat-wrapper { border-color: #000 !important; }
     }
   </style>
 </head>
@@ -222,7 +237,7 @@
 
       <h2>
         <span>Kartu Pelajar Terpadu</span>
-        <span class="badge-v">v4.5</span>
+        <span class="badge-v">v4.7</span>
       </h2>
       
       <div id="statusIndikator" class="status-box loading">Memuat data master siswa...</div>
@@ -252,9 +267,24 @@
         </div>
       </div>
 
-      <!-- TAHAP 2: EDIT POSISI LIVE CAP & TTD -->
-      <div class="section-title">2. Edit Posisi Live (Cap & TTD)</div>
+      <!-- TAHAP 2: EDIT POSISI LIVE CAP, TTD & FOTO -->
+      <div class="section-title">2. Edit Posisi Live (Cap, TTD & Foto)</div>
       <div class="grid-form">
+        <!-- SLIDER FOTO SISWA -->
+        <div class="form-group">
+          <label>Foto - Posisi X: <span id="valFotoX">0mm</span></label>
+          <input type="range" id="fotoX" min="-15" max="15" step="0.5" value="0" oninput="updatePosisiLive()">
+        </div>
+        <div class="form-group">
+          <label>Foto - Posisi Y: <span id="valFotoY">0mm</span></label>
+          <input type="range" id="fotoY" min="-15" max="15" step="0.5" value="0" oninput="updatePosisiLive()">
+        </div>
+        <div class="form-group full-width">
+          <label>Foto - Zoom / Scale: <span id="valFotoZoom">100%</span></label>
+          <input type="range" id="fotoZoom" min="80" max="200" step="2" value="100" oninput="updatePosisiLive()">
+        </div>
+
+        <!-- SLIDER CAP STEMPEL -->
         <div class="form-group">
           <label>Cap - Posisi X: <span id="valStempelX">-11mm</span></label>
           <input type="range" id="stempelX" min="-30" max="20" step="0.5" value="-11" oninput="updatePosisiLive()">
@@ -268,6 +298,7 @@
           <input type="range" id="stempelSize" min="8" max="25" step="0.5" value="14" oninput="updatePosisiLive()">
         </div>
 
+        <!-- SLIDER TANDA TANGAN -->
         <div class="form-group">
           <label>TTD - Posisi X: <span id="valTtdX">0.5mm</span></label>
           <input type="range" id="ttdX" min="-20" max="30" step="0.5" value="0.5" oninput="updatePosisiLive()">
@@ -381,7 +412,7 @@
       <div class="preview-header">
         <div style="display: flex; align-items: center; gap: 8px;">
           <span>Live Preview Kartu Pelajar Terpadu</span>
-          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v4.5 Unified</span>
+          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v4.7 Unified</span>
         </div>
         <span style="font-size: 11px; opacity: 0.7; font-weight: normal;">Presisi Standar KTP (85.6mm x 53.9mm)</span>
       </div>
@@ -397,7 +428,8 @@
 
     const defaultPosisi = {
       stempelX: '-11', stempelY: '1', stempelSize: '14',
-      ttdX: '0.5', ttdY: '2.5', ttdSize: '16'
+      ttdX: '0.5', ttdY: '2.5', ttdSize: '16',
+      fotoX: '0', fotoY: '0', fotoZoom: '100'
     };
 
     let geserBelakangX = parseFloat(localStorage.getItem('geserBelakangX')) || 1;
@@ -421,6 +453,10 @@
       document.getElementById('ttdY').value = localStorage.getItem('ttdY') || defaultPosisi.ttdY;
       document.getElementById('ttdSize').value = localStorage.getItem('ttdSize') || defaultPosisi.ttdSize;
 
+      document.getElementById('fotoX').value = localStorage.getItem('fotoX') || defaultPosisi.fotoX;
+      document.getElementById('fotoY').value = localStorage.getItem('fotoY') || defaultPosisi.fotoY;
+      document.getElementById('fotoZoom').value = localStorage.getItem('fotoZoom') || defaultPosisi.fotoZoom;
+
       updateLabelPosisi();
     }
 
@@ -432,6 +468,10 @@
       document.getElementById('valTtdX').innerText = document.getElementById('ttdX').value + 'mm';
       document.getElementById('valTtdY').innerText = document.getElementById('ttdY').value + 'mm';
       document.getElementById('valTtdSize').innerText = document.getElementById('ttdSize').value + 'mm';
+
+      document.getElementById('valFotoX').innerText = document.getElementById('fotoX').value + 'mm';
+      document.getElementById('valFotoY').innerText = document.getElementById('fotoY').value + 'mm';
+      document.getElementById('valFotoZoom').innerText = document.getElementById('fotoZoom').value + '%';
     }
 
     function updatePosisiLive() {
@@ -445,6 +485,10 @@
       const tY = document.getElementById('ttdY').value;
       const tSize = document.getElementById('ttdSize').value;
 
+      const fX = document.getElementById('fotoX').value;
+      const fY = document.getElementById('fotoY').value;
+      const fZoom = document.getElementById('fotoZoom').value;
+
       localStorage.setItem('stempelX', sX);
       localStorage.setItem('stempelY', sY);
       localStorage.setItem('stempelSize', sSize);
@@ -452,6 +496,10 @@
       localStorage.setItem('ttdX', tX);
       localStorage.setItem('ttdY', tY);
       localStorage.setItem('ttdSize', tSize);
+
+      localStorage.setItem('fotoX', fX);
+      localStorage.setItem('fotoY', fY);
+      localStorage.setItem('fotoZoom', fZoom);
 
       document.querySelectorAll('.img-stempel').forEach(img => {
         img.style.left = sX + 'mm';
@@ -463,6 +511,10 @@
         img.style.left = tX + 'mm';
         img.style.top = tY + 'mm';
         img.style.width = tSize + 'mm';
+      });
+
+      document.querySelectorAll('.foto-box').forEach(img => {
+        img.style.transform = `translate(${fX}mm, ${fY}mm) scale(${fZoom / 100})`;
       });
     }
 
@@ -480,6 +532,10 @@
       localStorage.setItem('ttdX', defaultPosisi.ttdX);
       localStorage.setItem('ttdY', defaultPosisi.ttdY);
       localStorage.setItem('ttdSize', defaultPosisi.ttdSize);
+
+      localStorage.setItem('fotoX', defaultPosisi.fotoX);
+      localStorage.setItem('fotoY', defaultPosisi.fotoY);
+      localStorage.setItem('fotoZoom', defaultPosisi.fotoZoom);
 
       geserBelakangX = 1;
       localStorage.setItem('geserBelakangX', 1);
@@ -635,6 +691,10 @@
       const tY = localStorage.getItem('ttdY') || defaultPosisi.ttdY;
       const tSize = localStorage.getItem('ttdSize') || defaultPosisi.ttdSize;
 
+      const fX = localStorage.getItem('fotoX') || defaultPosisi.fotoX;
+      const fY = localStorage.getItem('fotoY') || defaultPosisi.fotoY;
+      const fZoom = localStorage.getItem('fotoZoom') || defaultPosisi.fotoZoom;
+
       const nisn = (s[0] || '').trim();
       const nama = (s[1] || '').trim();
       const tempatLahir = (s[4] || '').trim();
@@ -670,7 +730,9 @@
           </div>
           <div class="judul-kartu">KARTU PELAJAR</div>
           <div class="content-depan">
-            <img src="${fotoUrl}" class="foto-box" onerror="this.src='https://via.placeholder.com/108x138?text=Foto'">
+            <div class="foto-wrapper">
+              <img src="${fotoUrl}" class="foto-box" style="transform: translate(${fX}mm, ${fY}mm) scale(${fZoom / 100});" onerror="this.src='https://via.placeholder.com/108x138?text=Foto'">
+            </div>
             <div class="data-box">
               <div class="data-row"><div class="data-label">Nama</div><div class="data-separator">:</div><div class="data-value" style="font-weight:800;">${nama}</div></div>
               <div class="data-row"><div class="data-label">NISN</div><div class="data-separator">:</div><div class="data-value">${nisn}</div></div>
