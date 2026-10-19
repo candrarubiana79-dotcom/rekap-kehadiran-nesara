@@ -91,7 +91,7 @@
       <div class="p-2.5 bg-indigo-50/80 rounded-xl border border-indigo-200 text-[10px] text-indigo-900 flex items-start gap-2">
         <i class="fa-solid fa-lightbulb text-indigo-600 text-xs shrink-0 mt-0.5"></i>
         <span>
-          <strong>Ganti Jam Sesuai Sesi:</strong> Untuk <strong>Sesi Masuk</strong> gunakan rentang 06:00 - 07:00 WIB. Untuk <strong>Sesi Pulang</strong> gunakan rentang 13:00 - 15:30 WIB (Jumat: 11:00 - 14:00 WIB).
+          <strong>Informasi:</strong> Siswa yang sudah diinputkan <strong>Sakit, Izin, atau Alpa</strong> otomatis dilewati dan tidak dihitung sebagai "Belum Absen".
         </span>
       </div>
     </div>
@@ -257,17 +257,20 @@
       const sesiSelected = document.getElementById("selectSesi").value;
       const tbody = document.getElementById("tabelBodySiswa");
 
-      const nisnSudahAbsenSesi = new Set();
+      // Pemetaan riwayat status per siswa pada tanggal terpilih
+      const statusSiswaMap = {}; 
+
       logPresensi.forEach(l => {
         if (l.tanggal === tglSelected) {
           const cleanNisn = String(l.kode || l.nisn || "").trim().replace(/^0+/, '');
-          const ket = String(l.keterangan || "").toLowerCase();
+          const ket = String(l.keterangan || "").trim();
 
-          if (sesiSelected === "MASUK" && (ket.includes("masuk") || ket.includes("terlambat"))) {
-            if (cleanNisn) nisnSudahAbsenSesi.add(cleanNisn);
-          } else if (sesiSelected === "PULANG" && ket.includes("pulang")) {
-            if (cleanNisn) nisnSudahAbsenSesi.add(cleanNisn);
+          if (!cleanNisn) return;
+
+          if (!statusSiswaMap[cleanNisn]) {
+            statusSiswaMap[cleanNisn] = [];
           }
+          statusSiswaMap[cleanNisn].push(ket);
         }
       });
 
@@ -285,25 +288,59 @@
       let html = "";
       listSiswaFiltered.forEach((s, idx) => {
         const cleanNisnSiswa = String(s.nisn || "").trim().replace(/^0+/, '');
-        const isSudahAbsen = nisnSudahAbsenSesi.has(cleanNisnSiswa);
+        const listKet = statusSiswaMap[cleanNisnSiswa] || [];
+        
+        let isHandled = false;
+        let statusBadgeHtml = "";
+
+        // Cek jika siswa terdeteksi Sakit, Izin, atau Alpa
+        const ketKetidakhadiran = listKet.find(k => {
+          const kl = k.toLowerCase();
+          return kl.includes("sakit") || kl.includes("izin") || kl.includes("ijin") || kl.includes("alpa");
+        });
+
+        if (ketKetidakhadiran) {
+          isHandled = true;
+          statusBadgeHtml = `<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 font-extrabold text-[9px]"><i class="fa-solid fa-user-xmark mr-1"></i>${ketKetidakhadiran}</span>`;
+        } else {
+          // Evaluasi berdasarkan target sesi
+          if (sesiSelected === "MASUK") {
+            const sudahMasuk = listKet.some(k => {
+              const kl = k.toLowerCase();
+              return kl.includes("masuk") || kl.includes("terlambat");
+            });
+            if (sudahMasuk) {
+              isHandled = true;
+              statusBadgeHtml = `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-extrabold text-[9px]"><i class="fa-solid fa-check mr-1"></i>Sudah Masuk</span>`;
+            } else {
+              statusBadgeHtml = `<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-extrabold text-[9px]"><i class="fa-solid fa-clock mr-1"></i>Belum Masuk</span>`;
+            }
+          } else if (sesiSelected === "PULANG") {
+            const sudahPulang = listKet.some(k => {
+              const kl = k.toLowerCase();
+              return kl.includes("pulang");
+            });
+            if (sudahPulang) {
+              isHandled = true;
+              statusBadgeHtml = `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-extrabold text-[9px]"><i class="fa-solid fa-check mr-1"></i>Sudah Pulang</span>`;
+            } else {
+              statusBadgeHtml = `<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-extrabold text-[9px]"><i class="fa-solid fa-clock mr-1"></i>Belum Pulang</span>`;
+            }
+          }
+        }
 
         html += `
-          <tr class="hover:bg-slate-50 transition ${isSudahAbsen ? 'bg-slate-50/70' : ''}">
+          <tr class="hover:bg-slate-50 transition ${isHandled ? 'bg-slate-50/70' : ''}">
             <td class="p-2.5 text-center">
               <input type="checkbox" class="checkSiswa accent-indigo-600 rounded cursor-pointer"
                 data-nisn="${s.nisn}" data-nama="${s.nama}" data-kelas="${s.kelas}"
-                ${isSudahAbsen ? 'disabled' : 'checked'} onchange="updateHitungPilihan()">
+                ${isHandled ? 'disabled' : 'checked'} onchange="updateHitungPilihan()">
             </td>
             <td class="p-2.5 text-center text-slate-400 font-medium">${idx + 1}</td>
             <td class="p-2.5 font-mono text-slate-600 font-bold">${s.nisn}</td>
             <td class="p-2.5 font-bold text-slate-800">${s.nama}</td>
             <td class="p-2.5 text-center"><span class="px-2 py-0.5 rounded-full bg-slate-100 font-bold text-slate-700 text-[10px]">${s.kelas}</span></td>
-            <td class="p-2.5 text-center">
-              ${isSudahAbsen 
-                ? `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-extrabold text-[9px]"><i class="fa-solid fa-check mr-1"></i>Sudah ${sesiSelected === "MASUK" ? 'Masuk' : 'Pulang'}</span>`
-                : `<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-extrabold text-[9px]"><i class="fa-solid fa-clock mr-1"></i>Belum ${sesiSelected === "MASUK" ? 'Masuk' : 'Pulang'}</span>`
-              }
-            </td>
+            <td class="p-2.5 text-center">${statusBadgeHtml}</td>
           </tr>`;
       });
 
