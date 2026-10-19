@@ -693,7 +693,6 @@
           const infoLibur = rawLibur.find(l => formatDateStandard(l.tanggal) === dateStr);
           const isToday = (dateStr === todayStr);
 
-          // PENGECEKAN PENETAPAN TANGGAL OPERASIONAL SISTEM
           if (tanggalMulaiSistem && dateStr < tanggalMulaiSistem) {
             html += `<td class="p-0.5 border border-slate-200 col-tanggal bg-slate-50 text-slate-400 font-medium" title="Sistem Belum Berjalan">-</td>`;
             continue;
@@ -783,7 +782,7 @@
       let filteredMaster = rawMaster.filter(m => m.kelas === kelasSelected);
       filteredMaster.sort((a, b) => (a.nama || "").localeCompare(b.nama || "", "id", { sensitivity: "base" }));
 
-      let countHadir = 0, countBelum = 0, countSakit = 0, countIzin = 0, countAlpa = 0;
+      let countHadir = 0, countBerhalangan = 0, countBelum = 0, countSakit = 0, countIzin = 0, countAlpa = 0;
       let html = `<thead><tr class="bg-emerald-100 text-emerald-950 font-bold uppercase text-[10px] sm:text-xs">
         <th class="p-2 border border-emerald-200 sticky-col-no bg-emerald-100">No</th>
         <th class="p-2 border border-emerald-200 text-left sticky-col-nama bg-emerald-100">Nama Siswa</th>
@@ -803,8 +802,14 @@
         let statusBadge = "";
 
         if (logDzu) {
-          statusBadge = '<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full font-extrabold">🕌 Hadir Dzuhur</span>';
-          countHadir++;
+          const st = String(logDzu.status || "").toLowerCase();
+          if (st.includes("berhalangan") || st.includes("haid")) {
+            statusBadge = '<span class="px-2 py-0.5 bg-pink-100 text-pink-800 border border-pink-300 rounded-full font-extrabold">🌸 Berhalangan (Haid)</span>';
+            countBerhalangan++;
+          } else {
+            statusBadge = '<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full font-extrabold">🕌 Hadir Dzuhur</span>';
+            countHadir++;
+          }
         } else if (logManual) {
           const k = getKet(logManual);
           if (k.includes("sakit")) {
@@ -832,10 +837,14 @@
 
       document.getElementById("boxStatistik").className = "";
       document.getElementById("boxStatistik").innerHTML = `
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 max-w-2xl mx-auto my-2">
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 max-w-4xl mx-auto my-2">
           <div class="bg-emerald-50 border border-emerald-300 p-2 rounded-xl text-center">
             <p class="text-[10px] font-bold uppercase text-emerald-700">Hadir Dzuhur</p>
             <p class="text-lg font-black text-emerald-900">${countHadir}</p>
+          </div>
+          <div class="bg-pink-50 border border-pink-300 p-2 rounded-xl text-center">
+            <p class="text-[10px] font-bold uppercase text-pink-700">Berhalangan (Haid)</p>
+            <p class="text-lg font-black text-pink-900">${countBerhalangan}</p>
           </div>
           <div class="bg-rose-50 border border-rose-300 p-2 rounded-xl text-center">
             <p class="text-[10px] font-bold uppercase text-rose-700">Belum Dzuhur</p>
@@ -845,7 +854,7 @@
             <p class="text-[10px] font-bold uppercase text-amber-700">Sakit / Izin</p>
             <p class="text-lg font-black text-amber-900">${countSakit + countIzin}</p>
           </div>
-          <div class="bg-slate-50 border border-slate-300 p-2 rounded-xl text-center">
+          <div class="bg-slate-50 border border-slate-300 p-2 rounded-xl text-center col-span-2 sm:col-span-1">
             <p class="text-[10px] font-bold uppercase text-slate-700">Alpa Reguler</p>
             <p class="text-lg font-black text-slate-900">${countAlpa}</p>
           </div>
@@ -871,10 +880,13 @@
         <th class="p-1 border border-emerald-200 text-left sticky-col-nama bg-emerald-100">Nama Siswa</th>`;
       
       for (let d = 1; d <= totalDays; d++) html += `<th class="p-1 border border-emerald-200 col-tanggal">${d}</th>`;
-      html += `<th class="p-1 border border-emerald-200 bg-emerald-200 text-emerald-900">Total H</th></tr></thead><tbody>`;
+      html += `<th class="p-1 border border-emerald-200 bg-emerald-200 text-emerald-900" title="Total Hadir Dzuhur">Total 🕌</th>`;
+      html += `<th class="p-1 border border-pink-200 bg-pink-200 text-pink-900" title="Total Berhalangan/Haid">Total 🌸</th></tr></thead><tbody>`;
 
       filteredMaster.forEach((siswa, index) => {
         let totalDzuhur = 0;
+        let totalBerhalangan = 0;
+
         html += `<tr class="hover:bg-emerald-50 cursor-pointer" onclick="sorotBarisSiswa(this)">
           <td class="p-1 border sticky-col-no bg-white">${index + 1}</td>
           <td class="p-1 border text-left font-bold sticky-col-nama bg-white">${siswa.nama}</td>`;
@@ -893,16 +905,22 @@
             continue;
           }
 
-          const isDzuhur = rawDzuhur.some(dz => matchStudentLog(dz, siswa, dateStr));
+          const logDzu = rawDzuhur.find(dz => matchStudentLog(dz, siswa, dateStr));
           const studentLogs = rawLogs.filter(l => matchStudentLog(l, siswa, dateStr));
           const logManual = studentLogs.find(l => {
             const k = getKet(l);
             return k.includes("izin") || k.includes("sakit") || k.includes("alpa");
           });
 
-          if (isDzuhur) {
-            totalDzuhur++;
-            html += `<td class="p-1 border col-tanggal bg-emerald-200 text-emerald-950 font-black" title="Hadir Dzuhur">🕌</td>`;
+          if (logDzu) {
+            const st = String(logDzu.status || "").toLowerCase();
+            if (st.includes("berhalangan") || st.includes("haid")) {
+              totalBerhalangan++;
+              html += `<td class="p-1 border col-tanggal bg-pink-200 text-pink-950 font-black" title="Berhalangan (Haid)">🌸</td>`;
+            } else {
+              totalDzuhur++;
+              html += `<td class="p-1 border col-tanggal bg-emerald-200 text-emerald-950 font-black" title="Hadir Dzuhur">🕌</td>`;
+            }
           } else if (logManual) {
             const k = getKet(logManual);
             if (k.includes("sakit")) {
@@ -917,7 +935,8 @@
           }
         }
         
-        html += `<td class="p-1 border font-black bg-emerald-50 text-emerald-900">${totalDzuhur}</td></tr>`;
+        html += `<td class="p-1 border font-black bg-emerald-50 text-emerald-900">${totalDzuhur}</td>`;
+        html += `<td class="p-1 border font-black bg-pink-50 text-pink-900">${totalBerhalangan}</td></tr>`;
       });
 
       document.getElementById("boxStatistik").innerHTML = "";
