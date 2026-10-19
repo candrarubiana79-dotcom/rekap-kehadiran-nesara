@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Generator Kartu Pelajar Terpadu - SMPN 1 Rancah (v4.1 Unified)</title>
+  <title>Generator Kartu Pelajar Terpadu - SMPN 1 Rancah (v4.3 Unified)</title>
   
   <!-- SKRIP PENGAMAN & AUTO LOGOUT -->
   <script src="auth-guard.js"></script>
@@ -62,18 +62,12 @@
     /* WADAH GRID PREVIEW */
     .grid-cetak-container { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; width: 100%; transition: all 0.2s ease; }
     
-    /* SKALA PERBESARAN PREVIEW SINGLE (1.65x) */
-    .grid-cetak-container.preview-single .kartu-container-depan,
-    .grid-cetak-container.preview-single .kartu-container-belakang {
+    /* DIPERBESAR HANYA PADA MODE SINGLE DEPAN ATAU BELAKANG SAJA */
+    .grid-cetak-container.zoom-single .kartu-container-depan,
+    .grid-cetak-container.zoom-single .kartu-container-belakang {
       transform: scale(1.65);
       transform-origin: top center;
       margin-bottom: 85px;
-    }
-    .grid-cetak-container.preview-single .single-pair-card,
-    .grid-cetak-container.preview-single .kartu-lipat-wrapper {
-      transform: scale(1.25);
-      transform-origin: top center;
-      margin-bottom: 40px;
     }
 
     /* LEMBAR DUPLEX / BULK SHEET A4 / F4 */
@@ -177,10 +171,8 @@
       .panel-control, .preview-header { display: none !important; }
       .app-layout { display: block !important; }
       .preview-section { background: none !important; border: none !important; padding: 0 !important; }
-      .grid-cetak-container.preview-single .kartu-container-depan,
-      .grid-cetak-container.preview-single .kartu-container-belakang,
-      .grid-cetak-container.preview-single .single-pair-card,
-      .grid-cetak-container.preview-single .kartu-lipat-wrapper {
+      .grid-cetak-container.zoom-single .kartu-container-depan,
+      .grid-cetak-container.zoom-single .kartu-container-belakang {
         transform: none !important; margin-bottom: 0 !important;
       }
       .page-sheet {
@@ -205,7 +197,7 @@
 
       <h2>
         <span>Kartu Pelajar Terpadu</span>
-        <span class="badge-v">v4.1</span>
+        <span class="badge-v">v4.3</span>
       </h2>
       
       <div id="statusIndikator" class="status-box loading">Memuat data master siswa...</div>
@@ -350,11 +342,11 @@
       <div class="preview-header">
         <div style="display: flex; align-items: center; gap: 8px;">
           <span>Live Preview Kartu Pelajar Terpadu</span>
-          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v4.1 Unified</span>
+          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v4.3 Unified</span>
         </div>
         <span style="font-size: 11px; opacity: 0.7; font-weight: normal;">Presisi Standar KTP (85.6mm x 53.9mm)</span>
       </div>
-      <div id="wadahCetak" class="grid-cetak-container preview-single"></div>
+      <div id="wadahCetak" class="grid-cetak-container"></div>
     </div>
   </div>
 
@@ -518,19 +510,16 @@
       const grpSiswa = document.getElementById('grpSelectSiswa');
       const btnSingle = document.getElementById('btnDownloadSingle');
       const btnKelas = document.getElementById('btnDownloadKelas');
-      const wadah = document.getElementById('wadahCetak');
 
       if (view === 'single') {
         grpSiswa.classList.remove('hidden');
         btnSingle.classList.remove('hidden');
         btnKelas.classList.add('hidden');
-        wadah.classList.add('preview-single');
         updateDropdownSiswaPerKelas();
       } else {
         grpSiswa.classList.add('hidden');
         btnSingle.classList.add('hidden');
         btnKelas.classList.remove('hidden');
-        wadah.classList.remove('preview-single');
         renderUnified();
       }
     }
@@ -575,6 +564,7 @@
       const tempatLahir = (s[4] || '').trim();
       const tglLahir = (s[5] || '').trim();
       const ttl = (tempatLahir && tglLahir) ? `${tempatLahir}, ${tglLahir}` : (tempatLahir || tglLahir || '-');
+      const jk = (s[6] || '').trim();
 
       const dsn = (s[7] || '').trim();
       const rt = (s[8] || '').trim();
@@ -609,6 +599,7 @@
               <div class="data-row"><div class="data-label">Nama</div><div class="data-separator">:</div><div class="data-value" style="font-weight:800;">${nama}</div></div>
               <div class="data-row"><div class="data-label">NISN</div><div class="data-separator">:</div><div class="data-value">${nisn}</div></div>
               <div class="data-row"><div class="data-label">Tempat Tanggal Lahir</div><div class="data-separator">:</div><div class="data-value">${ttl}</div></div>
+              <div class="data-row"><div class="data-label">Jenis Kelamin</div><div class="data-separator">:</div><div class="data-value">${jk || '-'}</div></div>
               <div class="data-row"><div class="data-label">Alamat</div><div class="data-separator">:</div><div class="data-value">${alamat}</div></div>
             </div>
           </div>
@@ -678,6 +669,13 @@
       const wadah = document.getElementById('wadahCetak');
 
       if (!kelasPilihan) { wadah.innerHTML = ''; return; }
+
+      // KONTROL KHUSUS: HANYA ZOOM SAAT MODE SINGLE DEPAN ATAU BELAKANG SAJA
+      if (viewMode === 'single' && (sisiTarget === 'depan' || sisiTarget === 'belakang')) {
+        wadah.classList.add('zoom-single');
+      } else {
+        wadah.classList.remove('zoom-single');
+      }
 
       let listTargetSiswa = [];
       if (viewMode === 'single') {
@@ -784,7 +782,8 @@
       const cardBelakang = document.getElementById(`kartu-belakang-${nisn}`);
       const cardLipat = document.getElementById(`kartu-lipat-${nisn}`);
 
-      wadah.classList.remove('preview-single');
+      const wasZoomed = wadah.classList.contains('zoom-single');
+      wadah.classList.remove('zoom-single');
 
       if (cardLipat) {
         html2canvas(cardLipat, { scale: 3, useCORS: true }).then(canvas => {
@@ -792,7 +791,7 @@
           link.download = `Kartu_Lipat_${nisn}_${nama.replace(/\s+/g, '_')}.png`;
           link.href = canvas.toDataURL('image/png');
           link.click();
-          wadah.classList.add('preview-single');
+          if (wasZoomed) wadah.classList.add('zoom-single');
         });
         return;
       }
@@ -803,7 +802,7 @@
           link.download = `Kartu_Depan_${nisn}_${nama.replace(/\s+/g, '_')}.png`;
           link.href = canvas.toDataURL('image/png');
           link.click();
-          wadah.classList.add('preview-single');
+          if (wasZoomed) wadah.classList.add('zoom-single');
         });
       }
 
@@ -814,7 +813,7 @@
             link.download = `Kartu_Belakang_${nisn}_${nama.replace(/\s+/g, '_')}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
-            wadah.classList.add('preview-single');
+            if (wasZoomed) wadah.classList.add('zoom-single');
           });
         }, 500);
       }
