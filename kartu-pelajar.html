@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Generator Kartu Pelajar Terpadu - SMPN 1 Rancah (v4.0 Unified)</title>
+  <title>Generator Kartu Pelajar Terpadu - SMPN 1 Rancah (v4.1 Unified)</title>
   
   <!-- SKRIP PENGAMAN & AUTO LOGOUT -->
   <script src="auth-guard.js"></script>
@@ -60,10 +60,23 @@
     .preview-header { width: 100%; color: #f8fafc; font-size: 14px; font-weight: 800; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
 
     /* WADAH GRID PREVIEW */
-    .grid-cetak-container { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; width: 100%; }
-    .grid-cetak-container.preview-single { padding-top: 20px; padding-bottom: 40px; }
+    .grid-cetak-container { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; width: 100%; transition: all 0.2s ease; }
+    
+    /* SKALA PERBESARAN PREVIEW SINGLE (1.65x) */
+    .grid-cetak-container.preview-single .kartu-container-depan,
+    .grid-cetak-container.preview-single .kartu-container-belakang {
+      transform: scale(1.65);
+      transform-origin: top center;
+      margin-bottom: 85px;
+    }
+    .grid-cetak-container.preview-single .single-pair-card,
+    .grid-cetak-container.preview-single .kartu-lipat-wrapper {
+      transform: scale(1.25);
+      transform-origin: top center;
+      margin-bottom: 40px;
+    }
 
-    /* LEMBAR DUPLEX A4 / F4 */
+    /* LEMBAR DUPLEX / BULK SHEET A4 / F4 */
     .page-sheet {
       background: white; padding: 8mm; margin-bottom: 20px; border-radius: 8px;
       box-shadow: 0 10px 20px rgba(0,0,0,0.3); display: grid;
@@ -140,6 +153,19 @@
     .qr-label { font-size: 3.4pt; font-weight: 800; color: #0f172a; margin-top: 0.6mm; text-align: center; text-transform: uppercase; }
     .footer-belakang { background: #0f172a; color: #ffffff; text-align: center; font-size: 3.8pt; font-weight: 600; padding: 0.7mm; border-radius: 0.8mm; position: relative; z-index: 2; }
 
+    /* MODE CETAK LIPAT (FOLDABLE CARD) */
+    .kartu-lipat-wrapper {
+      display: flex; border: 1px dashed #64748b; border-radius: 3.2mm; overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25); background: white; page-break-inside: avoid;
+    }
+    .kartu-lipat-wrapper .kartu-container-depan,
+    .kartu-lipat-wrapper .kartu-container-belakang {
+      box-shadow: none !important; border: none !important; border-radius: 0 !important;
+    }
+    .fold-line-divider {
+      border-r: 1px dashed #94a3b8; height: 53.9mm; width: 0px; z-index: 10;
+    }
+
     /* WADAH PAIR SINGLE (DEPAN & BELAKANG BERSAMAAN) */
     .single-pair-card {
       display: flex; gap: 15px; align-items: center; justify-content: center; flex-wrap: wrap; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; border: 1px border border-slate-700;
@@ -151,6 +177,12 @@
       .panel-control, .preview-header { display: none !important; }
       .app-layout { display: block !important; }
       .preview-section { background: none !important; border: none !important; padding: 0 !important; }
+      .grid-cetak-container.preview-single .kartu-container-depan,
+      .grid-cetak-container.preview-single .kartu-container-belakang,
+      .grid-cetak-container.preview-single .single-pair-card,
+      .grid-cetak-container.preview-single .kartu-lipat-wrapper {
+        transform: none !important; margin-bottom: 0 !important;
+      }
       .page-sheet {
         box-shadow: none !important; border-radius: 0 !important;
         page-break-after: always !important; break-after: page; display: grid !important;
@@ -158,7 +190,7 @@
       }
       .page-title-tag { display: none !important; }
       .kartu-container-depan, .kartu-container-belakang { box-shadow: none !important; border-color: #000 !important; page-break-inside: avoid !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-      .single-pair-card { background: none !important; border: none !important; padding: 0 !important; gap: 4mm 6mm !important; }
+      .single-pair-card, .kartu-lipat-wrapper { background: none !important; border: none !important; padding: 0 !important; gap: 4mm 6mm !important; }
     }
   </style>
 </head>
@@ -173,7 +205,7 @@
 
       <h2>
         <span>Kartu Pelajar Terpadu</span>
-        <span class="badge-v">v4.0</span>
+        <span class="badge-v">v4.1</span>
       </h2>
       
       <div id="statusIndikator" class="status-box loading">Memuat data master siswa...</div>
@@ -261,12 +293,13 @@
         </div>
 
         <div class="form-group">
-          <label>Target Sisi Kartu:</label>
+          <label>Target Sisi & Metode:</label>
           <select id="selectSisiTarget" onchange="renderUnified()">
-            <option value="keduanya" selected>Depan & Belakang</option>
-            <option value="depan">Sisi Depan Saja</option>
-            <option value="belakang">Sisi Belakang Saja</option>
-            <option value="duplex_sheet">Layout Lembaran (Duplex Ready)</option>
+            <option value="keduanya" selected>1. Pratinjau Depan & Belakang</option>
+            <option value="depan">2. Sisi Depan Saja</option>
+            <option value="belakang">3. Sisi Belakang Saja</option>
+            <option value="lipat">4. Mode Cetak Lipat (Berdampingan)</option>
+            <option value="duplex_sheet">5. Layout Lembaran Bolak-Balik (Duplex)</option>
           </select>
         </div>
 
@@ -317,7 +350,7 @@
       <div class="preview-header">
         <div style="display: flex; align-items: center; gap: 8px;">
           <span>Live Preview Kartu Pelajar Terpadu</span>
-          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v4.0 Unified</span>
+          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v4.1 Unified</span>
         </div>
         <span style="font-size: 11px; opacity: 0.7; font-weight: normal;">Presisi Standar KTP (85.6mm x 53.9mm)</span>
       </div>
@@ -485,16 +518,19 @@
       const grpSiswa = document.getElementById('grpSelectSiswa');
       const btnSingle = document.getElementById('btnDownloadSingle');
       const btnKelas = document.getElementById('btnDownloadKelas');
+      const wadah = document.getElementById('wadahCetak');
 
       if (view === 'single') {
         grpSiswa.classList.remove('hidden');
         btnSingle.classList.remove('hidden');
         btnKelas.classList.add('hidden');
+        wadah.classList.add('preview-single');
         updateDropdownSiswaPerKelas();
       } else {
         grpSiswa.classList.add('hidden');
         btnSingle.classList.add('hidden');
         btnKelas.classList.remove('hidden');
+        wadah.classList.remove('preview-single');
         renderUnified();
       }
     }
@@ -622,6 +658,17 @@
       `;
     }
 
+    function buatHtmlLipat(s) {
+      const nisn = (s[0] || '').trim();
+      return `
+        <div class="kartu-lipat-wrapper" id="kartu-lipat-${nisn}">
+          ${buatHtmlDepan(s)}
+          <div class="fold-line-divider"></div>
+          ${buatHtmlBelakang(s)}
+        </div>
+      `;
+    }
+
     function renderUnified() {
       const viewMode = document.getElementById('selectModeView').value;
       const sisiTarget = document.getElementById('selectSisiTarget').value;
@@ -681,6 +728,8 @@
             htmlAll += buatHtmlDepan(s);
           } else if (sisiTarget === 'belakang') {
             htmlAll += buatHtmlBelakang(s);
+          } else if (sisiTarget === 'lipat') {
+            htmlAll += buatHtmlLipat(s);
           }
         });
       }
@@ -688,7 +737,7 @@
       wadah.innerHTML = htmlAll;
 
       // GENERATE QR CODE AUTOMATIS
-      if (sisiTarget === 'keduanya' || sisiTarget === 'belakang' || sisiTarget === 'duplex_sheet') {
+      if (sisiTarget === 'keduanya' || sisiTarget === 'belakang' || sisiTarget === 'lipat' || sisiTarget === 'duplex_sheet') {
         let qrSiswaList = (sisiTarget === 'duplex_sheet') 
           ? dataSiswaGlobal.filter(s => (s[2]||'').trim() === kelasPilihan)
           : listTargetSiswa;
@@ -733,6 +782,20 @@
 
       const cardDepan = document.getElementById(`kartu-depan-${nisn}`);
       const cardBelakang = document.getElementById(`kartu-belakang-${nisn}`);
+      const cardLipat = document.getElementById(`kartu-lipat-${nisn}`);
+
+      wadah.classList.remove('preview-single');
+
+      if (cardLipat) {
+        html2canvas(cardLipat, { scale: 3, useCORS: true }).then(canvas => {
+          const link = document.createElement('a');
+          link.download = `Kartu_Lipat_${nisn}_${nama.replace(/\s+/g, '_')}.png`;
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+          wadah.classList.add('preview-single');
+        });
+        return;
+      }
 
       if (cardDepan) {
         html2canvas(cardDepan, { scale: 3, useCORS: true }).then(canvas => {
@@ -740,6 +803,7 @@
           link.download = `Kartu_Depan_${nisn}_${nama.replace(/\s+/g, '_')}.png`;
           link.href = canvas.toDataURL('image/png');
           link.click();
+          wadah.classList.add('preview-single');
         });
       }
 
@@ -750,6 +814,7 @@
             link.download = `Kartu_Belakang_${nisn}_${nama.replace(/\s+/g, '_')}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
+            wadah.classList.add('preview-single');
           });
         }, 500);
       }
