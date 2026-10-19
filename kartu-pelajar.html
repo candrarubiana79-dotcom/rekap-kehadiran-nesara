@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Generator Kartu Pelajar Terpadu - SMPN 1 Rancah (v4.3 Unified)</title>
+  <title>Generator Kartu Pelajar Terpadu - SMPN 1 Rancah (v4.4 Unified)</title>
   
   <!-- SKRIP PENGAMAN & AUTO LOGOUT -->
   <script src="auth-guard.js"></script>
@@ -70,15 +70,21 @@
       margin-bottom: 85px;
     }
 
-    /* LEMBAR DUPLEX / BULK SHEET A4 / F4 */
+    /* LEMBAR DUPLEX / BULK SHEET A4 / F4 (AMN MARGIN ATAS 14MM) */
     .page-sheet {
-      background: white; padding: 8mm; margin-bottom: 20px; border-radius: 8px;
+      background: white; padding: 14mm 8mm 10mm 8mm; margin-bottom: 20px; border-radius: 8px;
       box-shadow: 0 10px 20px rgba(0,0,0,0.3); display: grid;
-      grid-template-columns: repeat(2, 85.6mm); gap: 4mm 6mm; justify-content: start;
+      grid-template-columns: repeat(2, 85.6mm); gap: 3mm 6mm; justify-content: start; align-content: start;
     }
-    .page-title-tag {
+    .sheet-header {
       grid-column: span 2; font-size: 10px; font-weight: 800; text-transform: uppercase;
-      color: #0284c7; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-bottom: 4px;
+      color: #0284c7; border-bottom: 1px dashed #cbd5e1; padding-bottom: 2.5mm; margin-bottom: 2mm;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .sheet-footer {
+      grid-column: span 2; font-size: 9px; font-weight: 700; color: #64748b;
+      border-top: 1px dashed #cbd5e1; padding-top: 2.5mm; margin-top: 2mm;
+      display: flex; justify-content: space-between; align-items: center;
     }
 
     /* DESAIN DEPAN KARTU (85.6mm x 53.9mm) */
@@ -178,9 +184,9 @@
       .page-sheet {
         box-shadow: none !important; border-radius: 0 !important;
         page-break-after: always !important; break-after: page; display: grid !important;
-        grid-template-columns: repeat(2, 85.6mm) !important; gap: 4mm 6mm !important; justify-content: start !important;
+        grid-template-columns: repeat(2, 85.6mm) !important; gap: 3mm 6mm !important; justify-content: start !important;
       }
-      .page-title-tag { display: none !important; }
+      .sheet-header, .sheet-footer { display: flex !important; }
       .kartu-container-depan, .kartu-container-belakang { box-shadow: none !important; border-color: #000 !important; page-break-inside: avoid !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
       .single-pair-card, .kartu-lipat-wrapper { background: none !important; border: none !important; padding: 0 !important; gap: 4mm 6mm !important; }
     }
@@ -197,7 +203,7 @@
 
       <h2>
         <span>Kartu Pelajar Terpadu</span>
-        <span class="badge-v">v4.3</span>
+        <span class="badge-v">v4.4</span>
       </h2>
       
       <div id="statusIndikator" class="status-box loading">Memuat data master siswa...</div>
@@ -342,7 +348,7 @@
       <div class="preview-header">
         <div style="display: flex; align-items: center; gap: 8px;">
           <span>Live Preview Kartu Pelajar Terpadu</span>
-          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v4.3 Unified</span>
+          <span style="font-size: 10px; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">v4.4 Unified</span>
         </div>
         <span style="font-size: 11px; opacity: 0.7; font-weight: normal;">Presisi Standar KTP (85.6mm x 53.9mm)</span>
       </div>
@@ -670,7 +676,6 @@
 
       if (!kelasPilihan) { wadah.innerHTML = ''; return; }
 
-      // KONTROL KHUSUS: HANYA ZOOM SAAT MODE SINGLE DEPAN ATAU BELAKANG SAJA
       if (viewMode === 'single' && (sisiTarget === 'depan' || sisiTarget === 'belakang')) {
         wadah.classList.add('zoom-single');
       } else {
@@ -687,22 +692,37 @@
       let htmlAll = '';
 
       if (sisiTarget === 'duplex_sheet') {
-        // LAYOUT LEMBARAN CETAK DUPLEX (8 A4 / 10 F4)
         const batchSize = (ukuranKertas === "F4") ? 10 : 8;
         const siswaKelas = dataSiswaGlobal.filter(s => (s[2]||'').trim() === kelasPilihan);
+        const totalLembar = Math.ceil(siswaKelas.length / batchSize);
 
         for (let i = 0; i < siswaKelas.length; i += batchSize) {
           const chunk = siswaKelas.slice(i, i + batchSize);
           const nomorLembar = Math.floor(i / batchSize) + 1;
 
-          // DEPAN
-          htmlAll += `<div class="page-sheet" style="padding: 8mm;"><div class="page-title-tag">📄 LEMBAR ${nomorLembar} - SISI DEPAN</div>`;
+          // DEPAN PER LEMBAR
+          htmlAll += `
+            <div class="page-sheet" style="padding: 14mm 8mm 10mm 8mm;">
+              <div class="sheet-header">
+                <span>KARTU PELAJAR SMPN 1 RANCAH</span>
+                <span>KELAS: ${kelasPilihan}</span>
+              </div>`;
           chunk.forEach(s => { htmlAll += buatHtmlDepan(s); });
-          htmlAll += `</div>`;
+          htmlAll += `
+              <div class="sheet-footer">
+                <span>Kartu Pelajar SMPN 1 Rancah</span>
+                <span>Halaman ${nomorLembar} dari ${totalLembar} (Sisi Depan)</span>
+              </div>
+            </div>`;
 
-          // BELAKANG (MIRRORED)
+          // BELAKANG PER LEMBAR (MIRRORED)
           const calcPaddingLeft = 8 + geserBelakangX;
-          htmlAll += `<div class="page-sheet" style="padding: 8mm 8mm 8mm ${calcPaddingLeft}mm;"><div class="page-title-tag">📄 LEMBAR ${nomorLembar} - SISI BELAKANG (OFFSET ${geserBelakangX}mm)</div>`;
+          htmlAll += `
+            <div class="page-sheet" style="padding: 14mm 8mm 10mm ${calcPaddingLeft}mm;">
+              <div class="sheet-header">
+                <span>KARTU PELAJAR SMPN 1 RANCAH</span>
+                <span>KELAS: ${kelasPilihan}</span>
+              </div>`;
           for (let j = 0; j < chunk.length; j += 2) {
             if (j + 1 < chunk.length) {
               htmlAll += buatHtmlBelakang(chunk[j + 1]);
@@ -711,10 +731,14 @@
               htmlAll += buatHtmlBelakang(chunk[j]);
             }
           }
-          htmlAll += `</div>`;
+          htmlAll += `
+              <div class="sheet-footer">
+                <span>Kartu Pelajar SMPN 1 Rancah</span>
+                <span>Halaman ${nomorLembar} dari ${totalLembar} (Sisi Belakang)</span>
+              </div>
+            </div>`;
         }
       } else {
-        // PER SISWA / PER KELAS STANDARD
         listTargetSiswa.forEach(s => {
           if (sisiTarget === 'keduanya') {
             htmlAll += `
@@ -734,7 +758,6 @@
 
       wadah.innerHTML = htmlAll;
 
-      // GENERATE QR CODE AUTOMATIS
       if (sisiTarget === 'keduanya' || sisiTarget === 'belakang' || sisiTarget === 'lipat' || sisiTarget === 'duplex_sheet') {
         let qrSiswaList = (sisiTarget === 'duplex_sheet') 
           ? dataSiswaGlobal.filter(s => (s[2]||'').trim() === kelasPilihan)
