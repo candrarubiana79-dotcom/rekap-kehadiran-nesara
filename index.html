@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rekap Presensi Siswa v3.3 - SMPN 1 RANCAH</title>
+  <title>Rekap Presensi Siswa v3.4 - SMPN 1 RANCAH</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -78,7 +78,7 @@
                 Sistem Presensi Digital
               </span>
               <span class="px-1.5 py-0.5 bg-amber-400 text-slate-900 font-black text-[9px] sm:text-[11px] rounded-full shadow-sm">
-                v3.3
+                v3.4
               </span>
             </div>
             <h1 class="text-sm sm:text-2xl md:text-3xl font-extrabold tracking-tight leading-tight">REKAPITULASI PRESENSI SISWA</h1>
@@ -186,7 +186,7 @@
     </main>
 
     <footer class="text-center text-[10px] sm:text-xs text-slate-400 py-2">
-      &copy; 2026 Presensi Digital v3.3 • <span class="font-semibold text-slate-600">SMPN 1 RANCAH</span>
+      &copy; 2026 Presensi Digital v3.4 • <span class="font-semibold text-slate-600">SMPN 1 RANCAH</span>
     </footer>
 
   </div>
@@ -361,7 +361,7 @@
           rawLogs = data.logs || [];
           rawDzuhur = data.dzuhur || [];
           rawLibur = data.libur || [];
-          tanggalMulaiSistem = data.tanggal_mulai || "";
+          tanggalMulaiSistem = formatDateStandard(data.tanggal_mulai || "");
 
           initKelasDropdown();
           
@@ -414,7 +414,7 @@
     }
 
     function hitungStatistikHarian(kelasSelected) {
-      const tgl = document.getElementById("filterTanggal").value;
+      const tgl = formatDateStandard(document.getElementById("filterTanggal").value);
       const todayStr = getTodayString();
       const infoLibur = rawLibur.find(l => formatDateStandard(l.tanggal) === tgl);
 
@@ -479,6 +479,11 @@
       const kelas = document.getElementById("filterKelas").value;
       const stats = hitungStatistikHarian(kelas);
 
+      if (stats.isBeforeStart) {
+        box.innerHTML = `<div class="bg-amber-50 border border-amber-200 text-amber-800 p-2.5 sm:p-4 rounded-xl text-center font-bold text-xs sm:text-sm">🗓️ Tanggal ini sebelum Tanggal Mulai Operasional Sistem (${tanggalMulaiSistem}). Presensi belum dimulai.</div>`;
+        return;
+      }
+
       if (stats.isWeekendOrHoliday) {
         box.innerHTML = `<div class="bg-purple-50 border border-purple-200 text-purple-800 p-2.5 sm:p-4 rounded-xl text-center font-bold text-xs sm:text-sm">🎉 Hari Libur (${stats.isWeekendOrHoliday.keterangan || 'Libur'}). Tidak ada presensi.</div>`;
         return;
@@ -538,12 +543,16 @@
 
     // --- REKAP HARIAN REGULER ---
     function renderRekapHarian(kelasSelected) {
-      const tgl = document.getElementById("filterTanggal").value;
+      const tgl = formatDateStandard(document.getElementById("filterTanggal").value);
       const todayStr = getTodayString();
       const infoLibur = rawLibur.find(l => formatDateStandard(l.tanggal) === tgl);
+      const isBeforeStart = (tanggalMulaiSistem && tgl < tanggalMulaiSistem);
 
       document.getElementById("judulRekap").textContent = `REKAP HARIAN PRESENSI SISWA (${tgl})`;
-      if (infoLibur) {
+      
+      if (isBeforeStart) {
+        document.getElementById("subJudulRekap").innerHTML = `<span class="inline-block mt-1 px-3 py-0.5 bg-amber-100 text-amber-800 rounded-full font-bold text-[11px] sm:text-xs">🗓️ Presensi Belum Dimulai (Tanggal Mulai Operasional: ${tanggalMulaiSistem})</span>`;
+      } else if (infoLibur) {
         document.getElementById("subJudulRekap").innerHTML = `<span class="inline-block mt-1 px-3 py-0.5 bg-purple-100 text-purple-800 rounded-full font-bold text-[11px] sm:text-xs">🎉 Hari Libur: ${infoLibur.keterangan}</span>`;
       } else {
         document.getElementById("subJudulRekap").textContent = `Kelas: ${kelasSelected}`;
@@ -583,7 +592,12 @@
         let statusBadge = '<span class="inline-block px-1.5 py-0.5 bg-rose-100 text-rose-700 rounded font-bold">Alpa</span>';
         let bgRow = (index % 2 === 0) ? "bg-white" : "bg-slate-50";
 
-        if (logManual) {
+        if (isBeforeStart) {
+          statusBadge = '<span class="inline-block px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded font-bold">Belum Operasional</span>';
+          bgRow = "bg-slate-50/50";
+          jamMasuk = "-";
+          jamPulang = "-";
+        } else if (logManual) {
           const k = getKet(logManual);
           if (k.includes("izin")) statusBadge = '<span class="inline-block px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded font-bold">Izin</span>';
           else if (k.includes("sakit")) statusBadge = '<span class="inline-block px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded font-bold">Sakit</span>';
@@ -679,6 +693,12 @@
           const infoLibur = rawLibur.find(l => formatDateStandard(l.tanggal) === dateStr);
           const isToday = (dateStr === todayStr);
 
+          // PENGECEKAN PENETAPAN TANGGAL OPERASIONAL SISTEM
+          if (tanggalMulaiSistem && dateStr < tanggalMulaiSistem) {
+            html += `<td class="p-0.5 border border-slate-200 col-tanggal bg-slate-50 text-slate-400 font-medium" title="Sistem Belum Berjalan">-</td>`;
+            continue;
+          }
+
           if (dayOfWeek === 0 || dayOfWeek === 6 || infoLibur) {
             if (index === 0) {
               let textLibur = infoLibur ? infoLibur.keterangan.toUpperCase() : (dayOfWeek === 6 ? "SABTU" : "MINGGU");
@@ -741,7 +761,7 @@
 
     // --- REKAP HARIAN SHALAT DZUHUR ---
     function renderRekapDzuhurHarian(kelasSelected) {
-      const tgl = document.getElementById("filterTanggal").value;
+      const tgl = formatDateStandard(document.getElementById("filterTanggal").value);
       const partsTgl = tgl.split("-");
       const dObj = new Date(partsTgl[0], partsTgl[1] - 1, partsTgl[2]);
       
@@ -862,6 +882,11 @@
         for (let d = 1; d <= totalDays; d++) {
           const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
           const dayOfWeek = new Date(year, month - 1, d).getDay();
+
+          if (tanggalMulaiSistem && dateStr < tanggalMulaiSistem) {
+            html += `<td class="p-1 border col-tanggal bg-slate-100 text-slate-300 font-medium" title="Belum Operasional">-</td>`;
+            continue;
+          }
 
           if (dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6) {
             html += `<td class="p-1 border col-tanggal bg-slate-100 text-slate-400 font-bold" title="Tidak ada Dzuhur">-</td>`;
