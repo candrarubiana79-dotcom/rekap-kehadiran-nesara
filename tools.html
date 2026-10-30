@@ -46,9 +46,9 @@
 
     <!-- SUBTITLE / KETERANGAN -->
     <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 flex items-center gap-3">
-      <i class="fa-solid fa-circle-info text-indigo-600 text-xl"></i>
+      <i class="fa-solid fa-circle-info text-indigo-600 text-xl flex-shrink-0"></i>
       <p class="text-xs text-slate-600 font-medium">
-        Pilih salah satu alat di bawah ini untuk melihat laporan harian, presensi kolektif masal, mengelola QR Code, pemendekan link, cetak Kartu Pelajar Terpadu, atau manajemen hari libur.
+        Pilih salah satu alat di bawah ini untuk melihat laporan harian, daftar siswa per kelas, presensi kolektif masal, mengelola QR Code, pemendekan link, cetak Kartu Pelajar Terpadu, atau manajemen hari libur.
       </p>
     </div>
 
@@ -155,8 +155,8 @@
         </div>
       </a>
 
-      <!-- MENU 6: KARTU PELAJAR TERPADU (GABUNGAN SEBELUMNYA) -->
-      <a href="kartu-pelajar.html" class="group bg-white hover:bg-indigo-50/50 p-5 rounded-2xl border border-slate-200 hover:border-indigo-300 transition-all shadow-sm hover:shadow-md flex flex-col justify-between space-y-4 sm:col-span-1">
+      <!-- MENU 6: KARTU PELAJAR TERPADU -->
+      <a href="kartu-pelajar.html" class="group bg-white hover:bg-indigo-50/50 p-5 rounded-2xl border border-slate-200 hover:border-indigo-300 transition-all shadow-sm hover:shadow-md flex flex-col justify-between space-y-4">
         <div class="flex items-start gap-3.5">
           <div class="w-12 h-12 bg-indigo-100 text-indigo-700 rounded-2xl flex items-center justify-center text-xl font-bold group-hover:scale-110 transition-transform">
             <i class="fa-solid fa-address-card"></i>
@@ -193,6 +193,26 @@
           </div>
         </div>
         <div class="flex items-center justify-end text-xs font-bold text-rose-600 group-hover:translate-x-1 transition-transform">
+          <span>Buka Fitur</span>
+          <i class="fa-solid fa-chevron-right ml-1 text-[10px]"></i>
+        </div>
+      </a>
+
+      <!-- MENU 8: DAFTAR SISWA PER KELAS (BARU) -->
+      <a href="daftar-siswa.html" class="group bg-white hover:bg-violet-50/50 p-5 rounded-2xl border border-slate-200 hover:border-violet-300 transition-all shadow-sm hover:shadow-md flex flex-col justify-between space-y-4">
+        <div class="flex items-start gap-3.5">
+          <div class="w-12 h-12 bg-violet-100 text-violet-600 rounded-2xl flex items-center justify-center text-xl font-bold group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-address-book"></i>
+          </div>
+          <div>
+            <span class="text-[10px] font-extrabold text-violet-600 tracking-wider uppercase">Fitur 08</span>
+            <h3 class="text-base font-extrabold text-slate-900 group-hover:text-violet-600 transition-colors">Daftar Siswa Per Kelas</h3>
+            <p class="text-xs text-slate-500 font-medium mt-1 leading-relaxed">
+              Tampilkan master data siswa per kelas, filter Jenis Kelamin, pencarian NISN/Nama, cetak QR Code, & Export Excel.
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center justify-end text-xs font-bold text-violet-600 group-hover:translate-x-1 transition-transform">
           <span>Buka Fitur</span>
           <i class="fa-solid fa-chevron-right ml-1 text-[10px]"></i>
         </div>
