@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docs to Forms Converter</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    :root {
+      --primary: #1a73e8;
+      --primary-hover: #1557b0;
+      --bg: #f8f9fa;
+      --card: #ffffff;
+      --text: #202124;
+      --muted: #5f6368;
+      --border: #dadce0;
+    }
+    body {
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 40px 16px;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      width: 100%;
+      max-width: 560px;
+      background: var(--card);
+      padding: 32px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      border: 1px solid var(--border);
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 22px;
+      color: var(--primary);
+    }
+    p.subtitle {
+      margin: 0 0 24px;
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .auth-box {
+      background: #f1f3f4;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .auth-status {
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .btn {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-google {
+      background: #ffffff;
+      color: var(--text);
+      border: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .btn-google:hover { background: #f8f9fa; }
+    .btn-primary {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary);
+      color: #ffffff;
+      font-size: 15px;
+      margin-top: 20px;
+    }
+    .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
+    .btn-primary:disabled {
+      background: #9aa0a6;
+      cursor: not-allowed;
+    }
+    .form-group { margin-bottom: 16px; }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 14px;
+      box-sizing: border-box;
+      background: #fff;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    .hint {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 5px;
+      line-height: 1.4;
+    }
+    #notif {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 1.5;
+      display: none;
+    }
+    .notif-info { background: #e8f0fe; color: #1967d2; border: 1px solid #d2e3fc; }
+    .notif-success { background: #e6f4ea; color: #137333; border: 1px solid #ceead6; }
+    .notif-error { background: #fce8e6; color: #c5221f; border: 1px solid #fad2cf; }
+    .notif-success a.btn-link {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 8px 14px;
+      background: #137333;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 13px;
+    }
+    .breakdown-list {
+      margin: 10px 0 0;
+      padding-left: 18px;
+      font-size: 12.5px;
+      max-height: 180px;
+      overflow-y: auto;
+      background: rgba(255,255,255,0.6);
+      padding-top: 8px;
+      padding-bottom: 8px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Docs ke Google Forms</h1>
+  <p class="subtitle">Konversi soal dari Google Docs ke Google Forms secara otomatis dengan pembagian bobot nilai cerdas.</p>
+
+  <!-- Login Google -->
+  <div class="auth-box">
+    <span id="authStatus" class="auth-status">Status: Belum terhubung ke Google</span>
+    <button id="btnLogin" class="btn btn-google" onclick="handleAuthClick()">Login dengan Google</button>
+  </div>
+
+  <!-- Input Link Docs & Forms -->
+  <div class="form-group">
+    <label for="docUrl">Link atau ID Google Docs (Sumber Soal)</label>
+    <input type="text" id="docUrl" placeholder="https://docs.google.com/document/d/1BxiMVs.../edit">
+  </div>
+
+  <div class="form-group">
+    <label for="formUrl">Link atau ID Google Forms (Tujuan Kuis)</label>
+    <input type="text" id="formUrl" placeholder="https://docs.google.com/forms/d/1FAIpQLSd.../edit">
+  </div>
+
+  <!-- Pengaturan Pembagian Poin -->
+  <div class="form-group">
+    <label for="scoringMode">Mode Pembagian Poin Nilai</label>
+    <select id="scoringMode" onchange="togglePointInput()">
+      <option value="auto_complexity" selected>Otomatis Total 100 Poin (Sesuai Kerumitan Soal)</option>
+      <option value="auto_equal">Otomatis Total 100 Poin (Poin Rata / Sama Semua)</option>
+      <option value="manual_default">Poin Tetap per Soal (Manual)</option>
+    </select>
+    <span id="modeHint" class="hint">
+      Sistem menganalisis panjang soal & kata kunci HOTS untuk membagi total <b>100 poin</b> secara proporsional. Tag <code>[25 poin]</code> atau <code>[sulit]</code> di Docs tetap diprioritaskan.
+    </span>
+  </div>
+
+  <div class="form-group" id="manualPointGroup" style="display: none;">
+    <label for="defaultPoints">Poin Default per Soal</label>
+    <input type="number" id="defaultPoints" value="10" min="1">
+  </div>
+
+  <button id="btnGenerate" class="btn btn-primary" onclick="generateSoal()" disabled>Generate Soal ke Forms</button>
+
+  <div id="notif"></div>
+</div>
+
+<script>
+  // =========================================================================
+  // KONFIGURASI: Ganti dengan Client ID dari Google Cloud Console Anda
+  // =========================================================================
+  const CLIENT_ID = 'MASUKKAN_CLIENT_ID_ANDA_DISINI.apps.googleusercontent.com';
+
+  const SCOPES = [
+    'https://www.googleapis.com/auth/documents.readonly',
+    'https://www.googleapis.com/auth/forms.body'
+  ].join(' ');
+
+  let tokenClient;
+  let accessToken = null;
+
+  window.onload = () => {
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: CLIENT_ID,
+      scope: SCOPES,
+      callback: (tokenResponse) => {
+        if (tokenResponse && tokenResponse.access_token) {
+          accessToken = tokenResponse.access_token;
+          document.getElementById('authStatus').innerText = '✅ Akun Google terhubung';
+          document.getElementById('btnLogin').innerText = 'Ganti Akun';
+          document.getElementById('btnGenerate').disabled = false;
+        }
+      },
+    });
+  };
+
+  function handleAuthClick() {
+    if (CLIENT_ID.includes('MASUKKAN_CLIENT_ID')) {
+      showNotif('error', '⚠️ <b>Konfigurasi Belum Selesai:</b> Pemilik website belum memasukkan Google Client ID di kode <code>index.html</code>.');
+      return;
+    }
+    tokenClient.requestAccessToken({ prompt: 'consent' });
+  }
+
+  function togglePointInput() {
+    const mode = document.getElementById('scoringMode').value;
+    const manualGroup = document.getElementById('manualPointGroup');
+    const hint = document.getElementById('modeHint');
+
+    if (mode === 'manual_default') {
+      manualGroup.style.display = 'block';
+      hint.innerHTML = 'Setiap soal mendapat poin default di bawah, kecuali jika diberi tag <code>[25 poin]</code> di Docs.';
+    } else if (mode === 'auto_equal') {
+      manualGroup.style.display = 'none';
+      hint.innerHTML = 'Total nilai seluruh soal akan dibagi rata agar jumlah akhirnya tepat <b>100 poin</b>.';
+    } else {
+      manualGroup.style.display = 'none';
+      hint.innerHTML = 'Sistem menganalisis panjang soal & kata kunci HOTS untuk membagi total <b>100 poin</b> secara proporsional. Tag <code>[25 poin]</code> atau <code>[sulit]</code> di Docs tetap diprioritaskan.';
+    }
+  }
+
+  function extractId(input) {
+    if (!input) return '';
+    const match = input.match(/\/d\/([a-zA-Z0-9-_]+)/);
+    return match ? match[1] : input.trim();
+  }
+
+  function showNotif(type, htmlMessage) {
+    const notif = document.getElementById('notif');
+    notif.className = `notif-${type}`;
+    notif.innerHTML = htmlMessage;
+    notif.style.display = 'block';
+  }
+
+  // =========================================================================
+  // 1. PARSER FORMAT SOAL (A, B, C, D + "jawaban : X")
+  // =========================================================================
+  function parseDocsContent(docData) {
+    const content = docData.body?.content || [];
+    const questions = [];
+    let currentQ = null;
+
+    // Regex nomor soal: "1. Pertanyaan"
+    const questionRegex = /^(\d+)\.\s*(.+)/;
+    // Regex opsi pilihan: "A. Jawaban" atau "A) Jawaban"
+    const optionRegex = /^([A-Ea-e])[\.\)]\s*(.+)/;
+    // Regex kunci jawaban: "jawaban : C", "Jawaban: B", "Kunci Jawaban = A"
+    const answerRegex = /^(?:kunci\s*)?jawaban\s*[:=-]\s*([A-Ea-e](?:\s*,\s*[A-Ea-e])*)$/i;
+
+    const finalizeQuestion = (q) => {
+      if (!q || q.options.length === 0) return;
+
+      // Cocokkan huruf jawaban (misal "C") dengan teks opsinya
+      q.answerLetters.forEach(letter => {
+        const optText = q.optionsMap[letter.toUpperCase()];
+        if (optText && !q.correctAnswers.includes(optText)) {
+          q.correctAnswers.push(optText);
+        }
+      });
+
+      questions.push(q);
+    };
+
+    content.forEach(element => {
+      if (!element.paragraph) return;
+
+      let rawText = '';
+      (element.paragraph.elements || []).forEach(el => {
+        if (el.textRun && el.textRun.content) {
+          rawText += el.textRun.content;
+        }
+      });
+
+      const text = rawText.trim();
+      if (!text) return;
+
+      const qMatch = text.match(questionRegex);
+      const oMatch = text.match(optionRegex);
+      const aMatch = text.match(answerRegex);
+      const isTopBullet = element.paragraph.bullet && !element.paragraph.bullet.nestingLevel;
+
+      if (qMatch || (isTopBullet && !oMatch && !aMatch)) {
+        // Simpan soal sebelumnya jika ada
+        finalizeQuestion(currentQ);
+
+        let rawTitle = qMatch ? qMatch[2].trim() : text;
+        const meta = extractQuestionMeta(rawTitle);
+
+        currentQ = {
+          title: meta.cleanTitle,
+          manualPoints: meta.manualPoints,
+          explicitLevel: meta.explicitLevel,
+          options: [],
+          optionsMap: {},
+          answerLetters: [],
+          correctAnswers: [],
+          points: 0,
+          levelLabel: ''
+        };
+      } else if (oMatch && currentQ) {
+        const letter = oMatch[1].toUpperCase();
+        const optText = oMatch[2].trim();
+
+        if (!currentQ.options.includes(optText)) {
+          currentQ.options.push(optText);
+          currentQ.optionsMap[letter] = optText;
+        }
+      } else if (aMatch && currentQ) {
+        const letters = aMatch[1].split(',').map(l => l.trim().toUpperCase());
+        currentQ.answerLetters.push(...letters);
+      } else if (currentQ && currentQ.options.length === 0) {
+        // Jika soal terdiri dari beberapa paragraf (soal cerita), gabungkan ke judul soal
+        currentQ.title += '\n' + text;
+      }
+    });
+
+    finalizeQuestion(currentQ);
+    return questions;
+  }
+
+  // Ekstrak tag seperti [25 poin], [mudah], [sedang], [sulit] dari teks soal
+  function extractQuestionMeta(title) {
+    let manualPoints = null;
+    let explicitLevel = null;
+
+    let cleanTitle = title.replace(/\[([^\]]+)\]/g, (fullMatch, inside) => {
+      const lower = inside.trim().toLowerCase();
+
+      // Cek tag poin manual: [25 poin] atau [25 pts]
+      const ptMatch = lower.match(/^(\d+)\s*(?:poin|pts|point)?$/);
+      if (ptMatch) {
+        manualPoints = parseInt(ptMatch[1], 10);
+        return '';
+      }
+
+      // Cek tag tingkat kesulitan: [mudah], [sedang], [sulit]
+      if (['mudah', 'easy'].includes(lower)) {
+        explicitLevel = 'mudah';
+        return '';
+      }
+      if (['sedang', 'medium'].includes(lower)) {
+        explicitLevel = 'sedang';
+        return '';
+      }
+      if (['sulit', 'hard', 'hots'].includes(lower)) {
+        explicitLevel = 'sulit';
+        return '';
+      }
+
+      return fullMatch; // Biarkan jika bukan tag sistem (misal [Gambar 1])
+    });
+
+    return {
+      cleanTitle: cleanTitle.replace(/\s{2,}/g, ' ').trim(),
+      manualPoints,
+      explicitLevel
+    };
+  }
+
+  // =========================================================================
+  // 2. ALGORITMA KERUMITAN SOAL & PEMBAGIAN TEPAT 100 POIN
+  // =========================================================================
+  function evaluateComplexity(q) {
+    if (q.explicitLevel === 'sulit') return { weight: 2.0, label: 'Sulit (Tag)' };
+    if (q.explicitLevel === 'sedang') return { weight: 1.5, label: 'Sedang (Tag)' };
+    if (q.explicitLevel === 'mudah') return { weight: 1.0, label: 'Mudah (Tag)' };
+
+    const fullText = (q.title + ' ' + q.options.join(' ')).toLowerCase();
+    const wordCount = q.title.split(/\s+/).length;
+
+    // Kata kunci analisis / HOTS / hitungan
+    const hotsKeywords = [
+      'mengapa', 'bagaimana', 'analisis', 'kesimpulan', 'simpulkan',
+      'dampak', 'perbedaan', 'perbandingan', 'berdasarkan', 'kecuali',
+      'hitunglah', 'tentukan nilai', 'manakah pernyataan yang tepat',
+      'hubungan antara', 'penyebab utama', 'strategi'
+    ];
+    const hasHots = hotsKeywords.some(kw => fullText.includes(kw));
+    const hasNumbersOrMath = /\d+\s*[\+\-\*\/x=%]\s*\d+/.test(fullText);
+
+    if (wordCount >= 32 || (wordCount >= 18 && (hasHots || hasNumbersOrMath))) {
+      return { weight: 2.0, label: 'Sulit' };
+    } else if (wordCount >= 14 || hasHots || hasNumbersOrMath) {
+      return { weight: 1.5, label: 'Sedang' };
+    } else {
+      return { weight: 1.0, label: 'Mudah' };
+    }
+  }
+
+  function calculatePoints(questions, mode, defaultPoints) {
+    if (mode === 'manual_default') {
+      questions.forEach(q => {
+        q.points = q.manualPoints !== null ? q.manualPoints : defaultPoints;
+        q.levelLabel = q.manualPoints !== null ? 'Manual' : 'Default';
+      });
+      return;
+    }
+
+    const TARGET_TOTAL = 100;
+    let lockedPoints = 0;
+    const autoQuestions = [];
+
+    // Pisahkan soal yang sudah punya [X poin] manual
+    questions.forEach(q => {
+      if (q.manualPoints !== null) {
+        q.points = q.manualPoints;
+        q.levelLabel = 'Manual';
+        lockedPoints += q.manualPoints;
+      } else {
+        const comp = mode === 'auto_equal'
+          ? { weight: 1.0, label: 'Rata' }
+          : evaluateComplexity(q);
+        q.weight = comp.weight;
+        q.levelLabel = comp.label;
+        autoQuestions.push(q);
+      }
+    });
+
+    if (autoQuestions.length === 0) return;
+
+    const remainingPoints = Math.max(0, TARGET_TOTAL - lockedPoints);
+    const totalWeight = autoQuestions.reduce((sum, q) => sum + q.weight, 0);
+
+    // Largest Remainder Method agar hasil bilangan bulat selalu pas 100
+    let allocatedSum = 0;
+    const remainders = autoQuestions.map((q, index) => {
+      const exact = (remainingPoints * q.weight) / totalWeight;
+      const floored = Math.floor(exact);
+      q.points = floored;
+      allocatedSum += floored;
+      return { index, remainder: exact - floored };
+    });
+
+    let shortfall = remainingPoints - allocatedSum;
+    remainders.sort((a, b) => b.remainder - a.remainder);
+
+    for (let i = 0; i < shortfall; i++) {
+      const targetIdx = remainders[i % remainders.length].index;
+      autoQuestions[targetIdx].points += 1;
+    }
+  }
+
+  // =========================================================================
+  // 3. KIRIM KE GOOGLE FORMS API
+  // =========================================================================
+  async function generateSoal() {
+    const docId = extractId(document.getElementById('docUrl').value);
+    const formId = extractId(document.getElementById('formUrl').value);
+    const mode = document.getElementById('scoringMode').value;
+    const defaultPoints = parseInt(document.getElementById('defaultPoints').value, 10) || 10;
+    const btn = document.getElementById('btnGenerate');
+
+    if (!docId || !formId) {
+      showNotif('error', '❌ Harap masukkan Link atau ID Google Docs dan Google Forms.');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerText = 'Sedang memproses...';
+    showNotif('info', '⏳ Membaca dan menganalisis soal dari Google Docs...');
+
+    try {
+      const docRes = await fetch(`https://docs.googleapis.com/v1/documents/${docId}`, {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+
+      if (!docRes.ok) {
+        const err = await docRes.json();
+        throw new Error(err.error?.message || 'Gagal membaca Google Docs. Pastikan link benar dan Anda punya akses.');
+      }
+
+      const docData = await docRes.json();
+      const questions = parseDocsContent(docData);
+
+      if (questions.length === 0) {
+        throw new Error('Tidak ditemukan soal yang sesuai format di Google Docs tersebut.');
+      }
+
+      // Hitung pembagian poin
+      calculatePoints(questions, mode, defaultPoints);
+      const grandTotal = questions.reduce((sum, q) => sum + q.points, 0);
+
+      showNotif('info', `⏳ Mengirim ${questions.length} soal (Total ${grandTotal} poin) ke Google Forms...`);
+
+      const requests = [
+        {
+          updateSettings: {
+            settings: { quizSettings: { isQuiz: true } },
+            updateMask: 'quizSettings.isQuiz'
+          }
+        }
+      ];
+
+      questions.forEach((q, idx) => {
+        const grading = { pointValue: q.points };
+        if (q.correctAnswers.length > 0) {
+          grading.correctAnswers = {
+            answers: q.correctAnswers.map(ans => ({ value: ans }))
+          };
+        }
+
+        const choiceType = q.correctAnswers.length > 1 ? 'CHECKBOX' : 'RADIO';
+
+        requests.push({
+          createItem: {
+            item: {
+              title: q.title,
+              questionItem: {
+                question: {
+                  required: true,
+                  grading: grading,
+                  choiceQuestion: {
+                    type: choiceType,
+                    options: q.options.map(opt => ({ value: opt }))
+                  }
+                }
+              }
+            },
+            location: { index: idx }
+          }
+        });
+      });
+
+      const formRes = await fetch(`https://forms.googleapis.com/v1/forms/${formId}:batchUpdate`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ requests })
+      });
+
+      if (!formRes.ok) {
+        const err = await formRes.json();
+        throw new Error(err.error?.message || 'Gagal menulis ke Google Forms. Pastikan Anda memakai link Edit Form.');
+      }
+
+      // Buat rincian pembagian poin untuk ditampilkan di notifikasi
+      const breakdownHtml = questions.map((q, i) => {
+        const shortTitle = q.title.length > 42 ? q.title.substring(0, 42) + '...' : q.title;
+        const ansStatus = q.correctAnswers.length > 0 ? `Kunci: ${q.answerLetters.join(', ')}` : '⚠️ Tanpa kunci';
+        return `<li><b>Soal ${i + 1}</b> (${q.levelLabel} • ${ansStatus}): <b>${q.points} poin</b> — <i>${shortTitle}</i></li>`;
+      }).join('');
+
+      const editUrl = `https://docs.google.com/forms/d/${formId}/edit`;
+      showNotif(
+        'success',
+        `✅ <b>Selesai!</b> Berhasil membuat <b>${questions.length} soal</b> dengan total nilai <b>${grandTotal} poin</b>.` +
+        `<ul class="breakdown-list">${breakdownHtml}</ul>` +
+        `<a class="btn-link" href="${editUrl}" target="_blank">Buka Editor Google Forms →</a>`
+      );
+
+    } catch (error) {
+      showNotif('error', `❌ <b>Terjadi Kesalahan:</b> ${error.message}`);
+    } finally {
+      btn.disabled = false;
+      btn.innerText = 'Generate Soal ke Forms';
+    }
+  }
+</script>
+
+</body>
+</html>
