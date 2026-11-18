@@ -807,10 +807,18 @@ jawaban : B`;
     let manualPoints = null;
     let explicitLevel = null;
 
-    let cleanTitle = title.replace(/\[([^\]]+)\]/g, (fullMatch, inside) => {
-      const lower = inside.trim().toLowerCase();
+    // Mendukung kurung siku [ ], kurung biasa ( ), dan kurung kurawal { }
+    let cleanTitle = title.replace(/(\[([^\]]+)\]|\(([^)]+)\)|\{([^}]+)\})/g, (fullMatch, _all, sqInside, parenInside, curlyInside) => {
+      const isParen = parenInside !== undefined;
+      const inside = (sqInside ?? parenInside ?? curlyInside).trim();
+      const lower = inside.toLowerCase();
 
-      const ptMatch = lower.match(/^(\d+)\s*(?:poin|pts|point)?$/);
+      // Untuk kurung biasa ( ), wajib ada kata 'poin'/'pts' agar angka tahun seperti (1945) tidak ikut terpotong
+      const ptRegex = isParen
+        ? /^(\d+)\s*(?:poin|pts|point)$/
+        : /^(\d+)\s*(?:poin|pts|point)?$/;
+
+      const ptMatch = lower.match(ptRegex);
       if (ptMatch) {
         manualPoints = parseInt(ptMatch[1], 10);
         return '';
@@ -838,7 +846,7 @@ jawaban : B`;
       explicitLevel
     };
   }
-
+  
   // =========================================================================
   // 2. ALGORITMA KERUMITAN SOAL & PEMBAGIAN TEPAT 100 POIN
   // =========================================================================
