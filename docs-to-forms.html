@@ -189,6 +189,15 @@
     .notif-info { background: #e8f0fe; color: #1967d2; border: 1px solid #d2e3fc; }
     .notif-success { background: #e6f4ea; color: #137333; border: 1px solid #ceead6; }
     .notif-error { background: #fce8e6; color: #c5221f; border: 1px solid #fad2cf; }
+    .warn-box {
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: #fef7e0;
+      color: #b06000;
+      border: 1px solid #fde293;
+      border-radius: 6px;
+      font-size: 12.5px;
+    }
     .notif-success a.btn-link {
       display: inline-block;
       margin-top: 12px;
@@ -204,9 +213,9 @@
       margin: 10px 0 0;
       padding-left: 18px;
       font-size: 12.5px;
-      max-height: 180px;
+      max-height: 190px;
       overflow-y: auto;
-      background: rgba(255,255,255,0.6);
+      background: rgba(255,255,255,0.65);
       padding-top: 8px;
       padding-bottom: 8px;
       border-radius: 6px;
@@ -275,11 +284,13 @@
       margin: 0;
       padding: 12px 14px;
       font-family: 'Consolas', 'Courier New', monospace;
-      font-size: 12.5px;
+      font-size: 12px;
       line-height: 1.55;
       color: #202124;
       white-space: pre-wrap;
       word-break: break-word;
+      max-height: 310px;
+      overflow-y: auto;
     }
     .guide-notes {
       margin: 10px 0 0;
@@ -317,12 +328,12 @@
       <h3>1. Cara Pengisian</h3>
       <ol class="guide-steps">
         <li>Klik tombol <b>Login dengan Google</b>, lalu centang izin akses untuk membaca Google Docs dan mengisi Google Forms.</li>
-        <li>Siapkan file <b>Google Docs</b> berisi daftar soal sesuai format di bawah, lalu salin URL dokumen tersebut.</li>
+        <li>Siapkan file <b>Google Docs</b> berisi daftar soal sesuai contoh format di bawah, lalu salin URL dokumen tersebut.</li>
         <li>Buat file <b>Google Forms</b> baru (kosong), salin URL dari halaman <b>Edit</b> (berakhiran <code class="inline">/edit</code>, bukan link kirim/responder).</li>
         <li>Tempel kedua link ke kolom formulir, pilih <b>Mode Pembagian Poin Nilai</b>, lalu klik <b>Generate Soal ke Forms</b>.</li>
       </ol>
 
-      <h3>2. Contoh Format Penulisan di Google Docs</h3>
+      <h3>2. Contoh Format Soal (Biasa, Mudah, Sulit, Poin, & Gambar)</h3>
       <div class="sample-box">
         <div class="sample-header">
           <span>Salin contoh ini ke Google Docs Anda:</span>
@@ -335,34 +346,50 @@ C. Surabaya
 D. Medan
 jawaban : B
 
-2. [25 poin] Planet manakah yang dijuluki Planet Merah?
-A. Venus
-B. Mars
-C. Jupiter
-D. Bumi
-jawaban : B
+2. [mudah] Lambang sila pertama Pancasila adalah...
+A. Rantai
+B. Pohon Beringin
+C. Bintang
+D. Kepala Banteng
+jawaban : C
 
 3. [sulit] Berdasarkan analisis dampak perubahan iklim global terhadap wilayah pesisir, strategi adaptasi manakah yang paling berkelanjutan?
 A. Membangun tanggul beton di seluruh garis pantai
 B. Rehabilitasi ekosistem mangrove terpadu dengan tambak silvofishery
 C. Merelokasi seluruh penduduk pesisir ke dataran tinggi
 D. Mengimpor seluruh kebutuhan pangan pokok
+jawaban : B
+
+4. [25 poin] Planet manakah yang dijuluki Planet Merah?
+A. Venus
+B. Mars
+C. Jupiter
+D. Bumi
+jawaban : B
+
+5. Perhatikan gambar organ pernapasan di bawah ini!
+[Sisipkan / Paste Gambar JPG atau PNG langsung di baris ini]
+Bagian yang ditunjuk oleh huruf X berfungsi untuk...
+A. Menyaring udara kotor
+B. Pertukaran oksigen dan karbon dioksida
+C. Mengatur suhu udara masuk
+D. Menghasilkan suara
 jawaban : B</pre>
       </div>
 
-      <h3>3. Aturan Format & Pembagian Poin</h3>
+      <h3>3. Aturan Format, Gambar & Poin</h3>
       <ul class="guide-notes">
-        <li><b>Nomor & Pilihan Ganda:</b> Awali soal dengan angka (<code class="inline">1.</code>) dan opsi dengan huruf <code class="inline">A.</code> sampai <code class="inline">E.</code> (mendukung huruf besar maupun kecil).</li>
-        <li><b>Kunci Jawaban:</b> Tulis di baris terakhir tiap soal dengan format <code class="inline">jawaban : B</code> (tidak peka huruf besar/kecil). Untuk jawaban ganda (kotak centang), pisahkan dengan koma seperti <code class="inline">jawaban : A, C</code>.</li>
-        <li><b>Tag Bobot Opsional:</b> Tambahkan tag di awal soal seperti <code class="inline">[25 poin]</code> untuk mengunci nilai tertentu, atau <code class="inline">[mudah]</code>, <code class="inline">[sedang]</code>, <code class="inline">[sulit]</code> untuk mengatur kerumitan secara manual.</li>
-        <li><b>Total 100 Poin Otomatis:</b> Tanpa tag manual, sistem menganalisis panjang kalimat serta kata kunci HOTS tiap soal dan membagi nilai hingga pas <b>100 poin</b>.</li>
+        <li><b>Soal Biasa & Tag Bobot:</b> Nomor <b>1</b> adalah soal biasa (bobot dideteksi otomatis). Nomor <b>2–4</b> memakai tag opsional <code class="inline">[mudah]</code>, <code class="inline">[sulit]</code>, atau <code class="inline">[25 poin]</code> untuk mengunci bobot/nilai soal tertentu.</li>
+        <li><b>Soal Bergambar (Nomor 5):</b> Sisipkan gambar (format <b>JPG/PNG/GIF</b>, maks. 2 MB) langsung di bawah pertanyaan atau di samping opsi <code class="inline">A.</code>–<code class="inline">E.</code>. Hindari fitur <i>Insert > Drawing</i> agar gambar terbaca otomatis.</li>
+        <li><b>Kunci Jawaban:</b> Tulis di baris terakhir tiap soal dengan format <code class="inline">jawaban : B</code> (tidak peka huruf besar/kecil). Untuk jawaban ganda, pisahkan dengan koma seperti <code class="inline">jawaban : A, C</code>.</li>
+        <li><b>Total 100 Poin Otomatis:</b> Sistem otomatis membagi sisa poin ke seluruh soal biasa, mudah, dan sulit hingga jumlah nilainya pas <b>100 poin</b>.</li>
       </ul>
     </aside>
 
     <!-- PANEL UTAMA FORM KONVERSI (Di Desktop di kiri, di HP di bawah petunjuk) -->
     <main class="card converter-card">
       <h1>Docs ke Google Forms</h1>
-      <p class="subtitle">Konversi soal dari Google Docs ke Google Forms secara otomatis dengan pembagian bobot nilai cerdas.</p>
+      <p class="subtitle">Konversi soal teks maupun bergambar dari Google Docs ke Google Forms secara otomatis dengan pembagian bobot nilai cerdas.</p>
 
       <!-- Login Google -->
       <div class="auth-box">
@@ -390,7 +417,7 @@ jawaban : B</pre>
           <option value="manual_default">Poin Tetap per Soal (Manual)</option>
         </select>
         <span id="modeHint" class="hint">
-          Sistem menganalisis panjang soal & kata kunci HOTS untuk membagi total <b>100 poin</b> secara proporsional. Tag <code class="inline">[25 poin]</code> atau <code class="inline">[sulit]</code> di Docs tetap diprioritaskan.
+          Sistem menganalisis panjang soal, gambar, & kata kunci HOTS untuk membagi total <b>100 poin</b> secara proporsional. Tag <code class="inline">[25 poin]</code> atau <code class="inline">[sulit]</code> di Docs tetap diprioritaskan.
         </span>
       </div>
 
@@ -472,7 +499,7 @@ jawaban : B</pre>
       hint.innerHTML = 'Total nilai seluruh soal akan dibagi rata agar jumlah akhirnya tepat <b>100 poin</b>.';
     } else {
       manualGroup.style.display = 'none';
-      hint.innerHTML = 'Sistem menganalisis panjang soal & kata kunci HOTS untuk membagi total <b>100 poin</b> secara proporsional. Tag <code class="inline">[25 poin]</code> atau <code class="inline">[sulit]</code> di Docs tetap diprioritaskan.';
+      hint.innerHTML = 'Sistem menganalisis panjang soal, gambar, & kata kunci HOTS untuk membagi total <b>100 poin</b> secara proporsional. Tag <code class="inline">[25 poin]</code> atau <code class="inline">[sulit]</code> di Docs tetap diprioritaskan.';
     }
   }
 
@@ -490,15 +517,18 @@ jawaban : B</pre>
   }
 
   // =========================================================================
-  // 1. PARSER FORMAT SOAL (A, B, C, D + "jawaban : X")
+  // 1. PARSER FORMAT SOAL + EKSTRAKSI GAMBAR INLINE GOOGLE DOCS
   // =========================================================================
   function parseDocsContent(docData) {
     const content = docData.body?.content || [];
+    const inlineObjects = docData.inlineObjects || {};
     const questions = [];
     let currentQ = null;
+    let pendingImages = [];
+    let skippedDrawingsCount = 0;
 
     const questionRegex = /^(\d+)\.\s*(.+)/;
-    const optionRegex = /^([A-Ea-e])[\.\)]\s*(.+)/;
+    const optionRegex = /^([A-Ea-e])[\.\)]\s*(.*)/;
     const answerRegex = /^(?:kunci\s*)?jawaban\s*[:=-]\s*([A-Ea-e](?:\s*,\s*[A-Ea-e])*)$/i;
 
     const finalizeQuestion = (q) => {
@@ -511,6 +541,10 @@ jawaban : B</pre>
         }
       });
 
+      if (!q.title.trim() && q.images.length > 0) {
+        q.title = 'Perhatikan gambar berikut!';
+      }
+
       questions.push(q);
     };
 
@@ -518,14 +552,26 @@ jawaban : B</pre>
       if (!element.paragraph) return;
 
       let rawText = '';
+      const inlineImages = [];
+
       (element.paragraph.elements || []).forEach(el => {
         if (el.textRun && el.textRun.content) {
           rawText += el.textRun.content;
         }
+        if (el.inlineObjectElement && el.inlineObjectElement.inlineObjectId) {
+          const objId = el.inlineObjectElement.inlineObjectId;
+          const embedded = inlineObjects[objId]?.inlineObjectProperties?.embeddedObject;
+          const uri = embedded?.imageProperties?.contentUri;
+          if (uri) {
+            inlineImages.push(uri);
+          } else if (embedded?.embeddedDrawingProperties) {
+            skippedDrawingsCount++;
+          }
+        }
       });
 
       const text = rawText.trim();
-      if (!text) return;
+      if (!text && inlineImages.length === 0) return;
 
       const qMatch = text.match(questionRegex);
       const oMatch = text.match(optionRegex);
@@ -542,31 +588,56 @@ jawaban : B</pre>
           title: meta.cleanTitle,
           manualPoints: meta.manualPoints,
           explicitLevel: meta.explicitLevel,
+          images: [...pendingImages, ...inlineImages],
           options: [],
+          optionImages: {},
           optionsMap: {},
           answerLetters: [],
           correctAnswers: [],
           points: 0,
           levelLabel: ''
         };
+        pendingImages = [];
       } else if (oMatch && currentQ) {
         const letter = oMatch[1].toUpperCase();
-        const optText = oMatch[2].trim();
+        let optText = oMatch[2].trim();
 
-        if (!currentQ.options.includes(optText)) {
+        if (!optText && inlineImages.length > 0) {
+          optText = `Opsi ${letter}`;
+        }
+
+        if (optText && !currentQ.options.includes(optText)) {
+          const optIndex = currentQ.options.length;
           currentQ.options.push(optText);
           currentQ.optionsMap[letter] = optText;
+          if (inlineImages.length > 0) {
+            currentQ.optionImages[optIndex] = inlineImages[0];
+          }
         }
       } else if (aMatch && currentQ) {
         const letters = aMatch[1].split(',').map(l => l.trim().toUpperCase());
         currentQ.answerLetters.push(...letters);
-      } else if (currentQ && currentQ.options.length === 0) {
-        currentQ.title += '\n' + text;
+      } else if (currentQ) {
+        if (currentQ.options.length === 0) {
+          if (text) {
+            currentQ.title = currentQ.title ? `${currentQ.title}\n${text}` : text;
+          }
+          if (inlineImages.length > 0) {
+            currentQ.images.push(...inlineImages);
+          }
+        } else if (inlineImages.length > 0) {
+          const lastOptIdx = currentQ.options.length - 1;
+          if (!currentQ.optionImages[lastOptIdx]) {
+            currentQ.optionImages[lastOptIdx] = inlineImages[0];
+          }
+        }
+      } else if (!currentQ && inlineImages.length > 0) {
+        pendingImages.push(...inlineImages);
       }
     });
 
     finalizeQuestion(currentQ);
-    return questions;
+    return { questions, skippedDrawingsCount };
   }
 
   function extractQuestionMeta(title) {
@@ -615,6 +686,7 @@ jawaban : B</pre>
 
     const fullText = (q.title + ' ' + q.options.join(' ')).toLowerCase();
     const wordCount = q.title.split(/\s+/).length;
+    const hasImage = q.images.length > 0 || Object.keys(q.optionImages).length > 0;
 
     const hotsKeywords = [
       'mengapa', 'bagaimana', 'analisis', 'kesimpulan', 'simpulkan',
@@ -625,9 +697,9 @@ jawaban : B</pre>
     const hasHots = hotsKeywords.some(kw => fullText.includes(kw));
     const hasNumbersOrMath = /\d+\s*[\+\-\*\/x=%]\s*\d+/.test(fullText);
 
-    if (wordCount >= 32 || (wordCount >= 18 && (hasHots || hasNumbersOrMath))) {
+    if (wordCount >= 32 || (wordCount >= 18 && (hasHots || hasNumbersOrMath)) || (hasImage && hasHots)) {
       return { weight: 2.0, label: 'Sulit' };
-    } else if (wordCount >= 14 || hasHots || hasNumbersOrMath) {
+    } else if (wordCount >= 14 || hasHots || hasNumbersOrMath || hasImage) {
       return { weight: 1.5, label: 'Sedang' };
     } else {
       return { weight: 1.0, label: 'Mudah' };
@@ -686,8 +758,83 @@ jawaban : B</pre>
   }
 
   // =========================================================================
-  // 3. KIRIM KE GOOGLE FORMS API
+  // 3. PENYUSUN PAYLOAD & KIRIM KE GOOGLE FORMS API
   // =========================================================================
+  function buildBatchRequests(questions, includeImages) {
+    const requests = [
+      {
+        updateSettings: {
+          settings: { quizSettings: { isQuiz: true } },
+          updateMask: 'quizSettings.isQuiz'
+        }
+      }
+    ];
+
+    let formItemIndex = 0;
+
+    questions.forEach((q, qIdx) => {
+      if (includeImages && q.images.length > 1) {
+        q.images.slice(1).forEach((extraUri, extraIdx) => {
+          requests.push({
+            createItem: {
+              item: {
+                title: `Gambar Pendukung Soal ${qIdx + 1} (${extraIdx + 2})`,
+                imageItem: {
+                  image: { sourceUri: extraUri }
+                }
+              },
+              location: { index: formItemIndex++ }
+            }
+          });
+        });
+      }
+
+      const grading = { pointValue: q.points };
+      if (q.correctAnswers.length > 0) {
+        grading.correctAnswers = {
+          answers: q.correctAnswers.map(ans => ({ value: ans }))
+        };
+      }
+
+      const choiceType = q.correctAnswers.length > 1 ? 'CHECKBOX' : 'RADIO';
+
+      const questionItemPayload = {
+        question: {
+          required: true,
+          grading: grading,
+          choiceQuestion: {
+            type: choiceType,
+            options: q.options.map((opt, optIdx) => {
+              const optObj = { value: opt };
+              if (includeImages && q.optionImages[optIdx]) {
+                optObj.image = { sourceUri: q.optionImages[optIdx] };
+              }
+              return optObj;
+            })
+          }
+        }
+      };
+
+      if (includeImages && q.images.length > 0) {
+        questionItemPayload.image = {
+          sourceUri: q.images[0]
+        };
+      }
+
+      requests.push({
+        createItem: {
+          item: {
+            title: q.title,
+            questionItem: questionItemPayload
+          },
+          location: { index: formItemIndex++ }
+        }
+      });
+    });
+
+    return requests;
+  }
+
   async function generateSoal() {
     const docId = extractId(document.getElementById('docUrl').value);
     const formId = extractId(document.getElementById('formUrl').value);
@@ -702,7 +849,7 @@ jawaban : B</pre>
 
     btn.disabled = true;
     btn.innerText = 'Sedang memproses...';
-    showNotif('info', '⏳ Membaca dan menganalisis soal dari Google Docs...');
+    showNotif('info', '⏳ Membaca soal dan gambar dari Google Docs...');
 
     try {
       const docRes = await fetch(`https://docs.googleapis.com/v1/documents/${docId}`, {
@@ -715,7 +862,7 @@ jawaban : B</pre>
       }
 
       const docData = await docRes.json();
-      const questions = parseDocsContent(docData);
+      const { questions, skippedDrawingsCount } = parseDocsContent(docData);
 
       if (questions.length === 0) {
         throw new Error('Tidak ditemukan soal yang sesuai format di Google Docs tersebut.');
@@ -723,72 +870,66 @@ jawaban : B</pre>
 
       calculatePoints(questions, mode, defaultPoints);
       const grandTotal = questions.reduce((sum, q) => sum + q.points, 0);
+      const totalImages = questions.reduce((sum, q) => sum + q.images.length + Object.keys(q.optionImages).length, 0);
 
-      showNotif('info', `⏳ Mengirim ${questions.length} soal (Total ${grandTotal} poin) ke Google Forms...`);
+      showNotif(
+        'info',
+        `⏳ Mengirim ${questions.length} soal${totalImages > 0 ? ` & ${totalImages} gambar` : ''} (Total ${grandTotal} poin) ke Google Forms...`
+      );
 
-      const requests = [
-        {
-          updateSettings: {
-            settings: { quizSettings: { isQuiz: true } },
-            updateMask: 'quizSettings.isQuiz'
-          }
-        }
-      ];
-
-      questions.forEach((q, idx) => {
-        const grading = { pointValue: q.points };
-        if (q.correctAnswers.length > 0) {
-          grading.correctAnswers = {
-            answers: q.correctAnswers.map(ans => ({ value: ans }))
-          };
-        }
-
-        const choiceType = q.correctAnswers.length > 1 ? 'CHECKBOX' : 'RADIO';
-
-        requests.push({
-          createItem: {
-            item: {
-              title: q.title,
-              questionItem: {
-                question: {
-                  required: true,
-                  grading: grading,
-                  choiceQuestion: {
-                    type: choiceType,
-                    options: q.options.map(opt => ({ value: opt }))
-                  }
-                }
-              }
-            },
-            location: { index: idx }
-          }
-        });
-      });
-
-      const formRes = await fetch(`https://forms.googleapis.com/v1/forms/${formId}:batchUpdate`, {
+      let imageFallbackWarning = '';
+      let formRes = await fetch(`https://forms.googleapis.com/v1/forms/${formId}:batchUpdate`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ requests })
+        body: JSON.stringify({ requests: buildBatchRequests(questions, true) })
       });
 
-      if (!formRes.ok) {
-        const err = await formRes.json();
-        throw new Error(err.error?.message || 'Gagal menulis ke Google Forms. Pastikan Anda memakai link Edit Form.');
+      if (!formRes.ok && totalImages > 0) {
+        const errData = await formRes.json();
+        const errMsg = (errData.error?.message || '').toLowerCase();
+
+        if (errMsg.includes('image') || errMsg.includes('uri') || errMsg.includes('fetch') || errMsg.includes('size')) {
+          showNotif('info', '⚠️ Ada gambar yang ditolak Google Forms (ukuran/format). Mengirim ulang teks soal...');
+          formRes = await fetch(`https://forms.googleapis.com/v1/forms/${formId}:batchUpdate`, {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ requests: buildBatchRequests(questions, false) })
+          });
+
+          if (formRes.ok) {
+            imageFallbackWarning = `<div class="warn-box">⚠️ <b>Catatan Gambar:</b> Seluruh teks soal berhasil masuk, tetapi gambar tidak dapat dimuat otomatis (pastikan format gambar JPG/PNG dan ukuran di bawah 2 MB). Silakan unggah gambarnya secara manual di Google Forms.</div>`;
+          }
+        } else {
+          throw new Error(errData.error?.message || 'Gagal menulis ke Google Forms. Pastikan Anda memakai link Edit Form.');
+        }
+      } else if (!formRes.ok) {
+        const errData = await formRes.json();
+        throw new Error(errData.error?.message || 'Gagal menulis ke Google Forms. Pastikan Anda memakai link Edit Form.');
+      }
+
+      if (skippedDrawingsCount > 0) {
+        imageFallbackWarning += `<div class="warn-box">⚠️ Ditemukan <b>${skippedDrawingsCount} objek Google Drawing</b> yang dilewati karena bukan file gambar JPG/PNG.</div>`;
       }
 
       const breakdownHtml = questions.map((q, i) => {
-        const shortTitle = q.title.length > 42 ? q.title.substring(0, 42) + '...' : q.title;
+        const shortTitle = q.title.length > 40 ? q.title.substring(0, 40) + '...' : q.title;
         const ansStatus = q.correctAnswers.length > 0 ? `Kunci: ${q.answerLetters.join(', ')}` : '⚠️ Tanpa kunci';
-        return `<li><b>Soal ${i + 1}</b> (${q.levelLabel} • ${ansStatus}): <b>${q.points} poin</b> — <i>${shortTitle}</i></li>`;
+        const imgCount = q.images.length + Object.keys(q.optionImages).length;
+        const imgBadge = imgCount > 0 && !imageFallbackWarning.includes('tidak dapat dimuat') ? ` • 🖼️ ${imgCount} gambar` : '';
+        return `<li><b>Soal ${i + 1}</b> (${q.levelLabel} • ${ansStatus}${imgBadge}): <b>${q.points} poin</b> — <i>${shortTitle}</i></li>`;
       }).join('');
 
       const editUrl = `https://docs.google.com/forms/d/${formId}/edit`;
       showNotif(
         'success',
         `✅ <b>Selesai!</b> Berhasil membuat <b>${questions.length} soal</b> dengan total nilai <b>${grandTotal} poin</b>.` +
+        imageFallbackWarning +
         `<ul class="breakdown-list">${breakdownHtml}</ul>` +
         `<a class="btn-link" href="${editUrl}" target="_blank">Buka Editor Google Forms →</a>`
       );
