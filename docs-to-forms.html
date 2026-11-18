@@ -605,9 +605,17 @@ jawaban : B</div>
             document.getElementById('authStatus').innerText = '✅ Akun Google terhubung';
             document.getElementById('btnLogin').innerText = 'Ganti Akun';
             document.getElementById('btnGenerate').disabled = false;
+            document.getElementById('notif').style.display = 'none';
+          } else if (tokenResponse && tokenResponse.error) {
+            showNotif('error', `❌ <b>Login Google Gagal:</b> ${tokenResponse.error} — ${tokenResponse.error_description || 'Izin tidak diberikan.'}`);
           }
         },
+        error_callback: (err) => {
+          showNotif('error', `❌ <b>Popup Login Terkendala:</b> ${err.type || err.message || 'Popup diblokir browser / cookie pihak ketiga nonaktif.'}`);
+        }
       });
+    } else {
+      showNotif('error', '❌ Skrip Google Login gagal dimuat. Periksa koneksi internet atau matikan pemblokir iklan (AdBlock).');
     }
   });
 
@@ -621,6 +629,10 @@ jawaban : B</div>
   };
 
   function handleAuthClick() {
+    if (!tokenClient) {
+      showNotif('error', '❌ Layanan Google Login belum siap. Silakan muat ulang (refresh) halaman.');
+      return;
+    }
     tokenClient.requestAccessToken({ prompt: 'consent' });
   }
 
