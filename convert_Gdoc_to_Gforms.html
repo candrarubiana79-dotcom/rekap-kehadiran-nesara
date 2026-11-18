@@ -196,10 +196,8 @@
 </div>
 
 <script>
-  // =========================================================================
-  // KONFIGURASI: Ganti dengan Client ID dari Google Cloud Console Anda
-  // =========================================================================
-  const CLIENT_ID = 'MASUKKAN_CLIENT_ID_ANDA_DISINI.apps.googleusercontent.com';
+  // Client ID Google OAuth Anda
+  const CLIENT_ID = '198705852921-5q6k0oubqihmkbai4voo09232mpqkhbd.apps.googleusercontent.com';
 
   const SCOPES = [
     'https://www.googleapis.com/auth/documents.readonly',
@@ -225,10 +223,6 @@
   };
 
   function handleAuthClick() {
-    if (CLIENT_ID.includes('MASUKKAN_CLIENT_ID')) {
-      showNotif('error', '⚠️ <b>Konfigurasi Belum Selesai:</b> Pemilik website belum memasukkan Google Client ID di kode <code>index.html</code>.');
-      return;
-    }
     tokenClient.requestAccessToken({ prompt: 'consent' });
   }
 
@@ -270,17 +264,13 @@
     const questions = [];
     let currentQ = null;
 
-    // Regex nomor soal: "1. Pertanyaan"
     const questionRegex = /^(\d+)\.\s*(.+)/;
-    // Regex opsi pilihan: "A. Jawaban" atau "A) Jawaban"
     const optionRegex = /^([A-Ea-e])[\.\)]\s*(.+)/;
-    // Regex kunci jawaban: "jawaban : C", "Jawaban: B", "Kunci Jawaban = A"
     const answerRegex = /^(?:kunci\s*)?jawaban\s*[:=-]\s*([A-Ea-e](?:\s*,\s*[A-Ea-e])*)$/i;
 
     const finalizeQuestion = (q) => {
       if (!q || q.options.length === 0) return;
 
-      // Cocokkan huruf jawaban (misal "C") dengan teks opsinya
       q.answerLetters.forEach(letter => {
         const optText = q.optionsMap[letter.toUpperCase()];
         if (optText && !q.correctAnswers.includes(optText)) {
@@ -310,7 +300,6 @@
       const isTopBullet = element.paragraph.bullet && !element.paragraph.bullet.nestingLevel;
 
       if (qMatch || (isTopBullet && !oMatch && !aMatch)) {
-        // Simpan soal sebelumnya jika ada
         finalizeQuestion(currentQ);
 
         let rawTitle = qMatch ? qMatch[2].trim() : text;
@@ -339,7 +328,6 @@
         const letters = aMatch[1].split(',').map(l => l.trim().toUpperCase());
         currentQ.answerLetters.push(...letters);
       } else if (currentQ && currentQ.options.length === 0) {
-        // Jika soal terdiri dari beberapa paragraf (soal cerita), gabungkan ke judul soal
         currentQ.title += '\n' + text;
       }
     });
@@ -348,7 +336,6 @@
     return questions;
   }
 
-  // Ekstrak tag seperti [25 poin], [mudah], [sedang], [sulit] dari teks soal
   function extractQuestionMeta(title) {
     let manualPoints = null;
     let explicitLevel = null;
@@ -356,14 +343,12 @@
     let cleanTitle = title.replace(/\[([^\]]+)\]/g, (fullMatch, inside) => {
       const lower = inside.trim().toLowerCase();
 
-      // Cek tag poin manual: [25 poin] atau [25 pts]
       const ptMatch = lower.match(/^(\d+)\s*(?:poin|pts|point)?$/);
       if (ptMatch) {
         manualPoints = parseInt(ptMatch[1], 10);
         return '';
       }
 
-      // Cek tag tingkat kesulitan: [mudah], [sedang], [sulit]
       if (['mudah', 'easy'].includes(lower)) {
         explicitLevel = 'mudah';
         return '';
@@ -377,7 +362,7 @@
         return '';
       }
 
-      return fullMatch; // Biarkan jika bukan tag sistem (misal [Gambar 1])
+      return fullMatch;
     });
 
     return {
@@ -398,7 +383,6 @@
     const fullText = (q.title + ' ' + q.options.join(' ')).toLowerCase();
     const wordCount = q.title.split(/\s+/).length;
 
-    // Kata kunci analisis / HOTS / hitungan
     const hotsKeywords = [
       'mengapa', 'bagaimana', 'analisis', 'kesimpulan', 'simpulkan',
       'dampak', 'perbedaan', 'perbandingan', 'berdasarkan', 'kecuali',
@@ -430,7 +414,6 @@
     let lockedPoints = 0;
     const autoQuestions = [];
 
-    // Pisahkan soal yang sudah punya [X poin] manual
     questions.forEach(q => {
       if (q.manualPoints !== null) {
         q.points = q.manualPoints;
@@ -451,7 +434,6 @@
     const remainingPoints = Math.max(0, TARGET_TOTAL - lockedPoints);
     const totalWeight = autoQuestions.reduce((sum, q) => sum + q.weight, 0);
 
-    // Largest Remainder Method agar hasil bilangan bulat selalu pas 100
     let allocatedSum = 0;
     const remainders = autoQuestions.map((q, index) => {
       const exact = (remainingPoints * q.weight) / totalWeight;
@@ -506,7 +488,6 @@
         throw new Error('Tidak ditemukan soal yang sesuai format di Google Docs tersebut.');
       }
 
-      // Hitung pembagian poin
       calculatePoints(questions, mode, defaultPoints);
       const grandTotal = questions.reduce((sum, q) => sum + q.points, 0);
 
@@ -565,7 +546,6 @@
         throw new Error(err.error?.message || 'Gagal menulis ke Google Forms. Pastikan Anda memakai link Edit Form.');
       }
 
-      // Buat rincian pembagian poin untuk ditampilkan di notifikasi
       const breakdownHtml = questions.map((q, i) => {
         const shortTitle = q.title.length > 42 ? q.title.substring(0, 42) + '...' : q.title;
         const ansStatus = q.correctAnswers.length > 0 ? `Kunci: ${q.answerLetters.join(', ')}` : '⚠️ Tanpa kunci';
