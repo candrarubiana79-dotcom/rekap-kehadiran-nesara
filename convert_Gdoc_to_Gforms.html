@@ -24,13 +24,13 @@
       background-color: var(--bg);
       color: var(--text);
       margin: 0;
-      padding: 40px 16px;
+      padding: 36px 16px;
       display: flex;
       justify-content: center;
     }
     .container {
       width: 100%;
-      max-width: 560px;
+      max-width: 640px;
       background: var(--card);
       padding: 32px;
       border-radius: 12px;
@@ -151,6 +151,95 @@
       padding-bottom: 8px;
       border-radius: 6px;
     }
+
+    /* Styling Bagian Petunjuk & Format Soal */
+    .guide-divider {
+      border: 0;
+      border-top: 1px solid var(--border);
+      margin: 32px 0 24px;
+    }
+    .guide-section h2 {
+      font-size: 17px;
+      margin: 0 0 12px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .guide-section h3 {
+      font-size: 14px;
+      margin: 18px 0 8px;
+      color: var(--primary);
+    }
+    .guide-steps {
+      margin: 0;
+      padding-left: 20px;
+      font-size: 13.5px;
+      color: #3c4043;
+      line-height: 1.6;
+    }
+    .guide-steps li {
+      margin-bottom: 6px;
+    }
+    .sample-box {
+      background: #f8f9fa;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .sample-header {
+      background: #f1f3f4;
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .btn-copy {
+      background: #ffffff;
+      color: var(--primary);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-copy:hover {
+      background: #e8f0fe;
+    }
+    pre.sample-code {
+      margin: 0;
+      padding: 14px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 12.5px;
+      line-height: 1.55;
+      color: #202124;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .guide-notes {
+      margin: 14px 0 0;
+      padding-left: 18px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+    .guide-notes li {
+      margin-bottom: 5px;
+    }
+    code.inline {
+      background: #f1f3f4;
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-family: 'Consolas', monospace;
+      font-size: 12px;
+      color: #d93025;
+    }
   </style>
 </head>
 <body>
@@ -185,7 +274,7 @@
       <option value="manual_default">Poin Tetap per Soal (Manual)</option>
     </select>
     <span id="modeHint" class="hint">
-      Sistem menganalisis panjang soal & kata kunci HOTS untuk membagi total <b>100 poin</b> secara proporsional. Tag <code>[25 poin]</code> atau <code>[sulit]</code> di Docs tetap diprioritaskan.
+      Sistem menganalisis panjang soal & kata kunci HOTS untuk membagi total <b>100 poin</b> secara proporsional. Tag <code class="inline">[25 poin]</code> atau <code class="inline">[sulit]</code> di Docs tetap diprioritaskan.
     </span>
   </div>
 
@@ -197,6 +286,57 @@
   <button id="btnGenerate" class="btn btn-primary" onclick="generateSoal()" disabled>Generate Soal ke Forms</button>
 
   <div id="notif"></div>
+
+  <!-- BAGIAN PETUNJUK & FORMAT SOAL -->
+  <hr class="guide-divider">
+
+  <div class="guide-section">
+    <h2>📖 Petunjuk Penggunaan & Format Soal</h2>
+
+    <h3>1. Cara Pengisian</h3>
+    <ol class="guide-steps">
+      <li>Klik tombol <b>Login dengan Google</b> di atas, lalu centang izin akses untuk membaca Google Docs dan mengisi Google Forms.</li>
+      <li>Siapkan file <b>Google Docs</b> berisi daftar soal yang ditulis sesuai format di bawah, lalu salin URL/link dokumen tersebut.</li>
+      <li>Buat file <b>Google Forms</b> baru (kosong), pastikan Anda menyalin URL dari halaman <b>Edit</b> (yang berakhiran <code class="inline">/edit</code>, bukan link kirim/responder).</li>
+      <li>Tempel kedua link ke kolom yang tersedia, pilih <b>Mode Pembagian Poin Nilai</b>, lalu klik <b>Generate Soal ke Forms</b>.</li>
+    </ol>
+
+    <h3>2. Contoh Format Penulisan di Google Docs</h3>
+    <div class="sample-box">
+      <div class="sample-header">
+        <span>Salin contoh di bawah ini ke Google Docs Anda:</span>
+        <button type="button" id="btnCopySample" class="btn-copy" onclick="copySampleFormat()">📋 Salin Contoh</button>
+      </div>
+      <pre class="sample-code" id="sampleText">1. Apa ibu kota negara Indonesia?
+A. Bandung
+B. Jakarta
+C. Surabaya
+D. Medan
+jawaban : B
+
+2. [25 poin] Planet manakah yang dijuluki Planet Merah?
+A. Venus
+B. Mars
+C. Jupiter
+D. Bumi
+jawaban : B
+
+3. [sulit] Berdasarkan analisis dampak perubahan iklim global terhadap wilayah pesisir, strategi adaptasi manakah yang paling berkelanjutan?
+A. Membangun tanggul beton di seluruh garis pantai
+B. Rehabilitasi ekosistem mangrove terpadu dengan tambak silvofishery
+C. Merelokasi seluruh penduduk pesisir ke dataran tinggi
+D. Mengimpor seluruh kebutuhan pangan pokok
+jawaban : B</pre>
+    </div>
+
+    <h3>3. Aturan Format & Pembagian Poin</h3>
+    <ul class="guide-notes">
+      <li><b>Nomor & Pilihan Ganda:</b> Awali soal dengan angka (<code class="inline">1.</code>) dan opsi dengan huruf <code class="inline">A.</code> sampai <code class="inline">E.</code> (mendukung huruf besar maupun kecil).</li>
+      <li><b>Kunci Jawaban:</b> Tulis di baris terakhir tiap soal dengan format <code class="inline">jawaban : B</code> (tidak peka huruf besar/kecil). Untuk jawaban lebih dari satu (kotak centang), pisahkan dengan koma seperti <code class="inline">jawaban : A, C</code>.</li>
+      <li><b>Tag Bobot Opsional:</b> Anda bisa menambahkan tag di awal pertanyaan seperti <code class="inline">[25 poin]</code> untuk mengunci nilai soal tertentu, atau <code class="inline">[mudah]</code>, <code class="inline">[sedang]</code>, <code class="inline">[sulit]</code> untuk mengatur tingkat kerumitan secara manual.</li>
+      <li><b>Total 100 Poin Otomatis:</b> Jika tidak diberi tag manual, sistem akan menghitung panjang kalimat serta kata kunci analisis (HOTS) pada tiap soal dan membagi total nilai hingga pas <b>100 poin</b>.</li>
+    </ul>
+  </div>
 </div>
 
 <script>
@@ -241,6 +381,17 @@
     tokenClient.requestAccessToken({ prompt: 'consent' });
   }
 
+  function copySampleFormat() {
+    const sampleText = document.getElementById('sampleText').innerText;
+    const btn = document.getElementById('btnCopySample');
+    navigator.clipboard.writeText(sampleText).then(() => {
+      btn.innerText = '✅ Tersalin!';
+      setTimeout(() => {
+        btn.innerText = '📋 Salin Contoh';
+      }, 2000);
+    });
+  }
+
   function togglePointInput() {
     const mode = document.getElementById('scoringMode').value;
     const manualGroup = document.getElementById('manualPointGroup');
@@ -248,13 +399,13 @@
 
     if (mode === 'manual_default') {
       manualGroup.style.display = 'block';
-      hint.innerHTML = 'Setiap soal mendapat poin default di bawah, kecuali jika diberi tag <code>[25 poin]</code> di Docs.';
+      hint.innerHTML = 'Setiap soal mendapat poin default di bawah, kecuali jika diberi tag <code class="inline">[25 poin]</code> di Docs.';
     } else if (mode === 'auto_equal') {
       manualGroup.style.display = 'none';
       hint.innerHTML = 'Total nilai seluruh soal akan dibagi rata agar jumlah akhirnya tepat <b>100 poin</b>.';
     } else {
       manualGroup.style.display = 'none';
-      hint.innerHTML = 'Sistem menganalisis panjang soal & kata kunci HOTS untuk membagi total <b>100 poin</b> secara proporsional. Tag <code>[25 poin]</code> atau <code>[sulit]</code> di Docs tetap diprioritaskan.';
+      hint.innerHTML = 'Sistem menganalisis panjang soal & kata kunci HOTS untuk membagi total <b>100 poin</b> secara proporsional. Tag <code class="inline">[25 poin]</code> atau <code class="inline">[sulit]</code> di Docs tetap diprioritaskan.';
     }
   }
 
