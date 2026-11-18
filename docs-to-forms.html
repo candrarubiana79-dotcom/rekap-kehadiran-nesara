@@ -610,7 +610,6 @@ jawaban : B</div>
 
     if (tokenFromUrl) {
       setConnectedState(tokenFromUrl);
-      // Bersihkan token dari address bar browser agar rapi
       window.history.replaceState(null, '', window.location.pathname + window.location.search);
     } else if (errorFromUrl) {
       showNotif('error', `❌ <b>Login Google Gagal:</b> ${errorFromUrl}${errorDesc ? ` — ${errorDesc}` : ''}`);
@@ -628,7 +627,6 @@ jawaban : B</div>
     }
   };
 
-  // Alihkan halaman penuh ke login Google (menghindari blokir Cross-Origin-Opener-Policy pada popup)
   function handleAuthClick() {
     const redirectUri = window.location.origin + window.location.pathname;
     const authUrl = 'https://accounts.google.com/o/oauth2/v2/auth' +
@@ -698,19 +696,37 @@ jawaban : B`;
   }
 
   // =========================================================================
-  // 1. PARSER FORMAT SOAL + EKSTRAKSI GAMBAR INLINE GOOGLE DOCS
+  // 1. PARSER FORMAT SOAL (MENDUKUNG AUTO-LIST DOCS, TABEL, & GAMBAR INLINE)
   // =========================================================================
+  function extractParagraphsFromContent(contentElements) {
+    const paragraphs = [];
+    (contentElements || []).forEach(element => {
+      if (element.paragraph) {
+        paragraphs.push(element.paragraph);
+      } else if (element.table && element.table.tableRows) {
+        element.table.tableRows.forEach(row => {
+          (row.tableCells || []).forEach(cell => {
+            paragraphs.push(...extractParagraphsFromContent(cell.content));
+          });
+        });
+      }
+    });
+    return paragraphs;
+  }
+
   function parseDocsContent(docData) {
-    const content = docData.body?.content || [];
-    const inlineObjects = docData.inlineObjects || {};
+    const docBody = docData.body || docData.tabs?.[0]?.documentTab?.body;
+    const paragraphs = extractParagraphsFromContent(docBody?.content || []);
+    const inlineObjects = docData.inlineObjects || docData.tabs?.[0]?.documentTab?.inlineObjects || {};
+    const lists = docData.lists || docData.tabs?.[0]?.documentTab?.lists || {};
     const questions = [];
     let currentQ = null;
     let pendingImages = [];
     let skippedDrawingsCount = 0;
 
-    const questionRegex = /^(\d+)\.\s*(.+)/;
+    const questionRegex = /^(\d+)[\.\)]\s*(.+)/;
     const optionRegex = /^([A-Ea-e])[\.\)]\s*(.*)/;
-    const answerRegex = /^(?:kunci\s*)?jawaban\s*[:=-]\s*([A-Ea-e](?:\s*,\s*[A-Ea-e])*)$/i;
+    const answerRegex = /^(?:kunci(?:\s*jawaban)?|jawaban)\s*[:=-]\s*([A-Ea-e](?:\s*,\s*[A-Ea-e])*)\.?.*$/i;
 
     const finalizeQuestion = (q) => {
       if (!q || q.options.length === 0) return;
@@ -729,13 +745,11 @@ jawaban : B`;
       questions.push(q);
     };
 
-    content.forEach(element => {
-      if (!element.paragraph) return;
-
+    paragraphs.forEach(paragraph => {
       let rawText = '';
       const inlineImages = [];
 
-      (element.paragraph.elements || []).forEach(el => {
+      (paragraph.elements || []).forEach(el => {
         if (el.textRun && el.textRun.content) {
           rawText += el.textRun.content;
         }
@@ -757,9 +771,26 @@ jawaban : B`;
       const qMatch = text.match(questionRegex);
       const oMatch = text.match(optionRegex);
       const aMatch = text.match(answerRegex);
-      const isTopBullet = element.paragraph.bullet && !element.paragraph.bullet.nestingLevel;
 
-      if (qMatch || (isTopBullet && !oMatch && !aMatch)) {
+      // Deteksi penomoran otomatis bawaan Google Docs (1. dan A. B. C. D.)
+      let isAutoQuestionBullet = false;
+      let isAutoOptionBullet = false;
+
+      if (paragraph.bullet && !qMatch && !oMatch && !aMatch) {
+        const listId = paragraph.bullet.listId;
+        const level = paragraph.bullet.nestingLevel || 0;
+        const glyphType = lists[listId]?.listProperties?.nestingLevels?.[level]?.glyphType || '';
+
+        if (glyphType === 'UPPER_ALPHA' || glyphType === 'ALPHA') {
+          isAutoOptionBullet = true;
+        } else if (level >= 1 && currentQ) {
+          isAutoOptionBullet = true;
+        } else if (level === 0) {
+          isAutoQuestionBullet = true;
+        }
+      }
+
+      if (qMatch || isAutoQuestionBullet) {
         finalizeQuestion(currentQ);
 
         let rawTitle = qMatch ? qMatch[2].trim() : text;
@@ -773,15 +804,26 @@ jawaban : B`;
           options: [],
           optionImages: {},
           optionsMap: {},
+          autoOptionCounter: 0,
           answerLetters: [],
           correctAnswers: [],
           points: 0,
           levelLabel: ''
         };
         pendingImages = [];
-      } else if (oMatch && currentQ) {
-        const letter = oMatch[1].toUpperCase();
-        let optText = oMatch[2].trim();
+      } else if ((oMatch || isAutoOptionBullet) && currentQ) {
+        let letter;
+        let optText;
+
+        if (oMatch) {
+          letter = oMatch[1].toUpperCase();
+          optText = oMatch[2].trim();
+        } else {
+          const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+          letter = letters[currentQ.autoOptionCounter] || String.fromCharCode(65 + currentQ.autoOptionCounter);
+          currentQ.autoOptionCounter++;
+          optText = text;
+        }
 
         if (!optText && inlineImages.length > 0) {
           optText = `Opsi ${letter}`;
@@ -831,7 +873,6 @@ jawaban : B`;
       const inside = (sqInside ?? parenInside ?? curlyInside).trim();
       const lower = inside.toLowerCase();
 
-      // Untuk kurung biasa ( ), wajib ada kata 'poin'/'pts' agar angka tahun seperti (1945) tidak ikut terpotong
       const ptRegex = isParen
         ? /^(\d+)\s*(?:poin|pts|point)$/
         : /^(\d+)\s*(?:poin|pts|point)?$/;
@@ -1054,7 +1095,7 @@ jawaban : B`;
       const { questions, skippedDrawingsCount } = parseDocsContent(docData);
 
       if (questions.length === 0) {
-        throw new Error('Tidak ditemukan soal yang sesuai format di Google Docs tersebut.');
+        throw new Error('Tidak ditemukan soal yang sesuai format di Google Docs tersebut. Pastikan tiap soal memiliki nomor (1.) dan pilihan ganda (A. B. C. D.).');
       }
 
       calculatePoints(questions, mode, defaultPoints);
