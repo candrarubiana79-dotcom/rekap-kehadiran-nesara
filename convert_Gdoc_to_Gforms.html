@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Docs to Forms Converter</title>
+
+  <!-- SKRIP PENGAMAN & AUTO LOGOUT -->
+  <script src="auth-guard.js"></script>
+
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     :root {
@@ -207,19 +211,30 @@
   let tokenClient;
   let accessToken = null;
 
-  window.onload = () => {
-    tokenClient = google.accounts.oauth2.initTokenClient({
-      client_id: CLIENT_ID,
-      scope: SCOPES,
-      callback: (tokenResponse) => {
-        if (tokenResponse && tokenResponse.access_token) {
-          accessToken = tokenResponse.access_token;
-          document.getElementById('authStatus').innerText = '✅ Akun Google terhubung';
-          document.getElementById('btnLogin').innerText = 'Ganti Akun';
-          document.getElementById('btnGenerate').disabled = false;
-        }
-      },
-    });
+  window.addEventListener('load', () => {
+    if (window.google && google.accounts && google.accounts.oauth2) {
+      tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: CLIENT_ID,
+        scope: SCOPES,
+        callback: (tokenResponse) => {
+          if (tokenResponse && tokenResponse.access_token) {
+            accessToken = tokenResponse.access_token;
+            document.getElementById('authStatus').innerText = '✅ Akun Google terhubung';
+            document.getElementById('btnLogin').innerText = 'Ganti Akun';
+            document.getElementById('btnGenerate').disabled = false;
+          }
+        },
+      });
+    }
+  });
+
+  // Fungsi global agar dapat dipanggil oleh auth-guard.js saat auto-logout terjadi
+  window.revokeGoogleAuth = function() {
+    if (accessToken && window.google && google.accounts && google.accounts.oauth2) {
+      google.accounts.oauth2.revoke(accessToken, () => {
+        accessToken = null;
+      });
+    }
   };
 
   function handleAuthClick() {
