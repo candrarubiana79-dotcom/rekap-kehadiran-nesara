@@ -8,7 +8,6 @@
   <!-- SKRIP PENGAMAN & AUTO LOGOUT -->
   <script src="auth-guard.js"></script>
 
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     :root {
       --primary: #1a73e8;
@@ -336,7 +335,7 @@
       color: var(--muted);
       line-height: 1.5;
     }
-    .guide-notes li { margin-bottom: 5px; }
+    .guide-notes li { margin-bottom: 6px; }
     code.inline {
       background: #f1f5f9;
       padding: 1px 5px;
@@ -396,7 +395,7 @@ B. Mars
 C. Jupiter
 D. Bumi
 jawaban : B</div>
-        <span class="hint">Tag <code class="inline">[25 poin]</code> mengunci nilai soal ini menjadi 25, sisa 75 poin dibagi otomatis ke soal lain.</span>
+        <span class="hint">Tag <code class="inline">[25 poin]</code>, <code class="inline">(25 poin)</code>, atau <code class="inline">{25 poin}</code> mengunci nilai soal ini menjadi 25, sisa 75 poin dibagi otomatis ke soal lain.</span>
       </div>
     </aside>
 
@@ -466,14 +465,14 @@ C. Bintang
 D. Kepala Banteng
 jawaban : C
 
-4. [sedang] Mengapa proses fotosintesis pada tumbuhan hijau memerlukan cahaya matahari?
+4. (sedang) Mengapa proses fotosintesis pada tumbuhan hijau memerlukan cahaya matahari?
 A. Untuk menyerap air dari tanah
 B. Sebagai energi mengubah CO2 dan air menjadi glukosa
 C. Untuk menggugurkan daun tua
 D. Agar akar tumbuh memanjang
 jawaban : B
 
-5. [sulit] Berdasarkan analisis dampak perubahan iklim global terhadap wilayah pesisir, strategi adaptasi manakah yang paling berkelanjutan?
+5. {sulit} Berdasarkan analisis dampak perubahan iklim global terhadap wilayah pesisir, strategi adaptasi manakah yang paling berkelanjutan?
 A. Membangun tanggul beton di seluruh pantai
 B. Rehabilitasi mangrove terpadu silvofishery
 C. Merelokasi seluruh penduduk pesisir
@@ -500,7 +499,8 @@ jawaban : B</div>
       </div>
 
       <ul class="guide-notes">
-        <li><b>Format Gambar:</b> Gunakan gambar <b>JPG/PNG/GIF</b> (maks. 2 MB) lewat menu <i>Sisipkan > Gambar</i> di Google Docs (hindari <i>Drawing</i>).</li>
+        <li><b>Jenis Kurung Bebas:</b> Tag poin & tingkat kesulitan bisa memakai <code class="inline">[ ]</code>, <code class="inline">( )</code>, maupun <code class="inline">{ }</code>.</li>
+        <li><b>Tips Gambar dari Internet:</b> Agar gambar dari Google/internet tidak gagal karena format <i>.webp</i>, gunakan <i>screenshot</i> (<code class="inline">Win + Shift + S</code> di Windows atau <code class="inline">Cmd + Ctrl + Shift + 4</code> di Mac) lalu tempel (<code class="inline">Ctrl + V</code>) di Google Docs (otomatis berformat PNG, maks. 2 MB).</li>
         <li><b>Kunci Jawaban:</b> Tulis <code class="inline">jawaban : B</code> (huruf besar/kecil bebas). Untuk jawaban ganda, tulis <code class="inline">jawaban : A, C</code>.</li>
       </ul>
     </aside>
@@ -516,7 +516,6 @@ jawaban : B</div>
     'https://www.googleapis.com/auth/forms.body'
   ].join(' ');
 
-  let tokenClient;
   let accessToken = null;
 
   // Membuat gambar ilustrasi nyata (PNG) untuk Contoh Soal 4 di panel panduan
@@ -529,7 +528,6 @@ jawaban : B</div>
     canvas.height = 175;
     const ctx = canvas.getContext('2d');
 
-    // Background putih bersih
     ctx.fillStyle = '#f8fafc';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -592,48 +590,56 @@ jawaban : B</div>
     imgEl.src = canvas.toDataURL('image/png');
   }
 
+  function setConnectedState(token) {
+    accessToken = token;
+    document.getElementById('authStatus').innerText = '✅ Akun Google terhubung';
+    document.getElementById('btnLogin').innerText = 'Ganti Akun';
+    document.getElementById('btnGenerate').disabled = false;
+  }
+
   window.addEventListener('load', () => {
     renderSampleDiagram();
 
-    if (window.google && google.accounts && google.accounts.oauth2) {
-      tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: CLIENT_ID,
-        scope: SCOPES,
-        callback: (tokenResponse) => {
-          if (tokenResponse && tokenResponse.access_token) {
-            accessToken = tokenResponse.access_token;
-            document.getElementById('authStatus').innerText = '✅ Akun Google terhubung';
-            document.getElementById('btnLogin').innerText = 'Ganti Akun';
-            document.getElementById('btnGenerate').disabled = false;
-            document.getElementById('notif').style.display = 'none';
-          } else if (tokenResponse && tokenResponse.error) {
-            showNotif('error', `❌ <b>Login Google Gagal:</b> ${tokenResponse.error} — ${tokenResponse.error_description || 'Izin tidak diberikan.'}`);
-          }
-        },
-        error_callback: (err) => {
-          showNotif('error', `❌ <b>Popup Login Terkendala:</b> ${err.type || err.message || 'Popup diblokir browser / cookie pihak ketiga nonaktif.'}`);
-        }
-      });
-    } else {
-      showNotif('error', '❌ Skrip Google Login gagal dimuat. Periksa koneksi internet atau matikan pemblokir iklan (AdBlock).');
+    // Tangkap token hasil redirect dari Google OAuth (tanpa popup)
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const queryParams = new URLSearchParams(window.location.search);
+
+    const tokenFromUrl = hashParams.get('access_token');
+    const errorFromUrl = hashParams.get('error') || queryParams.get('error');
+    const errorDesc = hashParams.get('error_description') || queryParams.get('error_description');
+
+    if (tokenFromUrl) {
+      setConnectedState(tokenFromUrl);
+      // Bersihkan token dari address bar browser agar rapi
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    } else if (errorFromUrl) {
+      showNotif('error', `❌ <b>Login Google Gagal:</b> ${errorFromUrl}${errorDesc ? ` — ${errorDesc}` : ''}`);
+      window.history.replaceState(null, '', window.location.pathname);
     }
   });
 
   // Fungsi global agar dapat dipanggil oleh auth-guard.js saat auto-logout terjadi
   window.revokeGoogleAuth = function() {
-    if (accessToken && window.google && google.accounts && google.accounts.oauth2) {
-      google.accounts.oauth2.revoke(accessToken, () => {
-        accessToken = null;
-      });
+    if (accessToken) {
+      fetch(`https://oauth2.googleapis.com/revoke?token=${encodeURIComponent(accessToken)}`, {
+        method: 'POST'
+      }).catch(() => {});
+      accessToken = null;
     }
   };
 
+  // Alihkan halaman penuh ke login Google (menghindari blokir Cross-Origin-Opener-Policy pada popup)
   function handleAuthClick() {
-    if (!tokenClient) {
-      showNotif('error', '❌ Layanan Google Login belum siap. Silakan muat ulang (refresh) halaman.');
-      return;
-    }
-    tokenClient.requestAccessToken({ prompt: 'consent' });
+    const redirectUri = window.location.origin + window.location.pathname;
+    const authUrl = 'https://accounts.google.com/o/oauth2/v2/auth' +
+      `?client_id=${encodeURIComponent(CLIENT_ID)}` +
+      `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+      `&response_type=token` +
+      `&scope=${encodeURIComponent(SCOPES)}` +
+      `&include_granted_scopes=true` +
+      `&prompt=consent`;
+
+    window.location.href = authUrl;
   }
 
   function copyText(elementId, btn) {
@@ -858,7 +864,7 @@ jawaban : B`;
       explicitLevel
     };
   }
-  
+
   // =========================================================================
   // 2. ALGORITMA KERUMITAN SOAL & PEMBAGIAN TEPAT 100 POIN
   // =========================================================================
