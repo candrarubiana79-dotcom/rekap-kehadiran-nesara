@@ -13,11 +13,11 @@
     :root {
       --primary: #1a73e8;
       --primary-hover: #1557b0;
-      --bg: #f8f9fa;
+      --bg: #f1f5f9;
       --card: #ffffff;
-      --text: #202124;
-      --muted: #5f6368;
-      --border: #dadce0;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
     }
     * {
       box-sizing: border-box;
@@ -27,16 +27,19 @@
       background-color: var(--bg);
       color: var(--text);
       margin: 0;
-      padding: 28px 16px;
+      padding: 20px 14px 40px;
       display: flex;
       justify-content: center;
     }
     .page-wrapper {
       width: 100%;
-      max-width: 1140px;
+      max-width: 1380px;
     }
     .top-nav {
-      margin-bottom: 18px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
     .btn-back {
       display: inline-flex;
@@ -45,89 +48,103 @@
       padding: 8px 14px;
       font-size: 13px;
       font-weight: 600;
-      color: var(--muted);
+      color: #475569;
       background: #ffffff;
       border: 1px solid var(--border);
-      border-radius: 6px;
+      border-radius: 8px;
       text-decoration: none;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
       transition: background 0.2s, color 0.2s;
     }
     .btn-back:hover {
-      background: #f1f3f4;
+      background: #f8fafc;
       color: var(--text);
     }
 
-    /* Layout Responsif: HP (1 kolom, petunjuk di atas) -> Desktop (2 kolom, petunjuk di kanan) */
-    .layout-grid {
+    /* LAYOUT UTAMA:
+       - Mobile (< 1024px): Panduan Kiri & Kanan di atas, Form Utama di bawah
+       - Desktop (>= 1024px): 3 Kolom -> [Panduan Kiri] | [Form Tengah] | [Panduan Kanan]
+    */
+    .layout-3col {
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 18px;
     }
-    @media (min-width: 920px) {
-      .layout-grid {
+    .guide-left { order: 1; }
+    .guide-right { order: 2; }
+    .converter-center { order: 3; }
+
+    @media (min-width: 1024px) {
+      .layout-3col {
         display: grid;
-        grid-template-columns: 1.05fr 0.95fr;
-        gap: 24px;
+        grid-template-columns: 1fr 1.15fr 1fr;
+        gap: 20px;
         align-items: start;
       }
-      .converter-card {
+      .guide-left {
         grid-column: 1;
         grid-row: 1;
+        order: unset;
       }
-      .guide-card {
+      .converter-center {
         grid-column: 2;
         grid-row: 1;
+        order: unset;
         position: sticky;
-        top: 24px;
+        top: 20px;
+      }
+      .guide-right {
+        grid-column: 3;
+        grid-row: 1;
+        order: unset;
       }
     }
 
     .card {
       width: 100%;
       background: var(--card);
-      padding: 28px;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      padding: 22px;
+      border-radius: 14px;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
       border: 1px solid var(--border);
     }
-    @media (max-width: 480px) {
-      .card {
-        padding: 20px;
-      }
+    .converter-center.card {
+      padding: 26px;
+      border-top: 4px solid var(--primary);
     }
 
     h1 {
-      margin: 0 0 8px;
-      font-size: 22px;
+      margin: 0 0 6px;
+      font-size: 21px;
       color: var(--primary);
     }
     p.subtitle {
-      margin: 0 0 24px;
-      font-size: 14px;
+      margin: 0 0 20px;
+      font-size: 13.5px;
       color: var(--muted);
       line-height: 1.5;
     }
     .auth-box {
-      background: #f1f3f4;
-      padding: 14px 16px;
-      border-radius: 8px;
-      margin-bottom: 22px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      padding: 13px 14px;
+      border-radius: 10px;
+      margin-bottom: 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
       flex-wrap: wrap;
     }
     .auth-status {
       font-size: 13px;
-      font-weight: 500;
+      font-weight: 600;
     }
     .btn {
-      padding: 10px 16px;
+      padding: 9px 14px;
       border: none;
-      border-radius: 6px;
-      font-size: 14px;
+      border-radius: 7px;
+      font-size: 13.5px;
       font-weight: 600;
       cursor: pointer;
       transition: background 0.2s;
@@ -135,24 +152,25 @@
     .btn-google {
       background: #ffffff;
       color: var(--text);
-      border: 1px solid var(--border);
+      border: 1px solid #cbd5e1;
       white-space: nowrap;
     }
-    .btn-google:hover { background: #f8f9fa; }
+    .btn-google:hover { background: #f1f5f9; }
     .btn-primary {
       width: 100%;
       padding: 12px;
       background: var(--primary);
       color: #ffffff;
       font-size: 15px;
-      margin-top: 16px;
+      margin-top: 14px;
+      border-radius: 8px;
     }
     .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
     .btn-primary:disabled {
-      background: #9aa0a6;
+      background: #94a3b8;
       cursor: not-allowed;
     }
-    .form-group { margin-bottom: 16px; }
+    .form-group { margin-bottom: 15px; }
     label {
       display: block;
       font-size: 13px;
@@ -162,47 +180,50 @@
     input, select {
       width: 100%;
       padding: 10px 12px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      font-size: 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 13.5px;
       background: #fff;
     }
     input:focus, select:focus {
       outline: none;
       border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.12);
     }
     .hint {
       display: block;
       font-size: 12px;
       color: var(--muted);
       margin-top: 5px;
-      line-height: 1.4;
+      line-height: 1.45;
     }
+
+    /* Notifikasi Hasil */
     #notif {
-      margin-top: 20px;
-      padding: 16px;
+      margin-top: 18px;
+      padding: 14px;
       border-radius: 8px;
-      font-size: 14px;
+      font-size: 13.5px;
       line-height: 1.5;
       display: none;
     }
-    .notif-info { background: #e8f0fe; color: #1967d2; border: 1px solid #d2e3fc; }
-    .notif-success { background: #e6f4ea; color: #137333; border: 1px solid #ceead6; }
-    .notif-error { background: #fce8e6; color: #c5221f; border: 1px solid #fad2cf; }
+    .notif-info { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    .notif-success { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+    .notif-error { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
     .warn-box {
       margin-top: 10px;
-      padding: 10px 12px;
-      background: #fef7e0;
-      color: #b06000;
-      border: 1px solid #fde293;
+      padding: 9px 11px;
+      background: #fffbeb;
+      color: #b45309;
+      border: 1px solid #fde68a;
       border-radius: 6px;
-      font-size: 12.5px;
+      font-size: 12px;
     }
     .notif-success a.btn-link {
       display: inline-block;
       margin-top: 12px;
       padding: 8px 14px;
-      background: #137333;
+      background: #15803d;
       color: #fff;
       text-decoration: none;
       border-radius: 6px;
@@ -212,103 +233,118 @@
     .breakdown-list {
       margin: 10px 0 0;
       padding-left: 18px;
-      font-size: 12.5px;
-      max-height: 190px;
+      font-size: 12px;
+      max-height: 180px;
       overflow-y: auto;
-      background: rgba(255,255,255,0.65);
+      background: rgba(255,255,255,0.75);
       padding-top: 8px;
       padding-bottom: 8px;
       border-radius: 6px;
     }
 
-    /* Styling Panel Petunjuk & Format Soal */
-    .guide-card h2 {
-      font-size: 18px;
+    /* Styling Panel Panduan Kiri & Kanan */
+    .panel-title {
+      font-size: 15.5px;
+      font-weight: 700;
       margin: 0 0 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
       color: var(--text);
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border);
-    }
-    .guide-card h3 {
-      font-size: 14px;
-      margin: 16px 0 8px;
-      color: var(--primary);
+      gap: 7px;
     }
     .guide-steps {
-      margin: 0;
-      padding-left: 20px;
-      font-size: 13.5px;
-      color: #3c4043;
-      line-height: 1.6;
+      margin: 0 0 18px;
+      padding-left: 18px;
+      font-size: 12.8px;
+      color: #334155;
+      line-height: 1.55;
     }
-    .guide-steps li {
+    .guide-steps li { margin-bottom: 5px; }
+
+    .example-block {
+      margin-bottom: 16px;
+    }
+    .example-block:last-child {
+      margin-bottom: 0;
+    }
+    .example-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
       margin-bottom: 6px;
     }
-    .sample-box {
-      background: #f8f9fa;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      overflow: hidden;
-      margin-top: 8px;
-    }
-    .sample-header {
-      background: #f1f3f4;
-      padding: 8px 12px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--muted);
+    .badge-num {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--primary);
     }
     .btn-copy {
       background: #ffffff;
       color: var(--primary);
-      border: 1px solid var(--border);
-      padding: 4px 10px;
+      border: 1px solid #cbd5e1;
+      padding: 3px 9px;
       border-radius: 5px;
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 600;
       cursor: pointer;
       white-space: nowrap;
     }
     .btn-copy:hover {
-      background: #e8f0fe;
+      background: #eff6ff;
+      border-color: #93c5fd;
     }
-    pre.sample-code {
-      margin: 0;
-      padding: 12px 14px;
+    .sample-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 11px 12px;
       font-family: 'Consolas', 'Courier New', monospace;
       font-size: 12px;
-      line-height: 1.55;
-      color: #202124;
+      line-height: 1.5;
+      color: #1e293b;
       white-space: pre-wrap;
       word-break: break-word;
-      max-height: 310px;
-      overflow-y: auto;
+    }
+    .sample-img-wrapper {
+      margin: 8px 0;
+      padding: 8px;
+      background: #ffffff;
+      border: 1px dashed #94a3b8;
+      border-radius: 6px;
+      text-align: center;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .sample-img-wrapper img {
+      max-width: 100%;
+      width: 220px;
+      height: auto;
+      border-radius: 4px;
+      display: block;
+      margin: 0 auto 4px;
+    }
+    .sample-img-caption {
+      font-size: 11px;
+      color: var(--muted);
     }
     .guide-notes {
-      margin: 10px 0 0;
-      padding-left: 18px;
-      font-size: 13px;
+      margin: 14px 0 0;
+      padding-left: 16px;
+      font-size: 12.2px;
       color: var(--muted);
-      line-height: 1.55;
+      line-height: 1.5;
     }
-    .guide-notes li {
-      margin-bottom: 6px;
-    }
+    .guide-notes li { margin-bottom: 5px; }
     code.inline {
-      background: #f1f3f4;
-      padding: 2px 5px;
+      background: #f1f5f9;
+      padding: 1px 5px;
       border-radius: 4px;
       font-family: 'Consolas', monospace;
-      font-size: 12px;
-      color: #d93025;
+      font-size: 11.5px;
+      color: #dc2626;
+      border: 1px solid #e2e8f0;
     }
   </style>
 </head>
@@ -320,80 +356,60 @@
     <a href="tools.html" class="btn-back">← Kembali ke Tools</a>
   </div>
 
-  <div class="layout-grid">
-    <!-- PANEL PETUNJUK (Di HP muncul di atas, di Desktop pindah ke kanan) -->
-    <aside class="card guide-card">
-      <h2>📖 Petunjuk Penggunaan & Format Soal</h2>
+  <div class="layout-3col">
+    <!-- =================================================================== -->
+    <!-- KOLOM KIRI: CARA PENGISIAN + CONTOH 1 (BIASA) & CONTOH 2 (BERPOIN)  -->
+    <!-- =================================================================== -->
+    <aside class="card guide-left">
+      <h2 class="panel-title">📋 Cara Pengisian & Contoh (1–2)</h2>
 
-      <h3>1. Cara Pengisian</h3>
       <ol class="guide-steps">
-        <li>Klik tombol <b>Login dengan Google</b>, lalu centang izin akses untuk membaca Google Docs dan mengisi Google Forms.</li>
-        <li>Siapkan file <b>Google Docs</b> berisi daftar soal sesuai contoh format di bawah, lalu salin URL dokumen tersebut.</li>
-        <li>Buat file <b>Google Forms</b> baru (kosong), salin URL dari halaman <b>Edit</b> (berakhiran <code class="inline">/edit</code>, bukan link kirim/responder).</li>
-        <li>Tempel kedua link ke kolom formulir, pilih <b>Mode Pembagian Poin Nilai</b>, lalu klik <b>Generate Soal ke Forms</b>.</li>
+        <li>Klik <b>Login dengan Google</b> di tengah, lalu izinkan akses Docs & Forms.</li>
+        <li>Siapkan soal di <b>Google Docs</b> sesuai format, lalu salin link-nya.</li>
+        <li>Buat <b>Google Forms</b> kosong, salin link halaman <b>Edit</b> (<code class="inline">/edit</code>).</li>
+        <li>Tempel kedua link di form tengah lalu klik <b>Generate Soal</b>.</li>
       </ol>
 
-      <h3>2. Contoh Format Soal (Biasa, Mudah, Sulit, Poin, & Gambar)</h3>
-      <div class="sample-box">
-        <div class="sample-header">
-          <span>Salin contoh ini ke Google Docs Anda:</span>
-          <button type="button" id="btnCopySample" class="btn-copy" onclick="copySampleFormat()">📋 Salin Contoh</button>
+      <!-- 1. CONTOH SOAL BIASA -->
+      <div class="example-block">
+        <div class="example-label">
+          <span class="badge-num">1. Contoh Soal Biasa</span>
+          <button type="button" class="btn-copy" onclick="copyText('ex1', this)">📋 Salin</button>
         </div>
-        <pre class="sample-code" id="sampleText">1. Apa ibu kota negara Indonesia?
+        <div class="sample-box" id="ex1">1. Apa ibu kota negara Indonesia?
 A. Bandung
 B. Jakarta
 C. Surabaya
 D. Medan
-jawaban : B
+jawaban : B</div>
+      </div>
 
-2. [mudah] Lambang sila pertama Pancasila adalah...
-A. Rantai
-B. Pohon Beringin
-C. Bintang
-D. Kepala Banteng
-jawaban : C
-
-3. [sulit] Berdasarkan analisis dampak perubahan iklim global terhadap wilayah pesisir, strategi adaptasi manakah yang paling berkelanjutan?
-A. Membangun tanggul beton di seluruh garis pantai
-B. Rehabilitasi ekosistem mangrove terpadu dengan tambak silvofishery
-C. Merelokasi seluruh penduduk pesisir ke dataran tinggi
-D. Mengimpor seluruh kebutuhan pangan pokok
-jawaban : B
-
-4. [25 poin] Planet manakah yang dijuluki Planet Merah?
+      <!-- 2. CONTOH SOAL BERPOIN -->
+      <div class="example-block">
+        <div class="example-label">
+          <span class="badge-num">2. Contoh Soal Berpoin Khusus</span>
+          <button type="button" class="btn-copy" onclick="copyText('ex2', this)">📋 Salin</button>
+        </div>
+        <div class="sample-box" id="ex2">2. [25 poin] Planet manakah yang dijuluki Planet Merah?
 A. Venus
 B. Mars
 C. Jupiter
 D. Bumi
-jawaban : B
-
-5. Perhatikan gambar organ pernapasan di bawah ini!
-[Sisipkan / Paste Gambar JPG atau PNG langsung di baris ini]
-Bagian yang ditunjuk oleh huruf X berfungsi untuk...
-A. Menyaring udara kotor
-B. Pertukaran oksigen dan karbon dioksida
-C. Mengatur suhu udara masuk
-D. Menghasilkan suara
-jawaban : B</pre>
+jawaban : B</div>
+        <span class="hint">Tag <code class="inline">[25 poin]</code> mengunci nilai soal ini menjadi 25, sisa 75 poin dibagi otomatis ke soal lain.</span>
       </div>
-
-      <h3>3. Aturan Format, Gambar & Poin</h3>
-      <ul class="guide-notes">
-        <li><b>Soal Biasa & Tag Bobot:</b> Nomor <b>1</b> adalah soal biasa (bobot dideteksi otomatis). Nomor <b>2–4</b> memakai tag opsional <code class="inline">[mudah]</code>, <code class="inline">[sulit]</code>, atau <code class="inline">[25 poin]</code> untuk mengunci bobot/nilai soal tertentu.</li>
-        <li><b>Soal Bergambar (Nomor 5):</b> Sisipkan gambar (format <b>JPG/PNG/GIF</b>, maks. 2 MB) langsung di bawah pertanyaan atau di samping opsi <code class="inline">A.</code>–<code class="inline">E.</code>. Hindari fitur <i>Insert > Drawing</i> agar gambar terbaca otomatis.</li>
-        <li><b>Kunci Jawaban:</b> Tulis di baris terakhir tiap soal dengan format <code class="inline">jawaban : B</code> (tidak peka huruf besar/kecil). Untuk jawaban ganda, pisahkan dengan koma seperti <code class="inline">jawaban : A, C</code>.</li>
-        <li><b>Total 100 Poin Otomatis:</b> Sistem otomatis membagi sisa poin ke seluruh soal biasa, mudah, dan sulit hingga jumlah nilainya pas <b>100 poin</b>.</li>
-      </ul>
     </aside>
 
-    <!-- PANEL UTAMA FORM KONVERSI (Di Desktop di kiri, di HP di bawah petunjuk) -->
-    <main class="card converter-card">
+    <!-- =================================================================== -->
+    <!-- KOLOM TENGAH: LOGIN GOOGLE & INPUT LINK DOCS / FORMS                -->
+    <!-- =================================================================== -->
+    <main class="card converter-center">
       <h1>Docs ke Google Forms</h1>
-      <p class="subtitle">Konversi soal teks maupun bergambar dari Google Docs ke Google Forms secara otomatis dengan pembagian bobot nilai cerdas.</p>
+      <p class="subtitle">Ubah draf soal teks maupun bergambar dari Google Docs ke Google Forms secara otomatis.</p>
 
       <!-- Login Google -->
       <div class="auth-box">
-        <span id="authStatus" class="auth-status">Status: Belum terhubung ke Google</span>
+        <span id="authStatus" class="auth-status">Status: Belum terhubung</span>
         <button id="btnLogin" class="btn btn-google" onclick="handleAuthClick()">Login dengan Google</button>
       </div>
 
@@ -417,7 +433,7 @@ jawaban : B</pre>
           <option value="manual_default">Poin Tetap per Soal (Manual)</option>
         </select>
         <span id="modeHint" class="hint">
-          Sistem menganalisis panjang soal, gambar, & kata kunci HOTS untuk membagi total <b>100 poin</b> secara proporsional. Tag <code class="inline">[25 poin]</code> atau <code class="inline">[sulit]</code> di Docs tetap diprioritaskan.
+          Sistem menganalisis panjang soal, gambar, & kata kunci HOTS agar total nilai selalu tepat <b>100 poin</b>.
         </span>
       </div>
 
@@ -430,6 +446,64 @@ jawaban : B</pre>
 
       <div id="notif"></div>
     </main>
+
+    <!-- =================================================================== -->
+    <!-- KOLOM KANAN: CONTOH 3 (TINGKAT KESULITAN) & CONTOH 4 (BERGAMBAR)    -->
+    <!-- =================================================================== -->
+    <aside class="card guide-right">
+      <h2 class="panel-title">📝 Contoh Tingkat Kesulitan & Gambar (3–4)</h2>
+
+      <!-- 3. CONTOH SOAL BERDASARKAN TINGKAT KESULITAN -->
+      <div class="example-block">
+        <div class="example-label">
+          <span class="badge-num">3. Contoh Tingkat Kesulitan</span>
+          <button type="button" class="btn-copy" onclick="copyText('ex3', this)">📋 Salin</button>
+        </div>
+        <div class="sample-box" id="ex3">3. [mudah] Lambang sila pertama Pancasila adalah...
+A. Rantai
+B. Pohon Beringin
+C. Bintang
+D. Kepala Banteng
+jawaban : C
+
+4. [sedang] Mengapa proses fotosintesis pada tumbuhan hijau memerlukan cahaya matahari?
+A. Untuk menyerap air dari tanah
+B. Sebagai energi mengubah CO2 dan air menjadi glukosa
+C. Untuk menggugurkan daun tua
+D. Agar akar tumbuh memanjang
+jawaban : B
+
+5. [sulit] Berdasarkan analisis dampak perubahan iklim global terhadap wilayah pesisir, strategi adaptasi manakah yang paling berkelanjutan?
+A. Membangun tanggul beton di seluruh pantai
+B. Rehabilitasi mangrove terpadu silvofishery
+C. Merelokasi seluruh penduduk pesisir
+D. Mengimpor seluruh kebutuhan pangan
+jawaban : B</div>
+      </div>
+
+      <!-- 4. CONTOH SOAL BERGAMBAR -->
+      <div class="example-block">
+        <div class="example-label">
+          <span class="badge-num">4. Contoh Soal Bergambar</span>
+          <button type="button" class="btn-copy" onclick="copyExample4(this)">📋 Salin Teks</button>
+        </div>
+        <div class="sample-box">6. Perhatikan gambar organ pernapasan di bawah ini!
+<div class="sample-img-wrapper">
+  <img id="sampleDiagramImg" alt="Contoh Gambar Soal Pernapasan">
+  <div class="sample-img-caption">Sisipkan gambar JPG/PNG langsung di bawah soal pada Google Docs</div>
+</div>Bagian yang ditunjuk huruf X berfungsi untuk...
+A. Menyaring udara kotor
+B. Pertukaran oksigen dan karbon dioksida
+C. Mengatur suhu udara masuk
+D. Menghasilkan suara
+jawaban : B</div>
+      </div>
+
+      <ul class="guide-notes">
+        <li><b>Format Gambar:</b> Gunakan gambar <b>JPG/PNG/GIF</b> (maks. 2 MB) lewat menu <i>Sisipkan > Gambar</i> di Google Docs (hindari <i>Drawing</i>).</li>
+        <li><b>Kunci Jawaban:</b> Tulis <code class="inline">jawaban : B</code> (huruf besar/kecil bebas). Untuk jawaban ganda, tulis <code class="inline">jawaban : A, C</code>.</li>
+      </ul>
+    </aside>
   </div>
 </div>
 
@@ -445,7 +519,82 @@ jawaban : B</pre>
   let tokenClient;
   let accessToken = null;
 
+  // Membuat gambar ilustrasi nyata (PNG) untuk Contoh Soal 4 di panel panduan
+  function renderSampleDiagram() {
+    const imgEl = document.getElementById('sampleDiagramImg');
+    if (!imgEl) return;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 340;
+    canvas.height = 175;
+    const ctx = canvas.getContext('2d');
+
+    // Background putih bersih
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Tenggorokan (Trakea)
+    ctx.fillStyle = '#cbd5e1';
+    ctx.fillRect(162, 16, 16, 48);
+    ctx.strokeStyle = '#64748b';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(162, 16, 16, 48);
+
+    // Cabang Bronkus
+    ctx.beginPath();
+    ctx.moveTo(170, 64);
+    ctx.lineTo(132, 86);
+    ctx.moveTo(170, 64);
+    ctx.lineTo(208, 86);
+    ctx.strokeStyle = '#475569';
+    ctx.lineWidth = 5;
+    ctx.stroke();
+
+    // Paru-paru Kiri
+    ctx.beginPath();
+    ctx.ellipse(118, 108, 42, 52, 0.18, 0, Math.PI * 2);
+    ctx.fillStyle = '#fecdd3';
+    ctx.fill();
+    ctx.strokeStyle = '#e11d48';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    // Paru-paru Kanan
+    ctx.beginPath();
+    ctx.ellipse(222, 108, 42, 52, -0.18, 0, Math.PI * 2);
+    ctx.fillStyle = '#fecdd3';
+    ctx.fill();
+    ctx.strokeStyle = '#e11d48';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    // Gelembung Alveolus (Titik X)
+    ctx.beginPath();
+    ctx.arc(226, 114, 11, 0, Math.PI * 2);
+    ctx.fillStyle = '#fef08a';
+    ctx.fill();
+    ctx.strokeStyle = '#ca8a04';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Garis & Label Huruf X
+    ctx.beginPath();
+    ctx.moveTo(237, 114);
+    ctx.lineTo(286, 114);
+    ctx.strokeStyle = '#1e293b';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    ctx.fillStyle = '#dc2626';
+    ctx.font = 'bold 20px Segoe UI, sans-serif';
+    ctx.fillText('X', 294, 121);
+
+    imgEl.src = canvas.toDataURL('image/png');
+  }
+
   window.addEventListener('load', () => {
+    renderSampleDiagram();
+
     if (window.google && google.accounts && google.accounts.oauth2) {
       tokenClient = google.accounts.oauth2.initTokenClient({
         client_id: CLIENT_ID,
@@ -475,14 +624,28 @@ jawaban : B</pre>
     tokenClient.requestAccessToken({ prompt: 'consent' });
   }
 
-  function copySampleFormat() {
-    const sampleText = document.getElementById('sampleText').innerText;
-    const btn = document.getElementById('btnCopySample');
-    navigator.clipboard.writeText(sampleText).then(() => {
-      btn.innerText = '✅ Tersalin!';
-      setTimeout(() => {
-        btn.innerText = '📋 Salin Contoh';
-      }, 2000);
+  function copyText(elementId, btn) {
+    const text = document.getElementById(elementId).innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      const original = btn.innerText;
+      btn.innerText = '✅ Tersalin';
+      setTimeout(() => { btn.innerText = original; }, 1800);
+    });
+  }
+
+  function copyExample4(btn) {
+    const text = `6. Perhatikan gambar organ pernapasan di bawah ini!
+[Tempel Gambar di baris ini pada Google Docs]
+Bagian yang ditunjuk huruf X berfungsi untuk...
+A. Menyaring udara kotor
+B. Pertukaran oksigen dan karbon dioksida
+C. Mengatur suhu udara masuk
+D. Menghasilkan suara
+jawaban : B`;
+    navigator.clipboard.writeText(text).then(() => {
+      const original = btn.innerText;
+      btn.innerText = '✅ Tersalin';
+      setTimeout(() => { btn.innerText = original; }, 1800);
     });
   }
 
@@ -499,7 +662,7 @@ jawaban : B</pre>
       hint.innerHTML = 'Total nilai seluruh soal akan dibagi rata agar jumlah akhirnya tepat <b>100 poin</b>.';
     } else {
       manualGroup.style.display = 'none';
-      hint.innerHTML = 'Sistem menganalisis panjang soal, gambar, & kata kunci HOTS untuk membagi total <b>100 poin</b> secara proporsional. Tag <code class="inline">[25 poin]</code> atau <code class="inline">[sulit]</code> di Docs tetap diprioritaskan.';
+      hint.innerHTML = 'Sistem menganalisis panjang soal, gambar, & kata kunci HOTS agar total nilai selalu tepat <b>100 poin</b>.';
     }
   }
 
@@ -918,7 +1081,7 @@ jawaban : B</pre>
       }
 
       const breakdownHtml = questions.map((q, i) => {
-        const shortTitle = q.title.length > 40 ? q.title.substring(0, 40) + '...' : q.title;
+        const shortTitle = q.title.length > 38 ? q.title.substring(0, 38) + '...' : q.title;
         const ansStatus = q.correctAnswers.length > 0 ? `Kunci: ${q.answerLetters.join(', ')}` : '⚠️ Tanpa kunci';
         const imgCount = q.images.length + Object.keys(q.optionImages).length;
         const imgBadge = imgCount > 0 && !imageFallbackWarning.includes('tidak dapat dimuat') ? ` • 🖼️ ${imgCount} gambar` : '';
