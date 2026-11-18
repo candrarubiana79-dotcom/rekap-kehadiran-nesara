@@ -695,6 +695,15 @@ jawaban : B`;
     notif.style.display = 'block';
   }
 
+  // Menghapus karakter ganti baris (\n, \r, Shift+Enter \u000b) agar tidak ditolak Google Forms API
+  function sanitizeFormText(str) {
+    if (!str) return '';
+    return str
+      .replace(/[\r\n\v\f\u000b\u0085\u2028\u2029]+/g, ' ')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+  }
+
   // =========================================================================
   // 1. PARSER FORMAT SOAL (MENDUKUNG AUTO-LIST DOCS, TABEL, & GAMBAR INLINE)
   // =========================================================================
@@ -731,16 +740,17 @@ jawaban : B`;
     const finalizeQuestion = (q) => {
       if (!q || q.options.length === 0) return;
 
+      q.title = sanitizeFormText(q.title);
+      if (!q.title && q.images.length > 0) {
+        q.title = 'Perhatikan gambar berikut!';
+      }
+
       q.answerLetters.forEach(letter => {
         const optText = q.optionsMap[letter.toUpperCase()];
         if (optText && !q.correctAnswers.includes(optText)) {
           q.correctAnswers.push(optText);
         }
       });
-
-      if (!q.title.trim() && q.images.length > 0) {
-        q.title = 'Perhatikan gambar berikut!';
-      }
 
       questions.push(q);
     };
@@ -765,7 +775,7 @@ jawaban : B`;
         }
       });
 
-      const text = rawText.trim();
+      const text = sanitizeFormText(rawText);
       if (!text && inlineImages.length === 0) return;
 
       const qMatch = text.match(questionRegex);
@@ -797,7 +807,7 @@ jawaban : B`;
         const meta = extractQuestionMeta(rawTitle);
 
         currentQ = {
-          title: meta.cleanTitle,
+          title: sanitizeFormText(meta.cleanTitle),
           manualPoints: meta.manualPoints,
           explicitLevel: meta.explicitLevel,
           images: [...pendingImages, ...inlineImages],
@@ -817,7 +827,7 @@ jawaban : B`;
 
         if (oMatch) {
           letter = oMatch[1].toUpperCase();
-          optText = oMatch[2].trim();
+          optText = sanitizeFormText(oMatch[2]);
         } else {
           const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
           letter = letters[currentQ.autoOptionCounter] || String.fromCharCode(65 + currentQ.autoOptionCounter);
@@ -843,7 +853,7 @@ jawaban : B`;
       } else if (currentQ) {
         if (currentQ.options.length === 0) {
           if (text) {
-            currentQ.title = currentQ.title ? `${currentQ.title}\n${text}` : text;
+            currentQ.title = currentQ.title ? sanitizeFormText(`${currentQ.title} ${text}`) : text;
           }
           if (inlineImages.length > 0) {
             currentQ.images.push(...inlineImages);
@@ -900,7 +910,7 @@ jawaban : B`;
     });
 
     return {
-      cleanTitle: cleanTitle.replace(/\s{2,}/g, ' ').trim(),
+      cleanTitle: sanitizeFormText(cleanTitle),
       manualPoints,
       explicitLevel
     };
@@ -1022,7 +1032,7 @@ jawaban : B`;
       const grading = { pointValue: q.points };
       if (q.correctAnswers.length > 0) {
         grading.correctAnswers = {
-          answers: q.correctAnswers.map(ans => ({ value: ans }))
+          answers: q.correctAnswers.map(ans => ({ value: sanitizeFormText(ans) }))
         };
       }
 
@@ -1035,7 +1045,7 @@ jawaban : B`;
           choiceQuestion: {
             type: choiceType,
             options: q.options.map((opt, optIdx) => {
-              const optObj = { value: opt };
+              const optObj = { value: sanitizeFormText(opt) };
               if (includeImages && q.optionImages[optIdx]) {
                 optObj.image = { sourceUri: q.optionImages[optIdx] };
               }
@@ -1054,7 +1064,7 @@ jawaban : B`;
       requests.push({
         createItem: {
           item: {
-            title: q.title,
+            title: sanitizeFormText(q.title),
             questionItem: questionItemPayload
           },
           location: { index: formItemIndex++ }
