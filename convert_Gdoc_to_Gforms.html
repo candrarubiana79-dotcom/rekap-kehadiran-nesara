@@ -19,24 +19,84 @@
       --muted: #5f6368;
       --border: #dadce0;
     }
+    * {
+      box-sizing: border-box;
+    }
     body {
       font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       background-color: var(--bg);
       color: var(--text);
       margin: 0;
-      padding: 36px 16px;
+      padding: 28px 16px;
       display: flex;
       justify-content: center;
     }
-    .container {
+    .page-wrapper {
       width: 100%;
-      max-width: 640px;
+      max-width: 1140px;
+    }
+    .top-nav {
+      margin-bottom: 18px;
+    }
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      text-decoration: none;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      transition: background 0.2s, color 0.2s;
+    }
+    .btn-back:hover {
+      background: #f1f3f4;
+      color: var(--text);
+    }
+
+    /* Layout Responsif: HP (1 kolom, petunjuk di atas) -> Desktop (2 kolom, petunjuk di kanan) */
+    .layout-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    @media (min-width: 920px) {
+      .layout-grid {
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+        gap: 24px;
+        align-items: start;
+      }
+      .converter-card {
+        grid-column: 1;
+        grid-row: 1;
+      }
+      .guide-card {
+        grid-column: 2;
+        grid-row: 1;
+        position: sticky;
+        top: 24px;
+      }
+    }
+
+    .card {
+      width: 100%;
       background: var(--card);
-      padding: 32px;
+      padding: 28px;
       border-radius: 12px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.08);
       border: 1px solid var(--border);
     }
+    @media (max-width: 480px) {
+      .card {
+        padding: 20px;
+      }
+    }
+
     h1 {
       margin: 0 0 8px;
       font-size: 22px;
@@ -50,13 +110,14 @@
     }
     .auth-box {
       background: #f1f3f4;
-      padding: 16px;
+      padding: 14px 16px;
       border-radius: 8px;
-      margin-bottom: 24px;
+      margin-bottom: 22px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
+      flex-wrap: wrap;
     }
     .auth-status {
       font-size: 13px;
@@ -84,7 +145,7 @@
       background: var(--primary);
       color: #ffffff;
       font-size: 15px;
-      margin-top: 20px;
+      margin-top: 16px;
     }
     .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
     .btn-primary:disabled {
@@ -104,7 +165,6 @@
       border: 1px solid var(--border);
       border-radius: 6px;
       font-size: 14px;
-      box-sizing: border-box;
       background: #fff;
     }
     input:focus, select:focus {
@@ -152,23 +212,20 @@
       border-radius: 6px;
     }
 
-    /* Styling Bagian Petunjuk & Format Soal */
-    .guide-divider {
-      border: 0;
-      border-top: 1px solid var(--border);
-      margin: 32px 0 24px;
-    }
-    .guide-section h2 {
-      font-size: 17px;
-      margin: 0 0 12px;
+    /* Styling Panel Petunjuk & Format Soal */
+    .guide-card h2 {
+      font-size: 18px;
+      margin: 0 0 14px;
       color: var(--text);
       display: flex;
       align-items: center;
       gap: 8px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
     }
-    .guide-section h3 {
+    .guide-card h3 {
       font-size: 14px;
-      margin: 18px 0 8px;
+      margin: 16px 0 8px;
       color: var(--primary);
     }
     .guide-steps {
@@ -186,16 +243,17 @@
       border: 1px solid var(--border);
       border-radius: 8px;
       overflow: hidden;
-      margin-top: 10px;
+      margin-top: 8px;
     }
     .sample-header {
       background: #f1f3f4;
-      padding: 8px 14px;
+      padding: 8px 12px;
       border-bottom: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 12.5px;
+      gap: 8px;
+      font-size: 12px;
       font-weight: 600;
       color: var(--muted);
     }
@@ -208,13 +266,14 @@
       font-size: 12px;
       font-weight: 600;
       cursor: pointer;
+      white-space: nowrap;
     }
     .btn-copy:hover {
       background: #e8f0fe;
     }
     pre.sample-code {
       margin: 0;
-      padding: 14px;
+      padding: 12px 14px;
       font-family: 'Consolas', 'Courier New', monospace;
       font-size: 12.5px;
       line-height: 1.55;
@@ -223,14 +282,14 @@
       word-break: break-word;
     }
     .guide-notes {
-      margin: 14px 0 0;
+      margin: 10px 0 0;
       padding-left: 18px;
       font-size: 13px;
       color: var(--muted);
       line-height: 1.55;
     }
     .guide-notes li {
-      margin-bottom: 5px;
+      margin-bottom: 6px;
     }
     code.inline {
       background: #f1f3f4;
@@ -244,70 +303,32 @@
 </head>
 <body>
 
-<div class="container">
-  <h1>Docs ke Google Forms</h1>
-  <p class="subtitle">Konversi soal dari Google Docs ke Google Forms secara otomatis dengan pembagian bobot nilai cerdas.</p>
-
-  <!-- Login Google -->
-  <div class="auth-box">
-    <span id="authStatus" class="auth-status">Status: Belum terhubung ke Google</span>
-    <button id="btnLogin" class="btn btn-google" onclick="handleAuthClick()">Login dengan Google</button>
+<div class="page-wrapper">
+  <!-- Tombol Kembali ke tools.html -->
+  <div class="top-nav">
+    <a href="tools.html" class="btn-back">← Kembali ke Tools</a>
   </div>
 
-  <!-- Input Link Docs & Forms -->
-  <div class="form-group">
-    <label for="docUrl">Link atau ID Google Docs (Sumber Soal)</label>
-    <input type="text" id="docUrl" placeholder="https://docs.google.com/document/d/1BxiMVs.../edit">
-  </div>
+  <div class="layout-grid">
+    <!-- PANEL PETUNJUK (Di HP muncul di atas, di Desktop pindah ke kanan) -->
+    <aside class="card guide-card">
+      <h2>📖 Petunjuk Penggunaan & Format Soal</h2>
 
-  <div class="form-group">
-    <label for="formUrl">Link atau ID Google Forms (Tujuan Kuis)</label>
-    <input type="text" id="formUrl" placeholder="https://docs.google.com/forms/d/1FAIpQLSd.../edit">
-  </div>
+      <h3>1. Cara Pengisian</h3>
+      <ol class="guide-steps">
+        <li>Klik tombol <b>Login dengan Google</b>, lalu centang izin akses untuk membaca Google Docs dan mengisi Google Forms.</li>
+        <li>Siapkan file <b>Google Docs</b> berisi daftar soal sesuai format di bawah, lalu salin URL dokumen tersebut.</li>
+        <li>Buat file <b>Google Forms</b> baru (kosong), salin URL dari halaman <b>Edit</b> (berakhiran <code class="inline">/edit</code>, bukan link kirim/responder).</li>
+        <li>Tempel kedua link ke kolom formulir, pilih <b>Mode Pembagian Poin Nilai</b>, lalu klik <b>Generate Soal ke Forms</b>.</li>
+      </ol>
 
-  <!-- Pengaturan Pembagian Poin -->
-  <div class="form-group">
-    <label for="scoringMode">Mode Pembagian Poin Nilai</label>
-    <select id="scoringMode" onchange="togglePointInput()">
-      <option value="auto_complexity" selected>Otomatis Total 100 Poin (Sesuai Kerumitan Soal)</option>
-      <option value="auto_equal">Otomatis Total 100 Poin (Poin Rata / Sama Semua)</option>
-      <option value="manual_default">Poin Tetap per Soal (Manual)</option>
-    </select>
-    <span id="modeHint" class="hint">
-      Sistem menganalisis panjang soal & kata kunci HOTS untuk membagi total <b>100 poin</b> secara proporsional. Tag <code class="inline">[25 poin]</code> atau <code class="inline">[sulit]</code> di Docs tetap diprioritaskan.
-    </span>
-  </div>
-
-  <div class="form-group" id="manualPointGroup" style="display: none;">
-    <label for="defaultPoints">Poin Default per Soal</label>
-    <input type="number" id="defaultPoints" value="10" min="1">
-  </div>
-
-  <button id="btnGenerate" class="btn btn-primary" onclick="generateSoal()" disabled>Generate Soal ke Forms</button>
-
-  <div id="notif"></div>
-
-  <!-- BAGIAN PETUNJUK & FORMAT SOAL -->
-  <hr class="guide-divider">
-
-  <div class="guide-section">
-    <h2>📖 Petunjuk Penggunaan & Format Soal</h2>
-
-    <h3>1. Cara Pengisian</h3>
-    <ol class="guide-steps">
-      <li>Klik tombol <b>Login dengan Google</b> di atas, lalu centang izin akses untuk membaca Google Docs dan mengisi Google Forms.</li>
-      <li>Siapkan file <b>Google Docs</b> berisi daftar soal yang ditulis sesuai format di bawah, lalu salin URL/link dokumen tersebut.</li>
-      <li>Buat file <b>Google Forms</b> baru (kosong), pastikan Anda menyalin URL dari halaman <b>Edit</b> (yang berakhiran <code class="inline">/edit</code>, bukan link kirim/responder).</li>
-      <li>Tempel kedua link ke kolom yang tersedia, pilih <b>Mode Pembagian Poin Nilai</b>, lalu klik <b>Generate Soal ke Forms</b>.</li>
-    </ol>
-
-    <h3>2. Contoh Format Penulisan di Google Docs</h3>
-    <div class="sample-box">
-      <div class="sample-header">
-        <span>Salin contoh di bawah ini ke Google Docs Anda:</span>
-        <button type="button" id="btnCopySample" class="btn-copy" onclick="copySampleFormat()">📋 Salin Contoh</button>
-      </div>
-      <pre class="sample-code" id="sampleText">1. Apa ibu kota negara Indonesia?
+      <h3>2. Contoh Format Penulisan di Google Docs</h3>
+      <div class="sample-box">
+        <div class="sample-header">
+          <span>Salin contoh ini ke Google Docs Anda:</span>
+          <button type="button" id="btnCopySample" class="btn-copy" onclick="copySampleFormat()">📋 Salin Contoh</button>
+        </div>
+        <pre class="sample-code" id="sampleText">1. Apa ibu kota negara Indonesia?
 A. Bandung
 B. Jakarta
 C. Surabaya
@@ -327,15 +348,61 @@ B. Rehabilitasi ekosistem mangrove terpadu dengan tambak silvofishery
 C. Merelokasi seluruh penduduk pesisir ke dataran tinggi
 D. Mengimpor seluruh kebutuhan pangan pokok
 jawaban : B</pre>
-    </div>
+      </div>
 
-    <h3>3. Aturan Format & Pembagian Poin</h3>
-    <ul class="guide-notes">
-      <li><b>Nomor & Pilihan Ganda:</b> Awali soal dengan angka (<code class="inline">1.</code>) dan opsi dengan huruf <code class="inline">A.</code> sampai <code class="inline">E.</code> (mendukung huruf besar maupun kecil).</li>
-      <li><b>Kunci Jawaban:</b> Tulis di baris terakhir tiap soal dengan format <code class="inline">jawaban : B</code> (tidak peka huruf besar/kecil). Untuk jawaban lebih dari satu (kotak centang), pisahkan dengan koma seperti <code class="inline">jawaban : A, C</code>.</li>
-      <li><b>Tag Bobot Opsional:</b> Anda bisa menambahkan tag di awal pertanyaan seperti <code class="inline">[25 poin]</code> untuk mengunci nilai soal tertentu, atau <code class="inline">[mudah]</code>, <code class="inline">[sedang]</code>, <code class="inline">[sulit]</code> untuk mengatur tingkat kerumitan secara manual.</li>
-      <li><b>Total 100 Poin Otomatis:</b> Jika tidak diberi tag manual, sistem akan menghitung panjang kalimat serta kata kunci analisis (HOTS) pada tiap soal dan membagi total nilai hingga pas <b>100 poin</b>.</li>
-    </ul>
+      <h3>3. Aturan Format & Pembagian Poin</h3>
+      <ul class="guide-notes">
+        <li><b>Nomor & Pilihan Ganda:</b> Awali soal dengan angka (<code class="inline">1.</code>) dan opsi dengan huruf <code class="inline">A.</code> sampai <code class="inline">E.</code> (mendukung huruf besar maupun kecil).</li>
+        <li><b>Kunci Jawaban:</b> Tulis di baris terakhir tiap soal dengan format <code class="inline">jawaban : B</code> (tidak peka huruf besar/kecil). Untuk jawaban ganda (kotak centang), pisahkan dengan koma seperti <code class="inline">jawaban : A, C</code>.</li>
+        <li><b>Tag Bobot Opsional:</b> Tambahkan tag di awal soal seperti <code class="inline">[25 poin]</code> untuk mengunci nilai tertentu, atau <code class="inline">[mudah]</code>, <code class="inline">[sedang]</code>, <code class="inline">[sulit]</code> untuk mengatur kerumitan secara manual.</li>
+        <li><b>Total 100 Poin Otomatis:</b> Tanpa tag manual, sistem menganalisis panjang kalimat serta kata kunci HOTS tiap soal dan membagi nilai hingga pas <b>100 poin</b>.</li>
+      </ul>
+    </aside>
+
+    <!-- PANEL UTAMA FORM KONVERSI (Di Desktop di kiri, di HP di bawah petunjuk) -->
+    <main class="card converter-card">
+      <h1>Docs ke Google Forms</h1>
+      <p class="subtitle">Konversi soal dari Google Docs ke Google Forms secara otomatis dengan pembagian bobot nilai cerdas.</p>
+
+      <!-- Login Google -->
+      <div class="auth-box">
+        <span id="authStatus" class="auth-status">Status: Belum terhubung ke Google</span>
+        <button id="btnLogin" class="btn btn-google" onclick="handleAuthClick()">Login dengan Google</button>
+      </div>
+
+      <!-- Input Link Docs & Forms -->
+      <div class="form-group">
+        <label for="docUrl">Link atau ID Google Docs (Sumber Soal)</label>
+        <input type="text" id="docUrl" placeholder="https://docs.google.com/document/d/1BxiMVs.../edit">
+      </div>
+
+      <div class="form-group">
+        <label for="formUrl">Link atau ID Google Forms (Tujuan Kuis)</label>
+        <input type="text" id="formUrl" placeholder="https://docs.google.com/forms/d/1FAIpQLSd.../edit">
+      </div>
+
+      <!-- Pengaturan Pembagian Poin -->
+      <div class="form-group">
+        <label for="scoringMode">Mode Pembagian Poin Nilai</label>
+        <select id="scoringMode" onchange="togglePointInput()">
+          <option value="auto_complexity" selected>Otomatis Total 100 Poin (Sesuai Kerumitan Soal)</option>
+          <option value="auto_equal">Otomatis Total 100 Poin (Poin Rata / Sama Semua)</option>
+          <option value="manual_default">Poin Tetap per Soal (Manual)</option>
+        </select>
+        <span id="modeHint" class="hint">
+          Sistem menganalisis panjang soal & kata kunci HOTS untuk membagi total <b>100 poin</b> secara proporsional. Tag <code class="inline">[25 poin]</code> atau <code class="inline">[sulit]</code> di Docs tetap diprioritaskan.
+        </span>
+      </div>
+
+      <div class="form-group" id="manualPointGroup" style="display: none;">
+        <label for="defaultPoints">Poin Default per Soal</label>
+        <input type="number" id="defaultPoints" value="10" min="1">
+      </div>
+
+      <button id="btnGenerate" class="btn btn-primary" onclick="generateSoal()" disabled>Generate Soal ke Forms</button>
+
+      <div id="notif"></div>
+    </main>
   </div>
 </div>
 
